@@ -101,6 +101,16 @@ function AdminPanelGovde() {
       if (klavyeOlayiEslesir(e, harita.sil)) {
         e.preventDefault();
         void aksiyonCalistir('sil');
+        return;
+      }
+      if (klavyeOlayiEslesir(e, harita.oncekiKayit)) {
+        e.preventDefault();
+        void aksiyonCalistir('oncekiKayit');
+        return;
+      }
+      if (klavyeOlayiEslesir(e, harita.sonrakiKayit)) {
+        e.preventDefault();
+        void aksiyonCalistir('sonrakiKayit');
       }
     }
 

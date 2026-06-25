@@ -1,4 +1,11 @@
-export type KisayolIslemId = 'rehber' | 'kaydet' | 'ekle' | 'onizle' | 'sil';
+export type KisayolIslemId =
+  | 'rehber'
+  | 'kaydet'
+  | 'ekle'
+  | 'onizle'
+  | 'sil'
+  | 'oncekiKayit'
+  | 'sonrakiKayit';
 
 export interface KisayolTanimi {
   id: KisayolIslemId;
@@ -13,6 +20,18 @@ export const KISAYOL_ISLEMLERI: KisayolTanimi[] = [
   { id: 'ekle', etiket: 'Yeni Ekle', aciklama: 'Aktif modülde yeni kayıt', varsayilan: 'Ctrl+N' },
   { id: 'onizle', etiket: 'Önizle', aciklama: 'Aktif modülde önizleme', varsayilan: 'Ctrl+P' },
   { id: 'sil', etiket: 'Sil', aciklama: 'Aktif modülde silme', varsayilan: 'Delete' },
+  {
+    id: 'oncekiKayit',
+    etiket: 'Önceki Kayıt',
+    aciklama: 'Aktif modülde bir önceki kayda geç',
+    varsayilan: 'Alt+ArrowLeft',
+  },
+  {
+    id: 'sonrakiKayit',
+    etiket: 'Sonraki Kayıt',
+    aciklama: 'Aktif modülde bir sonraki kayda geç',
+    varsayilan: 'Alt+ArrowRight',
+  },
 ];
 
 const STORAGE_KEY = 'ap-kisayol-ayarlari';

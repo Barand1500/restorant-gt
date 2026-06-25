@@ -159,7 +159,7 @@ export const ADMIN_MODUL_REHBERLERI: Record<string, ModulRehber> = {
       {
         ikon: '💾',
         baslik: 'Yedek Oluşturma',
-        aciklama: 'Mevcut site verilerinin anlık yedeğini alın. JSON formatında indirilebilir.',
+        aciklama: 'Mevcut site verilerinin anlık yedeğini alın. JSON, SQL, ZIP veya RAR formatında indirilebilir.',
         renk: 'yesil',
       },
       {

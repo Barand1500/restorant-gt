@@ -10,6 +10,7 @@ import {
   adminKullaniciSil,
   adminKullaniciSiteleriGetir,
   adminKullanicilariGetir,
+  pinGecerliMi,
   VARSAYILAN_ROL_ETIKETLERI,
   type AdminKullanici,
   type AdminSiteOzet,
@@ -20,6 +21,7 @@ const bosForm: KullaniciFormDegeri = {
   email: '',
   ad: '',
   sifre: '',
+  pin: '',
   rol: 'MUSTERI_ADMIN',
   siteId: '',
   aktif: true,
@@ -30,6 +32,7 @@ function kullanicidanForm(k: AdminKullanici): KullaniciFormDegeri {
     email: k.email,
     ad: k.ad,
     sifre: '',
+    pin: '',
     rol: k.rol,
     siteId: k.siteId ?? '',
     aktif: k.aktif,
@@ -95,6 +98,10 @@ export function KullanicilarSayfasi() {
   const kaydet = useCallback(async () => {
     if (!form.ad.trim() || !form.email.trim()) {
       setHata('Ad ve e-posta zorunludur');
+      return;
+    }
+    if (!pinGecerliMi(form.pin)) {
+      setHata('PIN yalnızca rakam içermeli ve 4 ile 6 hane arasında olmalıdır');
       return;
     }
     setKaydediliyor(true);

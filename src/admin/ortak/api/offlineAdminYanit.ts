@@ -1,5 +1,9 @@
+import type { SistemAyarlariForm } from '@/admin/baslat-menusu/sistem/ayarlar/tipler';
+
+const OFFLINE_SISTEM_ANAHTAR = 'restorant-offline-sistem-ayarlari';
+
 /** Backend olmadan admin sayfalarının boş açılması için minimal yanıtlar */
-export function offlineAdminYanit(path: string, method: string): unknown {
+export function offlineAdminYanit(path: string, method: string, body?: BodyInit | null): unknown {
   const m = method.toUpperCase();
   const p = path.split('?')[0];
 
@@ -29,6 +33,15 @@ export function offlineAdminYanit(path: string, method: string): unknown {
       };
     }
     if (p.includes('/sistem-ayarlari')) {
+      if (m === 'PUT' && typeof body === 'string') {
+        try {
+          const form = JSON.parse(body) as SistemAyarlariForm;
+          offlineSistemKaydet(form);
+          return offlineSistemAyarlari(form);
+        } catch {
+          return offlineSistemAyarlari();
+        }
+      }
       return offlineSistemAyarlari();
     }
     return { mesaj: 'Kayıt (offline mod)' };
@@ -58,16 +71,31 @@ export function offlineAdminYanit(path: string, method: string): unknown {
   return {};
 }
 
-function offlineSistemAyarlari() {
+function offlineSistemOku(): Partial<SistemAyarlariForm> {
+  try {
+    const ham = localStorage.getItem(OFFLINE_SISTEM_ANAHTAR);
+    if (ham) return JSON.parse(ham) as Partial<SistemAyarlariForm>;
+  } catch {
+    /* bozuk kayıt */
+  }
+  return {};
+}
+
+function offlineSistemKaydet(form: SistemAyarlariForm) {
+  localStorage.setItem(OFFLINE_SISTEM_ANAHTAR, JSON.stringify(form));
+}
+
+function offlineSistemAyarlari(form?: Partial<SistemAyarlariForm>) {
+  const sistem = form ?? offlineSistemOku();
   return {
     site: {
       id: '1',
       ad: 'Restorant',
       slug: 'restorant',
       domain: null,
-      aktif: true,
+      aktif: form?.siteAktif ?? (sistem as SistemAyarlariForm).siteAktif ?? true,
     },
-    sistem: {},
+    sistem,
     surum: '0.1.0-offline',
   };
 }

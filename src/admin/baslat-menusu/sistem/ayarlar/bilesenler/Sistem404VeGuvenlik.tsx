@@ -140,26 +140,6 @@ export function SistemGuvenlikSekme({
         renk="kirmizi"
         ikon="🤖"
       />
-      <DurumAnahtari
-        etiket="Otomatik Yedekleme"
-        aciklama="Belirli aralıklarla site verisi yedeklenir"
-        acik={form.otomatikYedekleme}
-        onChange={(v) => onChange({ ...form, otomatikYedekleme: v })}
-        renk="mavi"
-        ikon="💾"
-      />
-      {form.otomatikYedekleme && (
-        <FormAlani etiket="Yedekleme Aralığı (gün)">
-          <input
-            type="number"
-            min={1}
-            max={30}
-            className={formInputSinifi}
-            value={form.otomatikYedeklemeGun}
-            onChange={(e) => onChange({ ...form, otomatikYedeklemeGun: Number(e.target.value) || 7 })}
-          />
-        </FormAlani>
-      )}
     </div>
   );
 }

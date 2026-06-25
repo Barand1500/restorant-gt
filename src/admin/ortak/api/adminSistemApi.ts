@@ -1,5 +1,6 @@
 import { tokenAl } from '@/admin/ortak/api/authApi';
 import { adminHeaders, adminJsonFetch } from '@/admin/ortak/api/adminFetch';
+import type { YedeklemeFormati } from '@/types/yedekleme';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -56,6 +57,11 @@ export const adminLogApi = {
   },
 };
 
+export interface YedekIndirSecenekleri {
+  dosyaAdi?: string;
+  format?: YedeklemeFormati;
+}
+
 export const adminYedekApi = {
   varsayilanDosyaAdi: () =>
     adminJsonFetch<{ dosyaAdi: string }>('/yedek/varsayilan-dosya-adi', {
@@ -67,17 +73,18 @@ export const adminYedekApi = {
       headers: adminHeaders(),
     }),
 
-  async indir(dosyaAdi?: string): Promise<void> {
+  async indir(secenekler?: YedekIndirSecenekleri): Promise<void> {
     const token = tokenAl();
     if (!token) throw new Error('Oturum bulunamadi');
 
+    const format = secenekler?.format ?? 'json';
     const yanit = await fetch(`${API_URL}/admin/yedek/indir`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(dosyaAdi ? { dosyaAdi } : {}),
+      body: JSON.stringify(secenekler ? { ...secenekler, format } : { format }),
     });
 
     if (!yanit.ok) {
@@ -88,7 +95,10 @@ export const adminYedekApi = {
     const blob = await yanit.blob();
     const disposition = yanit.headers.get('Content-Disposition') ?? '';
     const match = disposition.match(/filename="(.+)"/);
-    const ad = match?.[1] ?? dosyaAdi ?? `yedek-admin-${new Date().toISOString().slice(0, 10)}.json`;
+    const ad =
+      match?.[1] ??
+      secenekler?.dosyaAdi ??
+      `yedek-admin-${new Date().toISOString().slice(0, 10)}.${format}`;
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

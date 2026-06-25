@@ -9,6 +9,7 @@ export interface AdminKullanici {
   rol: RolKodu;
   siteId: string | null;
   aktif: boolean;
+  pin?: string | null;
   olusturma: string;
   guncelleme: string;
   siteAd: string | null;
@@ -25,9 +26,19 @@ export interface KullaniciFormDegeri {
   email: string;
   ad: string;
   sifre: string;
+  pin: string;
   rol: RolKodu;
   siteId: string;
   aktif: boolean;
+}
+
+export function pinTemizle(deger: string): string {
+  return deger.replace(/\D/g, '').slice(0, 6);
+}
+
+export function pinGecerliMi(pin: string): boolean {
+  if (!pin) return true;
+  return /^\d{4,6}$/.test(pin);
 }
 
 export async function adminKullanicilariGetir(): Promise<AdminKullanici[]> {
@@ -89,6 +100,9 @@ function payloadHazirla(form: KullaniciFormDegeri, sifreDahil: boolean) {
   };
   if (sifreDahil && form.sifre.trim()) {
     payload.sifre = form.sifre;
+  }
+  if (form.pin.trim()) {
+    payload.pin = form.pin.trim();
   }
   return payload;
 }

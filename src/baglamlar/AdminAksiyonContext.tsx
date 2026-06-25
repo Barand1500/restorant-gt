@@ -9,7 +9,17 @@ import {
 } from 'react';
 import { adminIslemBildirimi } from '@/araclar/adminBildirimOlaylari';
 
-export type AksiyonId = 'kaydet' | 'hizliKaydet' | 'guncelle' | 'ekle' | 'altEkle' | 'sil' | 'onizle' | 'yayinla';
+export type AksiyonId =
+  | 'kaydet'
+  | 'hizliKaydet'
+  | 'guncelle'
+  | 'ekle'
+  | 'altEkle'
+  | 'sil'
+  | 'onizle'
+  | 'yayinla'
+  | 'oncekiKayit'
+  | 'sonrakiKayit';
 
 export interface AksiyonHandlerlar {
   kaydet?: () => Promise<void> | void;
@@ -20,6 +30,8 @@ export interface AksiyonHandlerlar {
   sil?: () => Promise<void> | void;
   onizle?: () => void;
   yayinla?: () => Promise<void> | void;
+  oncekiKayit?: () => void;
+  sonrakiKayit?: () => void;
 }
 
 export type AksiyonDurumlari = Partial<Record<AksiyonId, boolean>>;
@@ -135,6 +147,8 @@ export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
         else if (id === 'sil' && handlers.sil) await handlers.sil();
         else if (id === 'onizle' && handlers.onizle) handlers.onizle();
         else if (id === 'yayinla' && handlers.yayinla) await handlers.yayinla();
+        else if (id === 'oncekiKayit' && handlers.oncekiKayit) handlers.oncekiKayit();
+        else if (id === 'sonrakiKayit' && handlers.sonrakiKayit) handlers.sonrakiKayit();
         else return;
 
         if (AKSİYON_BASARI[aksiyonId]) {

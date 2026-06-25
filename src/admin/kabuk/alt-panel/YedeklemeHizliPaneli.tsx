@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminYedekApi, type YedekKaydi } from '@/admin/ortak/api/adminSistemApi';
+import { sistemAyarlariGetir } from '@/admin/baslat-menusu/sistem/ayarlar/api';
+import { sistemdenForm } from '@/admin/baslat-menusu/sistem/ayarlar/tipler';
+import { VARSAYILAN_YEDEKLEME_FORMATI } from '@/types/yedekleme';
 import { AltPanel, AltPanelYukleniyor } from '@/admin/ortak/AltPanel';
 
 interface YedeklemeHizliPaneliProps {
@@ -23,12 +26,20 @@ export function YedeklemeHizliPaneli({ acik, onKapat, onModulAc }: YedeklemeHizl
   const [yukleniyor, setYukleniyor] = useState(false);
   const [indiriliyor, setIndiriliyor] = useState(false);
   const [mesaj, setMesaj] = useState<{ tur: 'basari' | 'hata'; metin: string } | null>(null);
+  const [format, setFormat] = useState(VARSAYILAN_YEDEKLEME_FORMATI);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
     try {
-      const veri = await adminYedekApi.gecmis();
+      const [veri, ayarlar] = await Promise.all([
+        adminYedekApi.gecmis(),
+        sistemAyarlariGetir().catch(() => null),
+      ]);
       setSonKayit(veri.sonKayit);
+      if (ayarlar) {
+        const form = sistemdenForm(ayarlar.site, ayarlar.sistem);
+        setFormat(form.yedeklemeFormati);
+      }
     } catch {
       setSonKayit(null);
     } finally {
@@ -47,7 +58,7 @@ export function YedeklemeHizliPaneli({ acik, onKapat, onModulAc }: YedeklemeHizl
     setIndiriliyor(true);
     setMesaj(null);
     try {
-      await adminYedekApi.indir();
+      await adminYedekApi.indir({ format });
       setMesaj({ tur: 'basari', metin: 'Yedek başarıyla indirildi.' });
       await yukle();
     } catch (err) {
@@ -66,7 +77,7 @@ export function YedeklemeHizliPaneli({ acik, onKapat, onModulAc }: YedeklemeHizl
       {!yukleniyor && (
         <div className="space-y-3 p-1">
           <p className="ap-alt-panel-aciklama">
-            Site verilerinizin JSON yedeğini hızlıca indirebilirsiniz.
+            Site verilerinizin {format.toUpperCase()} yedeğini hızlıca indirebilirsiniz.
           </p>
           {sonKayit && (
             <div className="ap-alt-panel-kart">
@@ -88,7 +99,7 @@ export function YedeklemeHizliPaneli({ acik, onKapat, onModulAc }: YedeklemeHizl
             disabled={indiriliyor}
             onClick={() => void hizliYedekle()}
           >
-            {indiriliyor ? 'Yedekleniyor...' : 'Hızlı yedek indir'}
+            {indiriliyor ? 'Yedekleniyor...' : `Hızlı ${format.toUpperCase()} yedek indir`}
           </button>
           <button
             type="button"

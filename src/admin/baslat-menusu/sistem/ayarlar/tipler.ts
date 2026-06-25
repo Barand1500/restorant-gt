@@ -1,6 +1,8 @@
 import type { SagTikPanelAyarlari } from '@/admin/ortak/tipler/sagTikPaneli';
 import { VARSAYILAN_SAG_TIK_PANEL } from '@/admin/ortak/tipler/sagTikPaneli';
 import { sagTikPanelNormalize } from '@/admin/baslat-menusu/sistem/ayarlar/yardimci-sag-tik';
+import type { YedeklemeFormati } from '@/types/yedekleme';
+import { VARSAYILAN_YEDEKLEME_FORMATI } from '@/types/yedekleme';
 
 export type Sayfa404MenuTipi = 'ust' | 'footer' | 'her-ikisi' | 'yok';
 
@@ -30,6 +32,7 @@ export interface SistemAyarlariJson {
   sayfa404?: Partial<Sayfa404Ayarlari>;
   otomatikYedekleme?: boolean;
   otomatikYedeklemeGun?: number;
+  yedeklemeFormati?: YedeklemeFormati;
   guvenlikBasliklari?: boolean;
   robotsEngelle?: boolean;
   scriptAyarlari?: ScriptAyarlari;
@@ -59,6 +62,7 @@ export interface SistemAyarlariForm {
   sayfa404: Sayfa404Ayarlari;
   otomatikYedekleme: boolean;
   otomatikYedeklemeGun: number;
+  yedeklemeFormati: YedeklemeFormati;
   guvenlikBasliklari: boolean;
   robotsEngelle: boolean;
   sagTikPaneli: SagTikPanelAyarlari;
@@ -117,6 +121,7 @@ export const bosSistemForm: SistemAyarlariForm = {
   sayfa404: { ...varsayilanSayfa404 },
   otomatikYedekleme: false,
   otomatikYedeklemeGun: 7,
+  yedeklemeFormati: VARSAYILAN_YEDEKLEME_FORMATI,
   guvenlikBasliklari: true,
   robotsEngelle: false,
   sagTikPaneli: { ...VARSAYILAN_SAG_TIK_PANEL, ogeler: [...VARSAYILAN_SAG_TIK_PANEL.ogeler] },
@@ -142,6 +147,7 @@ export function sistemdenForm(
     sayfa404: { ...varsayilanSayfa404, ...sistem.sayfa404 },
     otomatikYedekleme: sistem.otomatikYedekleme ?? false,
     otomatikYedeklemeGun: sistem.otomatikYedeklemeGun ?? 7,
+    yedeklemeFormati: sistem.yedeklemeFormati ?? VARSAYILAN_YEDEKLEME_FORMATI,
     guvenlikBasliklari: sistem.guvenlikBasliklari ?? true,
     robotsEngelle: sistem.robotsEngelle ?? false,
     sagTikPaneli: sagTikPanelNormalize(sistem.sagTikPaneli),

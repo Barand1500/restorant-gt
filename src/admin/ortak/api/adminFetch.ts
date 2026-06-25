@@ -16,7 +16,7 @@ export function adminHeaders(json = true): HeadersInit {
 export async function adminJsonFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (BACKEND_YOK) {
     const method = init?.method ?? 'GET';
-    return offlineAdminYanit(path, method) as T;
+    return offlineAdminYanit(path, method, init?.body) as T;
   }
 
   const yanit = await fetch(`${API_URL}/admin${path}`, init);
