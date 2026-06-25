@@ -1,0 +1,610 @@
+import { useId, type ReactNode } from 'react';
+
+export type SosyalIkonVaryant = 'solid' | 'minimal' | 'brand' | 'ozel';
+
+export interface SosyalPlatformBilgi {
+  id: string;
+  ad: string;
+  renk: string;
+  placeholder: string;
+  domainler: string[];
+  aramaEtiketleri?: string[];
+}
+
+export const SOSYAL_PLATFORMLAR: SosyalPlatformBilgi[] = [
+  {
+    id: 'facebook',
+    ad: 'Facebook',
+    renk: '#1877F2',
+    placeholder: 'https://facebook.com/...',
+    domainler: ['facebook.com', 'fb.com'],
+    aramaEtiketleri: ['facebook', 'fb', 'meta'],
+  },
+  {
+    id: 'instagram',
+    ad: 'Instagram',
+    renk: '#E4405F',
+    placeholder: 'https://instagram.com/...',
+    domainler: ['instagram.com'],
+    aramaEtiketleri: ['instagram', 'insta', 'ig'],
+  },
+  {
+    id: 'twitter',
+    ad: 'X (Twitter)',
+    renk: '#000000',
+    placeholder: 'https://x.com/...',
+    domainler: ['twitter.com', 'x.com'],
+    aramaEtiketleri: ['twitter', 'x', 'tweet'],
+  },
+  {
+    id: 'youtube',
+    ad: 'YouTube',
+    renk: '#FF0000',
+    placeholder: 'https://youtube.com/...',
+    domainler: ['youtube.com', 'youtu.be'],
+    aramaEtiketleri: ['youtube', 'yt'],
+  },
+  {
+    id: 'linkedin',
+    ad: 'LinkedIn',
+    renk: '#0A66C2',
+    placeholder: 'https://linkedin.com/...',
+    domainler: ['linkedin.com'],
+    aramaEtiketleri: ['linkedin', 'linked in'],
+  },
+  {
+    id: 'tiktok',
+    ad: 'TikTok',
+    renk: '#000000',
+    placeholder: 'https://tiktok.com/@...',
+    domainler: ['tiktok.com'],
+    aramaEtiketleri: ['tiktok', 'tik tok', 'tt'],
+  },
+  {
+    id: 'whatsapp',
+    ad: 'WhatsApp',
+    renk: '#25D366',
+    placeholder: 'https://wa.me/...',
+    domainler: ['wa.me', 'whatsapp.com'],
+    aramaEtiketleri: ['whatsapp', 'wa'],
+  },
+  {
+    id: 'telegram',
+    ad: 'Telegram',
+    renk: '#26A5E4',
+    placeholder: 'https://t.me/...',
+    domainler: ['t.me', 'telegram.me'],
+    aramaEtiketleri: ['telegram', 'tg'],
+  },
+  {
+    id: 'pinterest',
+    ad: 'Pinterest',
+    renk: '#E60023',
+    placeholder: 'https://pinterest.com/...',
+    domainler: ['pinterest.com'],
+    aramaEtiketleri: ['pinterest'],
+  },
+  {
+    id: 'github',
+    ad: 'GitHub',
+    renk: '#181717',
+    placeholder: 'https://github.com/...',
+    domainler: ['github.com'],
+    aramaEtiketleri: ['github', 'gh'],
+  },
+  {
+    id: 'discord',
+    ad: 'Discord',
+    renk: '#5865F2',
+    placeholder: 'https://discord.gg/...',
+    domainler: ['discord.com', 'discord.gg'],
+    aramaEtiketleri: ['discord'],
+  },
+  {
+    id: 'snapchat',
+    ad: 'Snapchat',
+    renk: '#FFFC00',
+    placeholder: 'https://snapchat.com/...',
+    domainler: ['snapchat.com'],
+    aramaEtiketleri: ['snapchat', 'snap'],
+  },
+  {
+    id: 'threads',
+    ad: 'Threads',
+    renk: '#000000',
+    placeholder: 'https://threads.net/...',
+    domainler: ['threads.net'],
+    aramaEtiketleri: ['threads'],
+  },
+  {
+    id: 'spotify',
+    ad: 'Spotify',
+    renk: '#1DB954',
+    placeholder: 'https://open.spotify.com/...',
+    domainler: ['spotify.com', 'open.spotify.com'],
+    aramaEtiketleri: ['spotify'],
+  },
+  {
+    id: 'medium',
+    ad: 'Medium',
+    renk: '#000000',
+    placeholder: 'https://medium.com/...',
+    domainler: ['medium.com'],
+    aramaEtiketleri: ['medium'],
+  },
+  {
+    id: 'behance',
+    ad: 'Behance',
+    renk: '#1769FF',
+    placeholder: 'https://behance.net/...',
+    domainler: ['behance.net'],
+    aramaEtiketleri: ['behance'],
+  },
+  {
+    id: 'dribbble',
+    ad: 'Dribbble',
+    renk: '#EA4C89',
+    placeholder: 'https://dribbble.com/...',
+    domainler: ['dribbble.com'],
+    aramaEtiketleri: ['dribbble'],
+  },
+  {
+    id: 'vimeo',
+    ad: 'Vimeo',
+    renk: '#1AB7EA',
+    placeholder: 'https://vimeo.com/...',
+    domainler: ['vimeo.com'],
+    aramaEtiketleri: ['vimeo'],
+  },
+  {
+    id: 'twitch',
+    ad: 'Twitch',
+    renk: '#9146FF',
+    placeholder: 'https://twitch.tv/...',
+    domainler: ['twitch.tv'],
+    aramaEtiketleri: ['twitch'],
+  },
+  {
+    id: 'reddit',
+    ad: 'Reddit',
+    renk: '#FF4500',
+    placeholder: 'https://reddit.com/...',
+    domainler: ['reddit.com'],
+    aramaEtiketleri: ['reddit'],
+  },
+];
+
+export type SosyalPlatform = string;
+
+const SIRA_ANAHTAR = '__sira__';
+
+const ICON_INSET = 4;
+const ICON_SCALE = (24 - ICON_INSET * 2) / 24;
+
+/** Mark-only ikonlar (brand / dolu mod icin — arka plan ustunde) */
+function renderPlatformMark(platform: string, fill: string): ReactNode | null {
+  switch (platform) {
+    case 'instagram':
+      return (
+        <>
+          <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke={fill} strokeWidth="1.8" />
+          <circle cx="12" cy="12" r="4" fill="none" stroke={fill} strokeWidth="1.8" />
+          <circle cx="17.2" cy="6.8" r="1.2" fill={fill} />
+        </>
+      );
+    case 'facebook':
+      return (
+        <>
+          <rect x="10" y="5.5" width="3" height="13.5" rx="0.35" fill={fill} />
+          <rect x="10" y="5.5" width="8" height="3" rx="0.35" fill={fill} />
+          <rect x="10" y="10.75" width="6" height="2.75" rx="0.35" fill={fill} />
+        </>
+      );
+    case 'threads':
+      return (
+        <>
+          <circle cx="12" cy="12" r="7.25" fill="none" stroke={fill} strokeWidth="2.4" />
+          <path
+            fill="none"
+            stroke={fill}
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            d="M16.75 9.25a4.25 4.25 0 1 1-5.75 3.85"
+          />
+        </>
+      );
+    case 'medium':
+      return (
+        <>
+          <circle cx="5.5" cy="12" r="4.5" fill={fill} />
+          <circle cx="15" cy="12" r="4.5" fill={fill} />
+          <circle cx="20.5" cy="12" r="2.75" fill={fill} />
+        </>
+      );
+    case 'behance':
+      return (
+        <>
+          <path
+            fill={fill}
+            d="M0 7.5V16.5H4.5C6.16 16.5 7.5 15.16 7.5 13.5c0-1.06-.56-2-1.44-2.44.88-.44 1.44-1.38 1.44-2.44C7.5 6.96 6.16 5.62 4.5 5.62H0V7.5zm2.25-.38h1.87c.63 0 1.13.5 1.13 1.13s-.5 1.13-1.13 1.13H2.25V7.12zm0 3.76h2.06c.69 0 1.25.56 1.25 1.25s-.56 1.25-1.25 1.25H2.25v-2.5zM9.75 9.75H15v1.5H9.75V9.75z"
+          />
+          <path
+            fill={fill}
+            d="M16.88 5.62c-2.19 0-3.76 1.69-3.76 3.94s1.57 3.94 3.76 3.94c1.31 0 2.43-.69 3-1.69l-1.5-.87c-.32.62-.88 1.06-1.5 1.06-1.07 0-1.94-.81-2.07-1.88H20c.06-.18.12-.37.12-.56 0-2.25-1.56-3.94-3.24-3.94zm-2.07 3.19c.19-1 1-1.69 2.07-1.69s1.88.69 2.07 1.69h-4.14zM21.75 5.81v7.5h1.5V5.81h-1.5zm.75-1.31a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25z"
+          />
+        </>
+      );
+    case 'tiktok':
+      return (
+        <path
+          fill={fill}
+          d="M15.5 4.5c.75 1.4 2 2.45 3.5 2.85v3.25a6.5 6.5 0 0 1-3.75-1.15v6.35a5.25 5.25 0 1 1-4.75-5.2v3.4a1.85 1.85 0 1 0 1.3 1.75V4.5H15.5z"
+        />
+      );
+    case 'snapchat':
+      return (
+        <path
+          fill={fill}
+          fillRule="evenodd"
+          d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.062c-.012.2-.024.405-.036.595-.07 1.011-.144 1.937-.09 2.456.063.59.838.982 1.73 1.337.618.254 1.244.512 1.67.916.348.33.52.77.48 1.24-.063.768-.88 1.216-1.936 1.716-.192.096-.39.195-.59.3-.653.34-1.305.78-1.48 1.363-.1.344-.067.71.094 1.006.283.548.86.86 1.54 1.18.303.15.616.305.9.48 1.246.75 1.87 1.512 1.87 2.274 0 .48-.17.93-.48 1.29-.55.63-1.54.96-2.94.96-.36 0-.74-.03-1.13-.09-.45-.07-.92-.17-1.39-.27-.6-.13-1.22-.26-1.81-.26-.58 0-1.2.13-1.81.26-.47.1-.94.2-1.39.27-.39.06-.77.09-1.13.09-1.4 0-2.39-.33-2.94-.96-.31-.36-.48-.81-.48-1.29 0-.762.624-1.524 1.87-2.274.284-.175.597-.33.9-.48.68-.32 1.257-.632 1.54-1.18.161-.296.194-.662.094-1.006-.175-.583-.827-1.023-1.48-1.363-.2-.105-.398-.204-.59-.3-1.056-.5-1.873-.948-1.936-1.716-.04-.47.132-.91.48-1.24.426-.404 1.052-.662 1.67-.916.892-.355 1.667-.747 1.73-1.337.054-.519-.02-1.445-.09-2.456-.012-.19-.024-.395-.036-.595l-.003-.062c-.104-1.628-.23-3.654.299-4.847C7.853 1.069 11.216.793 12.206.793z"
+        />
+      );
+    default:
+      return null;
+  }
+}
+
+const MARK_ONLY_MINIMAL = new Set([
+  'instagram',
+  'facebook',
+  'threads',
+  'behance',
+  'medium',
+  'tiktok',
+  'snapchat',
+]);
+
+/** Simple Icons — minimal mod ve diger platformlar */
+const PLATFORM_GLYPH: Record<string, string> = {
+  facebook:
+    'M9.101 23.691v-3.192H6.127v-4.089H3.025V9.349h3.102V7.222c0-3.064 1.915-5.222 5.535-5.222 1.563 0 2.876.117 3.267.17v3.789l-2.239-.001c-1.176 0-1.403.559-1.403 1.378v1.894h3.072l-.408 4.089h-2.664v3.192H9.101z',
+  twitter:
+    'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.933zm-1.291 19.494h2.039L6.486 3.24H4.298l13.312 17.408z',
+  youtube:
+    'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z',
+  linkedin:
+    'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.222 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
+  tiktok:
+    'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 3.61.01 7.22-.02 10.83-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 2.16 2.49 3.66 1.35.92-.66 1.47-1.77 1.49-2.88.03-2.36.01-4.72.02-7.08z',
+  whatsapp:
+    'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z',
+  telegram:
+    'M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z',
+  pinterest:
+    'M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z',
+  github:
+    'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
+  discord:
+    'M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1067c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z',
+  snapchat:
+    'M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.062c-.012.2-.024.405-.036.595-.07 1.011-.144 1.937-.09 2.456.063.59.838.982 1.73 1.337.618.254 1.244.512 1.67.916.348.33.52.77.48 1.24-.063.768-.88 1.216-1.936 1.716-.192.096-.39.195-.59.3-.653.34-1.305.78-1.48 1.363-.1.344-.067.71.094 1.006.283.548.86.86 1.54 1.18.303.15.616.305.9.48 1.246.75 1.87 1.512 1.87 2.274 0 .48-.17.93-.48 1.29-.55.63-1.54.96-2.94.96-.36 0-.74-.03-1.13-.09-.45-.07-.92-.17-1.39-.27-.6-.13-1.22-.26-1.81-.26-.58 0-1.2.13-1.81.26-.47.1-.94.2-1.39.27-.39.06-.77.09-1.13.09-1.4 0-2.39-.33-2.94-.96-.31-.36-.48-.81-.48-1.29 0-.762.624-1.524 1.87-2.274.284-.175.597-.33.9-.48.68-.32 1.257-.632 1.54-1.18.161-.296.194-.662.094-1.006-.175-.583-.827-1.023-1.48-1.363-.2-.105-.398-.204-.59-.3-1.056-.5-1.873-.948-1.936-1.716-.04-.47.132-.91.48-1.24.426-.404 1.052-.662 1.67-.916.892-.355 1.667-.747 1.73-1.337.054-.519-.02-1.445-.09-2.456-.012-.19-.024-.395-.036-.595l-.003-.062c-.104-1.628-.23-3.654.299-4.847C7.853 1.069 11.216.793 12.206.793z',
+  threads:
+    'M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-.584-2.043-1.505-3.528-2.85-4.62-1.42-1.093-3.202-1.646-5.303-1.67-2.93.033-5.11 1.013-6.484 2.913-1.305 1.81-1.96 4.367-1.948 7.6.012 3.234.655 5.79 1.96 7.6 1.374 1.9 3.554 2.88 6.484 2.913 2.101-.024 3.883-.577 5.303-1.67 1.345-1.092 2.266-2.577 2.85-4.62l2.04.569c-.651 2.337-1.832 4.177-3.509 5.467-1.783 1.373-4.08 2.078-6.826 2.098z',
+  spotify:
+    'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z',
+  medium:
+    'M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z',
+  behance:
+    'M0 7.5V16.5H4.5C6.16 16.5 7.5 15.16 7.5 13.5C7.5 12.44 6.94 11.5 6.06 11.06C6.94 10.62 7.5 9.68 7.5 8.62C7.5 6.96 6.16 5.62 4.5 5.62H0V7.5ZM2.25 7.12H4.12C4.75 7.12 5.25 7.62 5.25 8.25C5.25 8.88 4.75 9.38 4.12 9.38H2.25V7.12ZM2.25 10.88H4.31C5 10.88 5.53 11.41 5.53 12.1C5.53 12.79 5 13.32 4.31 13.32H2.25V10.88ZM9.75 9.75H15V11.25H9.75V9.75ZM16.88 5.62C14.69 5.62 13.12 7.31 13.12 9.56C13.12 11.81 14.69 13.5 16.88 13.5C18.19 13.5 19.31 12.81 19.88 11.81L18.38 10.94C18.06 11.56 17.5 12 16.88 12C15.81 12 14.94 11.19 14.81 10.12H20C20.06 9.94 20.12 9.75 20.12 9.56C20.12 7.31 18.56 5.62 16.88 5.62ZM14.81 8.81C15 7.81 15.81 7.12 16.88 7.12C17.94 7.12 18.75 7.81 18.94 8.81H14.81ZM21.75 5.81V13.31H23.25V5.81H21.75ZM22.5 4.5C22.09 4.5 21.75 4.16 21.75 3.75C21.75 3.34 22.09 3 22.5 3C22.91 3 23.25 3.34 23.25 3.75C23.25 4.16 22.91 4.5 22.5 4.5Z',
+  dribbble:
+    'M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308 2.3-1.555 3.936-4.02 4.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.025-8.04 6.4 1.73 1.358 3.92 2.166 6.29 2.166 1.42 0 2.77-.29 4-.814zm-11.62-2.58c.232-.4 3.045-5.055 8.332-6.765.135-.045.27-.084.405-.12-.26-.585-.54-1.167-.832-1.74C7.17 11.775 2.206 11.71 1.756 11.7l-.004.312c0 2.633.998 5.037 2.634 6.855zm-2.42-8.955c.46.008 4.683.026 9.477-1.248-1.698-3.018-3.53-5.558-3.8-5.928-2.868 1.35-5.01 3.99-5.676 7.17zM9.6 2.052c.282.38 2.145 2.914 3.822 6 3.645-1.365 5.19-3.44 5.373-3.702-1.81-1.03-3.9-1.626-6.195-1.626-.825 0-1.63.1-2.4.285zm10.335 3.483c-.218.29-1.935 2.493-5.724 4.04.24.49.47.985.68 1.486.08.18.15.36.22.53 3.41-.43 6.8.26 7.14.33-.02-2.42-.88-4.64-2.31-6.38z',
+  vimeo:
+    'M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.011 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z',
+  twitch:
+    'M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z',
+  reddit:
+    'M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z',
+};
+
+function platformHarf(id: string) {
+  const p = SOSYAL_PLATFORMLAR.find((x) => x.id === id);
+  return (p?.ad ?? id).charAt(0).toUpperCase();
+}
+
+function IkonGlyph({
+  platform,
+  fill,
+  inset = false,
+}: {
+  platform: string;
+  fill: string;
+  inset?: boolean;
+}) {
+  if (inset || MARK_ONLY_MINIMAL.has(platform)) {
+    const mark = renderPlatformMark(platform, fill);
+    if (mark) {
+      if (inset) {
+        return (
+          <g transform={`translate(${ICON_INSET} ${ICON_INSET}) scale(${ICON_SCALE})`}>
+            {mark}
+          </g>
+        );
+      }
+      return mark;
+    }
+  }
+
+  const path = PLATFORM_GLYPH[platform];
+  if (!path) {
+    return (
+      <text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="700" fill={fill}>
+        {platformHarf(platform)}
+      </text>
+    );
+  }
+
+  if (inset) {
+    return (
+      <g transform={`translate(${ICON_INSET} ${ICON_INSET}) scale(${ICON_SCALE})`}>
+        <path d={path} fill={fill} />
+      </g>
+    );
+  }
+
+  return <path d={path} fill={fill} />;
+}
+
+function InstagramArkaPlan({
+  varyant,
+  gradId,
+}: {
+  varyant: 'brand' | 'solid';
+  gradId: string;
+}) {
+  const stops = (
+    <>
+      <stop offset="0%" stopColor="#f09433" />
+      <stop offset="25%" stopColor="#e6683c" />
+      <stop offset="50%" stopColor="#dc2743" />
+      <stop offset="75%" stopColor="#cc2366" />
+      <stop offset="100%" stopColor="#bc1888" />
+    </>
+  );
+
+  if (varyant === 'solid') {
+    return (
+      <>
+        <defs>
+          <linearGradient id={gradId} x1="0%" y1="100%" x2="100%" y2="0%">
+            {stops}
+          </linearGradient>
+        </defs>
+        <circle cx="12" cy="12" r="12" fill={`url(#${gradId})`} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <defs>
+        <linearGradient id={gradId} x1="0%" y1="100%" x2="100%" y2="0%">
+          {stops}
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill={`url(#${gradId})`} />
+    </>
+  );
+}
+
+export function SosyalIkonSvg({
+  platform,
+  varyant,
+  className = 'h-5 w-5',
+  renk,
+}: {
+  platform: string;
+  varyant: SosyalIkonVaryant;
+  className?: string;
+  renk?: string;
+}) {
+  const uid = useId().replace(/:/g, '');
+  const platformRenk = renk ?? SOSYAL_PLATFORMLAR.find((p) => p.id === platform)?.renk ?? '#64748b';
+  const onColor = platform === 'snapchat' ? '#000000' : '#ffffff';
+
+  if (varyant === 'solid') {
+    return (
+      <svg className={className} viewBox="0 0 24 24" aria-hidden>
+        {platform === 'instagram' ? (
+          <InstagramArkaPlan varyant="solid" gradId={`ig-solid-${uid}`} />
+        ) : (
+          <circle cx="12" cy="12" r="12" fill={platformRenk} />
+        )}
+        <IkonGlyph platform={platform} fill={onColor} inset />
+      </svg>
+    );
+  }
+
+  if (varyant === 'brand') {
+    return (
+      <svg className={className} viewBox="0 0 24 24" aria-hidden>
+        {platform === 'instagram' ? (
+          <InstagramArkaPlan varyant="brand" gradId={`ig-brand-${uid}`} />
+        ) : (
+          <rect width="24" height="24" rx="6" fill={platformRenk} />
+        )}
+        <IkonGlyph platform={platform} fill={onColor} inset />
+      </svg>
+    );
+  }
+
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+      <IkonGlyph platform={platform} fill={platformRenk} />
+    </svg>
+  );
+}
+
+export const IKON_VARYANTLARI: { id: SosyalIkonVaryant; ad: string }[] = [
+  { id: 'brand', ad: 'Marka' },
+  { id: 'solid', ad: 'Dolu' },
+  { id: 'minimal', ad: 'Çizgi' },
+];
+
+/** İkon paketleri — admin panelde seçim etiketleri */
+export const IKON_PAKETLERI = [
+  { id: 'brand' as const, ad: 'Marka renkli', aciklama: 'Platform marka renkleri' },
+  { id: 'solid' as const, ad: 'Dolu yuvarlak', aciklama: 'Renkli daire içinde beyaz ikon' },
+  { id: 'minimal' as const, ad: 'Çizgi', aciklama: 'Sade kontur ikon' },
+];
+
+export function sosyalIkonAnahtar(platform: string) {
+  return `${platform}_icon`;
+}
+
+export function sosyalAdAnahtar(platform: string) {
+  return `${platform}_ad`;
+}
+
+export function ozelIkonMu(deger: string | undefined): deger is string {
+  return !!deger && (deger.startsWith('http') || deger.startsWith('/') || deger.startsWith('data:'));
+}
+
+function metaAnahtarMi(anahtar: string) {
+  return anahtar === SIRA_ANAHTAR || anahtar.endsWith('_icon') || anahtar.endsWith('_ad');
+}
+
+export function varsayilanPlatformUrl(platform: SosyalPlatformBilgi): string {
+  const sablonlar: Record<string, string> = {
+    facebook: 'https://www.facebook.com/',
+    instagram: 'https://www.instagram.com/',
+    twitter: 'https://x.com/',
+    youtube: 'https://www.youtube.com/@',
+    linkedin: 'https://www.linkedin.com/company/',
+    tiktok: 'https://www.tiktok.com/@',
+    whatsapp: 'https://wa.me/',
+    telegram: 'https://t.me/',
+    github: 'https://github.com/',
+    discord: 'https://discord.gg/',
+  };
+  return sablonlar[platform.id] ?? `https://${platform.domainler[0]}/`;
+}
+
+export function platformAra(metin: string, haricPlatformIdleri: string[]): SosyalPlatformBilgi[] {
+  const q = metin.trim().toLowerCase();
+  if (!q) return [];
+
+  return SOSYAL_PLATFORMLAR.filter((p) => {
+    if (haricPlatformIdleri.includes(p.id)) return false;
+    if (p.id.includes(q) || p.ad.toLowerCase().includes(q)) return true;
+    return (p.aramaEtiketleri ?? []).some((etiket) => etiket.includes(q) || q.includes(etiket));
+  });
+}
+
+export function platformUrlTanima(url: string): SosyalPlatformBilgi | null {
+  if (!url.trim()) return null;
+  try {
+    const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, '');
+    return SOSYAL_PLATFORMLAR.find((p) => p.domainler.some((d) => host === d || host.endsWith(`.${d}`))) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export interface SosyalMedyaOgesi {
+  id: string;
+  platformId: string;
+  ad: string;
+  url: string;
+  ikonVaryant: SosyalIkonVaryant;
+  ozelLogoUrl?: string;
+}
+
+function ogeKayittanOlustur(pid: string, sosyal: Record<string, string>): SosyalMedyaOgesi | null {
+  const platform = SOSYAL_PLATFORMLAR.find((p) => p.id === pid);
+  const url = sosyal[pid] ?? '';
+  const ikonHam = sosyal[sosyalIkonAnahtar(pid)] ?? 'brand';
+
+  if (platform) {
+    return {
+      id: pid,
+      platformId: pid,
+      ad: platform.ad,
+      url,
+      ikonVaryant: ozelIkonMu(ikonHam) ? 'ozel' : (ikonHam as SosyalIkonVaryant),
+      ozelLogoUrl: ozelIkonMu(ikonHam) ? ikonHam : undefined,
+    };
+  }
+
+  if (pid.startsWith('ozel-') || sosyal[sosyalAdAnahtar(pid)]) {
+    const ikon = sosyal[sosyalIkonAnahtar(pid)] ?? 'minimal';
+    return {
+      id: pid,
+      platformId: 'ozel',
+      ad: sosyal[sosyalAdAnahtar(pid)] ?? 'Özel Platform',
+      url,
+      ikonVaryant: ozelIkonMu(ikon) ? 'ozel' : (ikon as SosyalIkonVaryant),
+      ozelLogoUrl: ozelIkonMu(ikon) ? ikon : undefined,
+    };
+  }
+
+  return null;
+}
+
+export function sosyalKayittanOgeler(sosyal: Record<string, string>): SosyalMedyaOgesi[] {
+  if (sosyal[SIRA_ANAHTAR]) {
+    return sosyal[SIRA_ANAHTAR].split(',')
+      .map((pid) => pid.trim())
+      .filter(Boolean)
+      .map((pid) => ogeKayittanOlustur(pid, sosyal))
+      .filter((oge): oge is SosyalMedyaOgesi => oge !== null);
+  }
+
+  const ogeler: SosyalMedyaOgesi[] = [];
+  const islenen = new Set<string>();
+
+  for (const platform of SOSYAL_PLATFORMLAR) {
+    const url = sosyal[platform.id]?.trim();
+    if (!url) continue;
+    islenen.add(platform.id);
+    const oge = ogeKayittanOlustur(platform.id, sosyal);
+    if (oge) ogeler.push(oge);
+  }
+
+  for (const [anahtar, deger] of Object.entries(sosyal)) {
+    if (metaAnahtarMi(anahtar) || islenen.has(anahtar)) continue;
+    const url = deger.trim();
+    if (!url.startsWith('http')) continue;
+    const oge = ogeKayittanOlustur(anahtar, sosyal);
+    if (oge) {
+      ogeler.push(oge);
+      islenen.add(anahtar);
+    }
+  }
+
+  return ogeler;
+}
+
+export function sosyalOgelerdenKayit(ogeler: SosyalMedyaOgesi[]): Record<string, string> {
+  const kayit: Record<string, string> = {};
+  const sira: string[] = [];
+
+  for (const oge of ogeler) {
+    const pid = oge.platformId === 'ozel' ? oge.id : oge.platformId;
+    sira.push(pid);
+    kayit[pid] = oge.url;
+    if (oge.platformId === 'ozel') {
+      kayit[sosyalAdAnahtar(pid)] = oge.ad;
+    }
+    if (oge.ozelLogoUrl) {
+      kayit[sosyalIkonAnahtar(pid)] = oge.ozelLogoUrl;
+    } else if (oge.ikonVaryant !== 'ozel') {
+      kayit[sosyalIkonAnahtar(pid)] = oge.ikonVaryant;
+    }
+  }
+
+  if (sira.length > 0) {
+    kayit[SIRA_ANAHTAR] = sira.join(',');
+  }
+
+  return kayit;
+}

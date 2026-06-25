@@ -1,0 +1,231 @@
+export type HeroStil = 'klasik' | 'metin-solda' | 'ortalanmis' | 'tam-ekran';
+
+export type HeroButonKonum =
+  | 'ust-sol'
+  | 'ust-orta'
+  | 'ust-sag'
+  | 'orta-sol'
+  | 'orta-orta'
+  | 'orta-sag'
+  | 'alt-sol'
+  | 'alt-orta'
+  | 'alt-sag';
+
+export type HeroButonAksiyon = 'ayni-sekme' | 'yeni-sekme' | 'modal';
+
+/** Hero arka plan görselinin alana nasıl oturacağı */
+export type HeroGorselKirpma = 'kapla' | 'sigdir' | 'orijinal' | 'doldur';
+
+/** Kapla/orijinal modunda görselin hangi bölgesi öne çıksın */
+export type HeroGorselOdak = 'merkez' | 'ust' | 'alt' | 'sol' | 'sag';
+
+export interface HeroSlide {
+  id: string;
+  sira: number;
+  aktif: boolean;
+  gorselUrl: string;
+  gorselKirpma?: HeroGorselKirpma;
+  gorselOdak?: HeroGorselOdak;
+  baslik: string;
+  altBaslik: string;
+  aciklama: string;
+  stil: HeroStil;
+  butonAktif: boolean;
+  butonMetni: string;
+  butonLink: string;
+  butonKonum: HeroButonKonum;
+  butonRenk: string;
+  butonYaziRenk: string;
+  butonAksiyon?: HeroButonAksiyon;
+  /** Tam ekran stilinde turuncu vurgulu son satır */
+  baslikVurgu?: string;
+  ikinciButonAktif?: boolean;
+  ikinciButonMetni?: string;
+  ikinciButonLink?: string;
+  ikinciButonAksiyon?: HeroButonAksiyon;
+  /** Tam ekran stilinde sol altta saat/tarih */
+  saatGoster?: boolean;
+}
+
+export interface HeroKart {
+  id: string;
+  ikon: string;
+  baslik: string;
+  aciklama: string;
+  link?: string;
+  sira: number;
+}
+
+export type HeroSliderDuzenlemeModu = 'ayni-sekme' | 'yeni-sekme' | 'modal';
+
+export interface HeroAyarlari {
+  gecisSuresiSn: number;
+  sliderlar: HeroSlide[];
+  kartlarAktif: boolean;
+  kartlar: HeroKart[];
+  /** @deprecated Artık kullanılmıyor; geriye uyumluluk için tutuldu */
+  sliderDuzenlemeModu?: HeroSliderDuzenlemeModu;
+}
+
+export const HERO_BUTON_AKSIYONLARI: { id: HeroButonAksiyon; ad: string; aciklama: string }[] = [
+  { id: 'ayni-sekme', ad: 'Aynı pencerede aç', aciklama: 'Mevcut sekmede yönlendir' },
+  { id: 'yeni-sekme', ad: 'Yeni sekmede aç', aciklama: 'Tarayıcıda yeni sekme' },
+  { id: 'modal', ad: 'Modalda aç', aciklama: 'Sayfa üzerinde pencere' },
+];
+
+export const HERO_VARSAYILAN_GECIS_SN = 6;
+export const HERO_VARSAYILAN_BUTON_RENK = '#ffffff';
+export const HERO_VARSAYILAN_BUTON_YAZI = '#7c3aed';
+export const HERO_TAM_EKRAN_BUTON_RENK = '#f97316';
+export const HERO_TAM_EKRAN_BUTON_YAZI = '#ffffff';
+
+export const HERO_STILLER: { id: HeroStil; ad: string; aciklama: string }[] = [
+  { id: 'klasik', ad: 'Klasik', aciklama: 'Tam genişlik görsel, metin konuma göre' },
+  { id: 'metin-solda', ad: 'Metin Solda', aciklama: 'Sol tarafta koyu panel üzerinde metin' },
+  { id: 'ortalanmis', ad: 'Ortalanmış', aciklama: 'Metin ve buton ortada' },
+  { id: 'tam-ekran', ad: 'Tam Ekran', aciklama: 'Sol hizalı vitrin; aşağı kaydırınca kaybolur' },
+];
+
+const GECERLI_HERO_STILLER: HeroStil[] = ['klasik', 'metin-solda', 'ortalanmis', 'tam-ekran'];
+
+export function heroStilNormalize(stil?: string | null): HeroStil {
+  if (stil && GECERLI_HERO_STILLER.includes(stil as HeroStil)) return stil as HeroStil;
+  return 'klasik';
+}
+
+export const HERO_BUTON_KONUMLARI: { id: HeroButonKonum; etiket: string }[] = [
+  { id: 'ust-sol', etiket: '↖' },
+  { id: 'ust-orta', etiket: '↑' },
+  { id: 'ust-sag', etiket: '↗' },
+  { id: 'orta-sol', etiket: '←' },
+  { id: 'orta-orta', etiket: '●' },
+  { id: 'orta-sag', etiket: '→' },
+  { id: 'alt-sol', etiket: '↙' },
+  { id: 'alt-orta', etiket: '↓' },
+  { id: 'alt-sag', etiket: '↘' },
+];
+
+export const HERO_GORSEL_KIRPMA: { id: HeroGorselKirpma; ad: string; aciklama: string }[] = [
+  { id: 'kapla', ad: 'Kapla', aciklama: 'Alanı doldurur; taşan kısımlar kırpılır (önerilen)' },
+  { id: 'sigdir', ad: 'Sığdır', aciklama: 'Görselin tamamı görünür; yanlarda boşluk kalabilir' },
+  { id: 'orijinal', ad: 'Orijinal boyut', aciklama: 'Gerçek piksel boyutu; büyükse taşar' },
+  { id: 'doldur', ad: 'Uzat', aciklama: 'Alana zorla sığdırır; oran bozulabilir' },
+];
+
+export const HERO_GORSEL_ODAK: { id: HeroGorselOdak; ad: string }[] = [
+  { id: 'merkez', ad: 'Merkez' },
+  { id: 'ust', ad: 'Üst' },
+  { id: 'alt', ad: 'Alt' },
+  { id: 'sol', ad: 'Sol' },
+  { id: 'sag', ad: 'Sağ' },
+];
+
+const GECERLI_GORSEL_KIRPMA: HeroGorselKirpma[] = ['kapla', 'sigdir', 'orijinal', 'doldur'];
+const GECERLI_GORSEL_ODAK: HeroGorselOdak[] = ['merkez', 'ust', 'alt', 'sol', 'sag'];
+
+export function heroGorselKirpmaNormalize(kirpma?: string | null): HeroGorselKirpma {
+  if (kirpma && GECERLI_GORSEL_KIRPMA.includes(kirpma as HeroGorselKirpma)) return kirpma as HeroGorselKirpma;
+  return 'kapla';
+}
+
+export function heroGorselOdakNormalize(odak?: string | null): HeroGorselOdak {
+  if (odak && GECERLI_GORSEL_ODAK.includes(odak as HeroGorselOdak)) return odak as HeroGorselOdak;
+  return 'merkez';
+}
+
+export function heroGorselObjectSinifi(
+  kirpma?: HeroGorselKirpma | null,
+  odak?: HeroGorselOdak | null,
+): string {
+  const fitMap: Record<HeroGorselKirpma, string> = {
+    kapla: 'object-cover',
+    sigdir: 'object-contain',
+    orijinal: 'object-none',
+    doldur: 'object-fill',
+  };
+  const odakMap: Record<HeroGorselOdak, string> = {
+    merkez: 'object-center',
+    ust: 'object-top',
+    alt: 'object-bottom',
+    sol: 'object-left',
+    sag: 'object-right',
+  };
+  const k = heroGorselKirpmaNormalize(kirpma);
+  const o = heroGorselOdakNormalize(odak);
+  return `${fitMap[k]} ${odakMap[o]}`;
+}
+
+export function heroGorselSinifi(kirpma?: HeroGorselKirpma | null, odak?: HeroGorselOdak | null): string {
+  return `absolute inset-0 h-full w-full ${heroGorselObjectSinifi(kirpma, odak)}`;
+}
+
+function slideNormalize(s: HeroSlide): HeroSlide {
+  const stil = heroStilNormalize(s.stil);
+  const tamEkran = stil === 'tam-ekran';
+  return {
+    ...s,
+    stil,
+    gorselKirpma: heroGorselKirpmaNormalize(s.gorselKirpma),
+    gorselOdak: heroGorselOdakNormalize(s.gorselOdak),
+    butonRenk: s.butonRenk || (tamEkran ? HERO_TAM_EKRAN_BUTON_RENK : HERO_VARSAYILAN_BUTON_RENK),
+    butonYaziRenk: s.butonYaziRenk || (tamEkran ? HERO_TAM_EKRAN_BUTON_YAZI : HERO_VARSAYILAN_BUTON_YAZI),
+    butonAksiyon: s.butonAksiyon ?? 'ayni-sekme',
+    baslikVurgu: s.baslikVurgu ?? '',
+    ikinciButonAktif: s.ikinciButonAktif ?? false,
+    ikinciButonMetni: s.ikinciButonMetni ?? '',
+    ikinciButonLink: s.ikinciButonLink ?? '',
+    ikinciButonAksiyon: s.ikinciButonAksiyon ?? 'ayni-sekme',
+    saatGoster: s.saatGoster ?? tamEkran,
+  };
+}
+
+export function varsayilanHeroAyarlari(): HeroAyarlari {
+  return {
+    gecisSuresiSn: HERO_VARSAYILAN_GECIS_SN,
+    sliderlar: [],
+    kartlarAktif: true,
+    kartlar: [
+      { id: 'k1', ikon: '🏢', baslik: 'Kurumsal Deneyim', aciklama: 'Yılların tecrübesi', sira: 0 },
+      { id: 'k2', ikon: '🔒', baslik: 'Güvenilir Hizmet', aciklama: 'Profesyonel çözümler', sira: 1 },
+      { id: 'k3', ikon: '💬', baslik: '7/24 Destek', aciklama: 'Uzman ekip yanınızda', sira: 2 },
+      { id: 'k4', ikon: '✅', baslik: 'Memnuniyet', aciklama: 'Referans müşteriler', sira: 3 },
+    ],
+    sliderDuzenlemeModu: 'ayni-sekme',
+  };
+}
+
+export function bosHeroSlide(sira: number): HeroSlide {
+  return {
+    id: `slide-${Date.now()}`,
+    sira,
+    aktif: true,
+    gorselUrl: '',
+    gorselKirpma: 'kapla',
+    gorselOdak: 'merkez',
+    baslik: '',
+    altBaslik: '',
+    aciklama: '',
+    stil: 'klasik',
+    butonAktif: false,
+    butonMetni: '',
+    butonLink: '',
+    butonKonum: 'alt-sol',
+    butonRenk: HERO_VARSAYILAN_BUTON_RENK,
+    butonYaziRenk: HERO_VARSAYILAN_BUTON_YAZI,
+    butonAksiyon: 'ayni-sekme',
+  };
+}
+
+export function heroAyarlariBirlestir(ham?: HeroAyarlari | null): HeroAyarlari {
+  const varsayilan = varsayilanHeroAyarlari();
+  if (!ham) return varsayilan;
+  return {
+    gecisSuresiSn: ham.gecisSuresiSn ?? varsayilan.gecisSuresiSn,
+    kartlarAktif: ham.kartlarAktif ?? varsayilan.kartlarAktif,
+    kartlar: ham.kartlar?.length
+      ? [...ham.kartlar].sort((a, b) => a.sira - b.sira).map((k) => ({ ...k, link: k.link ?? '' }))
+      : varsayilan.kartlar,
+    sliderlar: [...(ham.sliderlar ?? [])].map(slideNormalize).sort((a, b) => a.sira - b.sira),
+    sliderDuzenlemeModu: ham.sliderDuzenlemeModu ?? 'ayni-sekme',
+  };
+}
