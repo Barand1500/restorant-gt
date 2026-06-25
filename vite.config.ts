@@ -10,6 +10,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    outDir: 'frontend',
+    emptyOutDir: true,
+  },
   server: {
     port: 5174,
   },

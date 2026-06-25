@@ -14,85 +14,6 @@ const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: b
 });
 
 const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
-  dashboard: [
-    A('kaydet', 'Kaydet', false),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', true, true),
-    A('yayinla', 'Yayınla', false),
-  ],
-  sayfalar: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', true),
-    A('altEkle', 'Yeni Alt Ekle', false),
-    A('sil', 'Sil', true),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', true),
-  ],
-  blog: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', true),
-    A('sil', 'Sil', true),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', true),
-  ],
-  formlar: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', true),
-    A('sil', 'Sil', true),
-    A('onizle', 'Önizle', false),
-    A('yayinla', 'Yayınla', true),
-  ],
-  medya: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', true),
-    A('onizle', 'Önizle', false),
-    A('yayinla', 'Yayınla', false),
-  ],
-  'site-ayarlari': [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', false),
-  ],
-  'widget-yonetimi': [
-    A('kaydet', 'Kaydet', true),
-    A('hizliKaydet', 'Hızlı Kaydet', true),
-    A('ekle', 'Yeni Ekle', true, true),
-    A('sil', 'Sil', true),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', true),
-  ],
-  seo: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', false),
-    A('yayinla', 'Yayınla', false),
-  ],
-  header: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', false),
-  ],
-  hero: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', false),
-  ],
-  footer: [
-    A('kaydet', 'Kaydet', true, true),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', true),
-    A('yayinla', 'Yayınla', false),
-  ],
   ayarlar: [
     A('kaydet', 'Kaydet', true, true),
     A('ekle', 'Yeni Ekle', false),
@@ -128,13 +49,27 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  loglar: [
+    A('kaydet', 'Kaydet', false),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', true),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'veri-yedekleme': [
+    A('kaydet', 'Kaydet', false),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
 };
 
 const varsayilanAksiyonlar: AksiyonButonu[] = [
   A('kaydet', 'Kaydet', true),
   A('ekle', 'Yeni Ekle', false),
   A('sil', 'Sil', false),
-  A('onizle', 'Önizle', true),
+  A('onizle', 'Önizle', false),
   A('yayinla', 'Yayınla', false),
 ];
 
@@ -148,10 +83,7 @@ const MODUL_AKSIYON_YETKI: Partial<Record<string, Partial<Record<AksiyonId, Yetk
 
 const AKSIYON_YETKI: Partial<Record<AksiyonId, YetkiKodu>> = {
   kaydet: 'duzenleme',
-  hizliKaydet: 'duzenleme',
-  guncelle: 'duzenleme',
   ekle: 'ekleme',
-  altEkle: 'ekleme',
   sil: 'silme',
   onizle: 'goruntuleme',
   yayinla: 'duzenleme',

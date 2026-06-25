@@ -10,11 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tiptap/extension-link": "^3.26.1",
-    "@tiptap/extension-text-align": "^3.26.1",
-    "@tiptap/extension-underline": "^3.26.1",
-    "@tiptap/react": "^3.26.1",
-    "@tiptap/starter-kit": "^3.26.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2"

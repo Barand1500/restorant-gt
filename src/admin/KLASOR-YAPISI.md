@@ -47,3 +47,7 @@ Her modul klasorunde:
 | `dil/` | Panel cevirileri |
 | `yapilandirma/` | Uygulama ayarlari |
 | `stiller/` | CSS dosyalari |
+
+## Build ciktisi
+
+`npm run build` komutu derlenmis dosyalari `frontend/` klasorune yazar (eski `dist` yerine).
