@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./styles/konumluSlider.css";
 
 @theme {
   --color-primary: #7c3aed;

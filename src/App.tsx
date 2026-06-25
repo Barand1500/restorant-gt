@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/baglamlar/AuthContext';
 import { RouterProvider } from 'react-router-dom';
 import { siteRouter } from '@/router';
 
