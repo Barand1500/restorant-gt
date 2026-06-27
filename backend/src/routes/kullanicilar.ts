@@ -1,13 +1,26 @@
 import { Router } from 'express';
 import type { Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { sifreHashle } from '../lib/crypto.js';
 import { adminKullaniciYanit, rolIdCoz } from '../lib/mappers.js';
+import {
+  kullaniciInclude,
+  masterKullaniciListesiGetir,
+  masterKullaniciYanitOlustur,
+} from '../lib/masterKullaniciYardimci.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
 const router = Router();
 router.use(authZorunlu);
+
+const GECERLI_TIPLER = ['merkez', 'bayi', 'firma', 'sube'] as const;
+
+router.get('/master', async (_req: AuthRequest, res: Response) => {
+  const kullanicilar = await masterKullaniciListesiGetir();
+  return res.json({ kullanicilar });
+});
 
 router.get('/', async (_req: AuthRequest, res: Response) => {
   const kullanicilar = await prisma.kullanici.findMany({
@@ -22,35 +35,88 @@ router.get('/siteler', (_req: AuthRequest, res: Response) => {
 });
 
 router.post('/', async (req: AuthRequest, res: Response) => {
-  const { email, ad, sifre, rol, aktif } = req.body as {
-    email?: string;
-    ad?: string;
-    sifre?: string;
-    rol?: string;
-    aktif?: boolean;
-  };
+  const body = req.body as Record<string, unknown>;
+  const email = String(body.email ?? '').trim();
+  const ad = String(body.ad ?? '').trim();
+  const sifre = String(body.sifre ?? '').trim();
+  const rol = String(body.rol ?? '');
 
-  if (!email?.trim() || !ad?.trim() || !sifre?.trim() || !rol) {
+  if (!email || !ad || !sifre || !rol) {
     return res.status(400).json({ mesaj: 'Zorunlu alanlar eksik' });
   }
 
   const rolId = await rolIdCoz(rol);
+  const kullaniciTipi = GECERLI_TIPLER.includes(body.kullaniciTipi as (typeof GECERLI_TIPLER)[number])
+    ? (body.kullaniciTipi as (typeof GECERLI_TIPLER)[number])
+    : 'merkez';
+
+  const bayiId = body.bayiId != null && body.bayiId !== '' ? Number(body.bayiId) : null;
+  const firmaId = body.firmaId != null && body.firmaId !== '' ? Number(body.firmaId) : null;
+  const subeId = body.subeId != null && body.subeId !== '' ? Number(body.subeId) : null;
+  const gsm = body.gsm != null && String(body.gsm).trim() ? String(body.gsm).trim().slice(0, 20) : null;
 
   const kullanici = await prisma.kullanici.create({
     data: {
-      email: email.trim().toLowerCase(),
-      ad: ad.trim(),
+      email: email.toLowerCase(),
+      ad,
       sifreHash: sifreHashle(sifre),
       rolId,
-      aktif: aktif !== false,
+      kullaniciTipi,
+      bayiId,
+      firmaId,
+      subeId,
+      gsm,
+      aktif: body.aktif !== false,
     },
+    include: kullaniciInclude,
   });
 
   await prisma.kullaniciKisayol.create({
     data: { kullaniciId: kullanici.id, harita: {} },
   });
 
+  if (body.kapsam === 'master') {
+    return res.status(201).json({ kullanici: await masterKullaniciYanitOlustur(kullanici) });
+  }
+
   return res.status(201).json({ kullanici: await adminKullaniciYanit(kullanici) });
+});
+
+router.patch('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  const body = req.body as Record<string, unknown>;
+  const data: Prisma.KullaniciUpdateInput = {};
+
+  if (body.aktif !== undefined) data.aktif = Boolean(body.aktif);
+  if (body.ad !== undefined) data.ad = String(body.ad).trim();
+  if (body.email !== undefined) data.email = String(body.email).trim().toLowerCase();
+  if (body.gsm !== undefined) data.gsm = body.gsm ? String(body.gsm).trim().slice(0, 20) : null;
+  if (body.rol !== undefined) data.rol = { connect: { id: await rolIdCoz(String(body.rol)) } };
+  if (body.kullaniciTipi !== undefined && GECERLI_TIPLER.includes(body.kullaniciTipi as (typeof GECERLI_TIPLER)[number])) {
+    data.kullaniciTipi = body.kullaniciTipi as (typeof GECERLI_TIPLER)[number];
+  }
+  if (body.bayiId !== undefined) {
+    data.bayi = body.bayiId ? { connect: { id: Number(body.bayiId) } } : { disconnect: true };
+  }
+  if (body.firmaId !== undefined) {
+    data.firma = body.firmaId ? { connect: { id: Number(body.firmaId) } } : { disconnect: true };
+  }
+  if (body.subeId !== undefined) {
+    data.sube = body.subeId ? { connect: { id: Number(body.subeId) } } : { disconnect: true };
+  }
+  if (body.sifre && String(body.sifre).trim()) {
+    data.sifreHash = sifreHashle(String(body.sifre));
+  }
+
+  if (Object.keys(data).length === 0) return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
+
+  const kullanici = await prisma.kullanici.update({
+    where: { id },
+    data,
+    include: kullaniciInclude,
+  });
+
+  return res.json({ kullanici: await masterKullaniciYanitOlustur(kullanici) });
 });
 
 router.put('/:id', async (req: AuthRequest, res: Response) => {

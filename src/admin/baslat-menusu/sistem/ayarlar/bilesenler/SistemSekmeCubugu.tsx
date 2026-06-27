@@ -34,6 +34,7 @@ export function DurumAnahtari({
   renk = 'yesil',
   ikon,
   devreDisi = false,
+  kompakt = false,
 }: {
   etiket: string;
   aciklama?: string;
@@ -42,10 +43,11 @@ export function DurumAnahtari({
   renk?: 'yesil' | 'turuncu' | 'mavi' | 'kirmizi';
   ikon?: string;
   devreDisi?: boolean;
+  kompakt?: boolean;
 }) {
   return (
     <div
-      className={`ap-sistem-toggle ap-sistem-toggle-${renk} ${acik ? 'ap-sistem-toggle-aktif' : ''} ${devreDisi ? 'opacity-60' : ''}`}
+      className={`ap-sistem-toggle ap-sistem-toggle-${renk} ${kompakt ? 'ap-sistem-toggle-kompakt' : ''} ${acik ? 'ap-sistem-toggle-aktif' : ''} ${devreDisi ? 'opacity-60' : ''}`}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">
         {ikon && <span className="ap-sistem-toggle-ikon">{ikon}</span>}

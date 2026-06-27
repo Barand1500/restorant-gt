@@ -4,6 +4,7 @@ import { randomBytes, scryptSync } from 'node:crypto';
 const prisma = new PrismaClient();
 
 const PANEL_MODULLERI = [
+  { modulAdi: 'Master', prefix: 'master' },
   { modulAdi: 'Kullanicilar', prefix: 'kullanicilar' },
   { modulAdi: 'Roller', prefix: 'roller' },
   { modulAdi: 'Ayarlar', prefix: 'ayarlar' },
