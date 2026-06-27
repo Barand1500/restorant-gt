@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import type { Response } from 'express';
+import { MERKEZ_SUBE_ID } from '../lib/ayarlar.js';
 import { tarihIso } from '../lib/mappers.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
@@ -13,7 +14,9 @@ const yukleme = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20
 
 router.get('/', async (_req: AuthRequest, res: Response) => {
   const katalog = await prisma.eklentiKatalog.findMany({ orderBy: { ad: 'asc' } });
-  const kurulumlar = await prisma.eklentiKurulum.findMany();
+  const kurulumlar = await prisma.eklentiKurulum.findMany({
+    where: { subeId: MERKEZ_SUBE_ID },
+  });
   const kurulumMap = new Map(kurulumlar.map((k) => [k.eklentiKodu, k]));
 
   const eklentiler = katalog.map((e) => {
@@ -47,8 +50,8 @@ router.post('/:kod/kur', async (req: AuthRequest, res: Response) => {
   if (!eklenti) return res.status(404).json({ mesaj: 'Eklenti bulunamadi' });
 
   await prisma.eklentiKurulum.upsert({
-    where: { eklentiKodu: kod },
-    create: { eklentiKodu: kod, durum: 'kurulu', kaynak: 'katalog' },
+    where: { subeId_eklentiKodu: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod } },
+    create: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod, durum: 'kurulu', kaynak: 'katalog' },
     update: { durum: 'kurulu' },
   });
 
@@ -59,7 +62,7 @@ router.patch('/:kod/aktif', async (req: AuthRequest, res: Response) => {
   const kod = decodeURIComponent(String(req.params.kod));
 
   await prisma.eklentiKurulum.updateMany({
-    where: { eklentiKodu: kod },
+    where: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod },
     data: { durum: 'aktif' },
   });
 
@@ -70,7 +73,7 @@ router.patch('/:kod/pasif', async (req: AuthRequest, res: Response) => {
   const kod = decodeURIComponent(String(req.params.kod));
 
   await prisma.eklentiKurulum.updateMany({
-    where: { eklentiKodu: kod },
+    where: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod },
     data: { durum: 'pasif' },
   });
 
@@ -80,7 +83,9 @@ router.patch('/:kod/pasif', async (req: AuthRequest, res: Response) => {
 router.delete('/:kod', async (req: AuthRequest, res: Response) => {
   const kod = decodeURIComponent(String(req.params.kod));
 
-  await prisma.eklentiKurulum.deleteMany({ where: { eklentiKodu: kod } });
+  await prisma.eklentiKurulum.deleteMany({
+    where: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod },
+  });
   return res.json({ mesaj: 'Kaldirildi' });
 });
 
@@ -111,8 +116,8 @@ router.post('/yukle', yukleme.single('dosya'), async (req: AuthRequest, res: Res
   });
 
   await prisma.eklentiKurulum.upsert({
-    where: { eklentiKodu: kod },
-    create: { eklentiKodu: kod, durum: 'kurulu', kaynak: 'yukleme' },
+    where: { subeId_eklentiKodu: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod } },
+    create: { subeId: MERKEZ_SUBE_ID, eklentiKodu: kod, durum: 'kurulu', kaynak: 'yukleme' },
     update: { durum: 'kurulu', kaynak: 'yukleme' },
   });
 

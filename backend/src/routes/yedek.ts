@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import type { Response } from 'express';
-import { tarihIso } from '../lib/mappers.js';
+import { MERKEZ_SUBE_ID, tumAyarlarOku } from '../lib/ayarlar.js';
+import { rolSatirlarindanOzet, tarihIso } from '../lib/mappers.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
@@ -53,14 +54,14 @@ router.get('/gecmis', async (_req: AuthRequest, res: Response) => {
 });
 
 async function yedekVerisiAl() {
-  const ayar = await prisma.siteAyar.findUniqueOrThrow({ where: { siteId: 1 } });
-  const roller = await prisma.rol.findMany({ include: { yetkiler: true } });
-  const eklentiler = await prisma.eklentiKurulum.findMany();
+  const ayarlar = await tumAyarlarOku(MERKEZ_SUBE_ID);
+  const satirlar = await prisma.rol.findMany({ where: { subeId: MERKEZ_SUBE_ID } });
+  const eklentiler = await prisma.eklentiKurulum.findMany({ where: { subeId: MERKEZ_SUBE_ID } });
   return {
-    surum: '2.0',
+    surum: '3.0',
     olusturma: new Date().toISOString(),
-    ayar,
-    roller,
+    ayarlar,
+    roller: rolSatirlarindanOzet(satirlar),
     eklentiler,
   };
 }

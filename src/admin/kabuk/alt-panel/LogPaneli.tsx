@@ -51,9 +51,9 @@ export function LogPaneli({ acik, onKapat, onModulAc }: LogPaneliProps) {
       {loglar.map((log) => (
         <AltPanelOge
           key={log.id}
-          baslik={log.islem}
-          alt={`${log.kullaniciAd} · ${log.modulId ?? 'sistem'}`}
-          zaman={log.olusturma}
+          baslik={log.mesaj}
+          alt={`${log.kullaniciEmail ?? 'sistem'} · ${log.ipAdresi ?? '—'}`}
+          zaman={log.kayitTarihi}
         />
       ))}
     </AltPanel>

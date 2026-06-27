@@ -7,18 +7,15 @@ const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 export interface AdminLogKayit {
   id: string;
   kullaniciId?: string | null;
-  kullaniciAd: string;
-  kullaniciEmail: string;
-  islem: string;
-  modulId?: string | null;
-  aksiyonId?: string | null;
-  olusturma: string;
+  mesaj: string;
+  ipAdresi?: string | null;
+  kayitTarihi: string;
+  kullaniciAd?: string | null;
+  kullaniciEmail?: string | null;
 }
 
 export interface LogKaydetPayload {
-  islem: string;
-  modulId?: string;
-  aksiyonId?: string;
+  mesaj: string;
 }
 
 export interface YedekKaydi {

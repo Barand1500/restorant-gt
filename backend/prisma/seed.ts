@@ -1,14 +1,17 @@
 import { PrismaClient } from '@prisma/client';
-import { createHash, randomBytes, scryptSync } from 'node:crypto';
+import { randomBytes, scryptSync } from 'node:crypto';
+import { MERKEZ_SUBE_ID, varsayilanAyarlarOlustur } from '../src/lib/ayarlar.js';
 
 const prisma = new PrismaClient();
 
-const VARSAYILAN_YETKILER = [
-  { kod: 'goruntuleme', etiket: 'Goruntuleme' },
-  { kod: 'ekleme', etiket: 'Ekleme' },
-  { kod: 'duzenleme', etiket: 'Duzenleme' },
-  { kod: 'silme', etiket: 'Silme' },
-  { kod: 'kullanici_yonetimi', etiket: 'Kullanici Yonetimi' },
+const PANEL_MODULLERI = [
+  { modulAdi: 'Kullanicilar', prefix: 'kullanicilar' },
+  { modulAdi: 'Roller', prefix: 'roller' },
+  { modulAdi: 'Ayarlar', prefix: 'ayarlar' },
+  { modulAdi: 'Sekme Yonetimi', prefix: 'sekme_yonetimi' },
+  { modulAdi: 'Kisayol Ayarlari', prefix: 'kisayol_ayarlari' },
+  { modulAdi: 'Loglar', prefix: 'loglar' },
+  { modulAdi: 'Veri Yedekleme', prefix: 'veri_yedekleme' },
 ];
 
 const SISTEM_ROLLERI = [
@@ -56,99 +59,152 @@ function sifreHashle(sifre: string) {
   return `scrypt:${tuz}:${hash}`;
 }
 
-function pinHashle(pin: string) {
-  return createHash('sha256').update(pin).digest('hex');
+async function modulleriOlustur() {
+  const modulMap = new Map<string, number>();
+  for (const m of PANEL_MODULLERI) {
+    const kayit = await prisma.modul.upsert({
+      where: { prefix: m.prefix },
+      create: { modulAdi: m.modulAdi, prefix: m.prefix },
+      update: { modulAdi: m.modulAdi, durum: true },
+    });
+    modulMap.set(m.prefix, kayit.id);
+  }
+  return modulMap;
+}
+
+async function rolleriOlustur(modulIds: number[]) {
+  for (const rol of SISTEM_ROLLERI) {
+    for (const modulId of modulIds) {
+      await prisma.rol.upsert({
+        where: {
+          rolKodu_modulId_subeId: {
+            rolKodu: rol.kod,
+            modulId,
+            subeId: MERKEZ_SUBE_ID,
+          },
+        },
+        create: {
+          rolKodu: rol.kod,
+          rolAdi: rol.baslik,
+          modulId,
+          yetki: rol.yetkiler,
+          subeId: MERKEZ_SUBE_ID,
+          sistemRolu: true,
+          aciklama: rol.aciklama,
+        },
+        update: {
+          rolAdi: rol.baslik,
+          yetki: rol.yetkiler,
+          sistemRolu: true,
+          aciklama: rol.aciklama,
+          durum: true,
+        },
+      });
+    }
+  }
+}
+
+async function organizasyonOlustur() {
+  const bayi = await prisma.bayi.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      unvan: 'Guzel Teknoloji',
+      eposta: 'info@guzelteknoloji.com',
+      il: 'Istanbul',
+      durum: true,
+    },
+    update: { unvan: 'Guzel Teknoloji', durum: true },
+  });
+
+  const firma = await prisma.firma.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      bayiId: bayi.id,
+      tabelaAdi: 'Demo Restoran',
+      unvan: 'Demo Restoran Grubu',
+      eposta: 'demo@restoran.local',
+      il: 'Istanbul',
+      durum: true,
+    },
+    update: { unvan: 'Demo Restoran Grubu', durum: true },
+  });
+
+  const paket = await prisma.paket.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      paketAdi: 'Temel Paket',
+      aciklama: 'Baslangic paketi',
+      subeSayisi: 5,
+      personelSayisi: 20,
+      masaSayisi: 100,
+      fiyat: 0,
+      durum: true,
+    },
+    update: { paketAdi: 'Temel Paket', durum: true },
+  });
+
+  await prisma.lisans.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      firmaId: firma.id,
+      paketId: paket.id,
+      durum: true,
+    },
+    update: { durum: true },
+  });
+
+  const sube = await prisma.sube.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      firmaId: firma.id,
+      subeAdi: 'Merkez Sube',
+      subeTipi: 'restoran',
+      dbBilgileri: { not: 'Tek MySQL — restoran-db' },
+      lisansBilgileri: { paketId: paket.id },
+      durum: true,
+    },
+    update: { subeAdi: 'Merkez Sube', durum: true },
+  });
+
+  return { bayi, firma, sube, paket };
 }
 
 async function main() {
   console.log('Veritabani tohum verisi yukleniyor...');
 
-  for (const yetki of VARSAYILAN_YETKILER) {
-    await prisma.yetki.upsert({
-      where: { kod: yetki.kod },
-      create: yetki,
-      update: { etiket: yetki.etiket },
-    });
-  }
+  const modulMap = await modulleriOlustur();
+  const modulIds = [...modulMap.values()];
+  await rolleriOlustur(modulIds);
+  await varsayilanAyarlarOlustur(MERKEZ_SUBE_ID);
 
-  await prisma.siteAyar.upsert({
-    where: { siteId: 1 },
-    create: {
-      siteId: 1,
-      bakimModu: false,
-      bakimBaslik: 'Bakim Calismasi',
-      bakimMesaji: 'Site gecici olarak bakimda. Lutfen daha sonra tekrar deneyin.',
-      logSaklamaGun: 90,
-      panelDili: 'tr',
-      otomatikYedekleme: false,
-      otomatikYedeklemeGun: 7,
-      yedeklemeFormati: 'json',
-      guvenlikBasliklari: true,
-      robotsEngelle: false,
-      sayfa404: {
-        baslik: 'Sayfa Bulunamadi',
-        mesaj: 'Aradiginiz sayfa tasinmis, silinmis veya hic var olmamis olabilir.',
-        gorselUrl: '',
-        menuTipi: 'ust',
-        oneriSayfaId: null,
-        anaSayfaButonu: true,
-      },
-      sagTikPaneli: { aktif: true, ogeler: [], modulIdler: [] },
-      scriptAyarlari: {
-        googleAnalytics: '',
-        headerScript: '',
-        bodyAcilisScript: '',
-        footerScript: '',
-      },
-    },
-    update: {},
-  });
-
-  for (const rol of SISTEM_ROLLERI) {
-    const kayit = await prisma.rol.upsert({
-      where: { kod: rol.kod },
-      create: {
-        kod: rol.kod,
-        baslik: rol.baslik,
-        aciklama: rol.aciklama,
-        sistemRolu: true,
-      },
-      update: {
-        baslik: rol.baslik,
-        aciklama: rol.aciklama,
-        sistemRolu: true,
-      },
-    });
-
-    await prisma.rolYetki.deleteMany({ where: { rolId: kayit.id } });
-    if (rol.yetkiler.length) {
-      await prisma.rolYetki.createMany({
-        data: rol.yetkiler.map((yetkiKodu) => ({ rolId: kayit.id, yetkiKodu })),
-        skipDuplicates: true,
-      });
-    }
-  }
+  const { sube } = await organizasyonOlustur();
 
   const adminEmail = process.env.SEED_ADMIN_EMAIL ?? 'admin@restorant.local';
   const adminSifre = process.env.SEED_ADMIN_PASSWORD ?? 'admin123';
-  const adminPin = process.env.SEED_ADMIN_PIN ?? '1234';
 
   const admin = await prisma.kullanici.upsert({
     where: { email: adminEmail },
     create: {
       email: adminEmail,
-      ad: 'Restorant Admin',
+      ad: 'Sistem Admin',
       sifreHash: sifreHashle(adminSifre),
-      pinHash: pinHashle(adminPin),
       rolKodu: 'SUPER_ADMIN',
+      kullaniciTipi: 'merkez',
+      subeId: sube.id,
       aktif: true,
     },
     update: {
-      ad: 'Restorant Admin',
+      ad: 'Sistem Admin',
       rolKodu: 'SUPER_ADMIN',
+      kullaniciTipi: 'merkez',
+      subeId: sube.id,
       aktif: true,
       sifreHash: sifreHashle(adminSifre),
-      pinHash: pinHashle(adminPin),
     },
   });
 
@@ -169,8 +225,15 @@ async function main() {
     update: {},
   });
 
+  await prisma.kullaniciSekmeAyar.upsert({
+    where: { kullaniciId: admin.id },
+    create: { kullaniciId: admin.id, ayarlar: {} },
+    update: {},
+  });
+
   console.log('Tohum verisi tamamlandi.');
   console.log(`  Admin id: ${admin.id} — ${adminEmail}`);
+  console.log(`  Sube id: ${sube.id} — ${sube.subeAdi}`);
 }
 
 main()

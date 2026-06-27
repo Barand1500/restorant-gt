@@ -196,7 +196,10 @@ function AdminPanelGovde() {
 
   async function logKaydet(islem: string, modulId?: string, aksiyonId?: string) {
     try {
-      await adminLogApi.kaydet({ islem, modulId, aksiyonId });
+      const mesaj = [islem, modulId && `modul:${modulId}`, aksiyonId && `aksiyon:${aksiyonId}`]
+        .filter(Boolean)
+        .join(' | ');
+      await adminLogApi.kaydet({ mesaj });
       adminBildirimleriYenile();
     } catch {
       // log hatasi paneli bloke etmesin

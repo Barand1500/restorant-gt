@@ -21,7 +21,7 @@ echo "==> Veritabani tablolari"
 npx prisma db push --force-reset
 
 echo "==> Tohum verisi"
-node prisma/seed.mjs
+npm run db:seed
 
 echo "==> Derleme"
 npm run build

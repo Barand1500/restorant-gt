@@ -69,19 +69,19 @@ export function LoglarSayfasi() {
               <tr>
                 <th className="px-4 py-3">Tarih</th>
                 <th className="px-4 py-3">Kullanıcı</th>
-                <th className="px-4 py-3">İşlem</th>
-                <th className="px-4 py-3">Modül</th>
+                <th className="px-4 py-3">Mesaj</th>
+                <th className="px-4 py-3">IP</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700 bg-slate-900/50">
               {loglar.map((log) => (
                 <tr key={log.id}>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-400">
-                    {new Date(log.olusturma).toLocaleString('tr-TR')}
+                    {new Date(log.kayitTarihi).toLocaleString('tr-TR')}
                   </td>
-                  <td className="px-4 py-3 text-slate-200">{log.kullaniciEmail}</td>
-                  <td className="px-4 py-3 text-white">{log.islem}</td>
-                  <td className="px-4 py-3 text-slate-400">{log.modulId ?? '—'}</td>
+                  <td className="px-4 py-3 text-slate-200">{log.kullaniciEmail ?? '—'}</td>
+                  <td className="px-4 py-3 text-white">{log.mesaj}</td>
+                  <td className="px-4 py-3 text-slate-400">{log.ipAdresi ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

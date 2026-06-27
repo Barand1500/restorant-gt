@@ -1,5 +1,5 @@
-// Restorant GT — MySQL (tek restoran, site tablosu yok)
-// ID'ler: Int autoincrement (1'den baslar)
+// Guzel Teknoloji — Coklu bayi / firma / sube (tek MySQL, MASTER + SUBE mantigi)
+// CloudPanel: restoran-db @ 127.0.0.1:3306
 
 generator client {
   provider      = "prisma-client-js"
@@ -10,6 +10,10 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+// ---------------------------------------------------------------------------
+// Enumlar
+// ---------------------------------------------------------------------------
 
 enum YedeklemeFormati {
   json
@@ -38,62 +42,233 @@ enum EklentiKaynak {
   yukleme
 }
 
-// ---------------------------------------------------------------------------
-// Site ayarlari (tek satir, site tablosu yok)
-// ---------------------------------------------------------------------------
+enum KullaniciTipi {
+  merkez
+  bayi
+  firma
+  sube
+}
 
-model SiteAyar {
-  siteId Int @id @default(1) @map("site_id")
-
-  bakimModu         Boolean @default(false) @map("bakim_modu")
-  bakimBaslik       String  @default("Bakim Calismasi") @map("bakim_baslik") @db.VarChar(191)
-  bakimMesaji       String  @default("Site gecici olarak bakimda.") @map("bakim_mesaji") @db.VarChar(1000)
-  bakimGorselUrl    String? @map("bakim_gorsel_url") @db.VarChar(500)
-  bakimTahminiSure  String? @map("bakim_tahmini_sure") @db.VarChar(100)
-  bakimIpBeyazListe Json    @default("[]") @map("bakim_ip_beyaz_liste")
-
-  logSaklamaGun  Int    @default(90) @map("log_saklama_gun")
-  panelDili      String @default("tr") @map("panel_dili") @db.VarChar(10)
-  panelCeviriler Json   @default("{}") @map("panel_ceviriler")
-
-  sayfa404 Json @default("{}") @map("sayfa_404")
-
-  otomatikYedekleme    Boolean          @default(false) @map("otomatik_yedekleme")
-  otomatikYedeklemeGun Int              @default(7) @map("otomatik_yedekleme_gun")
-  yedeklemeFormati     YedeklemeFormati @default(json) @map("yedekleme_formati")
-
-  guvenlikBasliklari Boolean @default(true) @map("guvenlik_basliklari")
-  robotsEngelle      Boolean @default(false) @map("robots_engelle")
-
-  sagTikPaneli   Json @default("{}") @map("sag_tik_paneli")
-  scriptAyarlari Json @default("{}") @map("script_ayarlari")
-
-  guncelleme DateTime @updatedAt @map("guncelleme")
-
-  @@map("site_ayar")
+enum SubeTipi {
+  restoran
+  kafe
+  fast_food
+  diger
 }
 
 // ---------------------------------------------------------------------------
-// Kimlik ve yetkilendirme
+// MASTER_DB — moduller, roller, organizasyon
 // ---------------------------------------------------------------------------
 
-model Kullanici {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique @db.VarChar(191)
-  ad         String   @db.VarChar(191)
-  sifreHash  String   @map("sifre_hash") @db.VarChar(255)
-  pinHash    String?  @map("pin_hash") @db.VarChar(255)
-  rolKodu    String   @map("rol_kodu") @db.VarChar(50)
-  aktif      Boolean  @default(true)
-  olusturma  DateTime @default(now()) @map("olusturma")
-  guncelleme DateTime @updatedAt @map("guncelleme")
+model Modul {
+  id               Int      @id @default(autoincrement())
+  modulAdi         String   @map("modul_adi") @db.VarChar(191)
+  prefix           String   @unique @db.VarChar(50)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
 
+  roller Rol[]
+
+  @@map("moduller")
+}
+
+/// Resimdeki roller tablosu: her rol x modul = bir satir, yetki JSON
+model Rol {
+  id               Int      @id @default(autoincrement())
+  rolKodu          String   @map("rol_kodu") @db.VarChar(50)
+  rolAdi           String   @map("rol_adi") @db.VarChar(191)
+  modulId          Int      @map("modul_id")
+  yetki            Json     @default("[]")
+  subeId           Int      @default(0) @map("sube_id") // 0 = merkez/panel rolleri
+  sistemRolu       Boolean  @default(false) @map("sistem_rolu")
+  aciklama         String   @default("") @db.VarChar(500)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  modul Modul @relation(fields: [modulId], references: [id], onDelete: Cascade)
+
+  @@unique([rolKodu, modulId, subeId])
+  @@index([rolKodu])
+  @@index([subeId])
+  @@map("roller")
+}
+
+model Bayi {
+  id               Int      @id @default(autoincrement())
+  ustId            Int?     @map("ust_id")
+  unvan            String   @db.VarChar(191)
+  adres            String?  @db.VarChar(500)
+  il               String?  @db.VarChar(100)
+  ilce             String?  @db.VarChar(100)
+  telefon          String?  @db.VarChar(20)
+  gsm              String?  @db.VarChar(20)
+  eposta           String?  @db.VarChar(191)
+  vergiDairesi     String?  @map("vergi_dairesi") @db.VarChar(191)
+  vergiNo          String?  @map("vergi_no") @db.VarChar(50)
+  iskonto          Decimal? @db.Decimal(5, 2)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  ustBayi    Bayi?  @relation("BayiHiyerarsi", fields: [ustId], references: [id], onDelete: SetNull)
+  altBayiler Bayi[] @relation("BayiHiyerarsi")
+  firmalar   Firma[]
+  kullanicilar Kullanici[]
+
+  @@index([ustId])
+  @@map("bayiler")
+}
+
+model Firma {
+  id               Int      @id @default(autoincrement())
+  bayiId           Int      @map("bayi_id")
+  tabelaAdi        String?  @map("tabela_adi") @db.VarChar(191)
+  unvan            String   @db.VarChar(191)
+  adres            String?  @db.VarChar(500)
+  il               String?  @db.VarChar(100)
+  ilce             String?  @db.VarChar(100)
+  telefon          String?  @db.VarChar(20)
+  gsm              String?  @db.VarChar(20)
+  eposta           String?  @db.VarChar(191)
+  vergiDairesi     String?  @map("vergi_dairesi") @db.VarChar(191)
+  vergiNo          String?  @map("vergi_no") @db.VarChar(50)
+  iskonto          Decimal? @db.Decimal(5, 2)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  bayi         Bayi       @relation(fields: [bayiId], references: [id], onDelete: Cascade)
+  subeler      Sube[]
+  lisanslar    Lisans[]
+  kullanicilar Kullanici[]
+
+  @@index([bayiId])
+  @@map("firmalar")
+}
+
+model Sube {
+  id               Int      @id @default(autoincrement())
+  firmaId          Int      @map("firma_id")
+  subeAdi          String   @map("sube_adi") @db.VarChar(191)
+  subeTipi         SubeTipi @default(restoran) @map("sube_tipi")
+  dbBilgileri      Json?    @map("db_bilgileri")
+  lisansBilgileri  Json?    @map("lisans_bilgileri")
+  adres            String?  @db.VarChar(500)
+  telefon          String?  @db.VarChar(20)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  firma          Firma            @relation(fields: [firmaId], references: [id], onDelete: Cascade)
+  urunler        Urun[]
+  fiyatlar       Fiyat[]
+  personeller    SubePersonel[]
+  kullanicilar   Kullanici[]
+  bildirimler    Bildirim[]
+  yedekKayitlari YedekKaydi[]
+
+  @@index([firmaId])
+  @@map("subeler")
+}
+
+model Paket {
+  id               Int      @id @default(autoincrement())
+  paketAdi         String   @map("paket_adi") @db.VarChar(191)
+  aciklama         String   @default("") @db.VarChar(1000)
+  subeSayisi       Int      @default(1) @map("sube_sayisi")
+  personelSayisi   Int      @default(10) @map("personel_sayisi")
+  masaSayisi       Int      @default(50) @map("masa_sayisi")
+  fiyat            Decimal  @default(0) @db.Decimal(12, 2)
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  lisanslar Lisans[]
+
+  @@map("paketler")
+}
+
+model Lisans {
+  id               Int       @id @default(autoincrement())
+  firmaId          Int       @map("firma_id")
+  paketId          Int       @map("paket_id")
+  baslangicTarihi  DateTime  @default(now()) @map("baslangic_tarihi")
+  bitisTarihi      DateTime? @map("bitis_tarihi")
+  kayitTarihi      DateTime  @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime  @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean   @default(true)
+
+  firma Firma @relation(fields: [firmaId], references: [id], onDelete: Cascade)
+  paket Paket @relation(fields: [paketId], references: [id], onDelete: Restrict)
+
+  @@index([firmaId])
+  @@index([paketId])
+  @@map("lisanslar")
+}
+
+/// Panel / merkez kullanicilari (MASTER)
+model Kullanici {
+  id              Int           @id @default(autoincrement())
+  rolKodu         String        @map("rol_kodu") @db.VarChar(50)
+  bayiId          Int?          @map("bayi_id")
+  firmaId         Int?          @map("firma_id")
+  subeId          Int?          @map("sube_id")
+  ad              String        @map("ad_soyad") @db.VarChar(191)
+  gsm             String?       @db.VarChar(20)
+  email           String        @unique @map("eposta") @db.VarChar(191)
+  sifreHash       String        @map("sifre_hash") @db.VarChar(255)
+  kullaniciTipi   KullaniciTipi @default(merkez) @map("kullanici_tipi")
+  iskonto         Decimal?      @db.Decimal(5, 2)
+  sonGirisTarihi  DateTime?     @map("son_giris_tarihi")
+  aktif           Boolean       @default(true) @map("durum")
+  olusturma       DateTime      @default(now()) @map("kayit_tarihi")
+  guncelleme      DateTime      @updatedAt @map("guncelleme_tarihi")
+
+  bayi           Bayi?              @relation(fields: [bayiId], references: [id], onDelete: SetNull)
+  firma          Firma?             @relation(fields: [firmaId], references: [id], onDelete: SetNull)
+  sube           Sube?              @relation(fields: [subeId], references: [id], onDelete: SetNull)
   kisayolAyari   KullaniciKisayol?
-  islemLoglari   IslemLogu[]
+  sekmeAyari     KullaniciSekmeAyar?
+  loglar         Log[]
   yedekKayitlari YedekKaydi[]
 
   @@index([rolKodu])
-  @@map("kullanici")
+  @@index([bayiId])
+  @@index([firmaId])
+  @@index([subeId])
+  @@map("kullanicilar")
+}
+
+model Log {
+  id          Int      @id @default(autoincrement())
+  kullaniciId Int?     @map("kullanici_id")
+  mesaj       String   @db.VarChar(1000)
+  ipAdresi    String?  @map("ip_adresi") @db.VarChar(45)
+  kayitTarihi DateTime @default(now()) @map("kayit_tarihi")
+
+  kullanici Kullanici? @relation(fields: [kullaniciId], references: [id], onDelete: SetNull)
+
+  @@index([kayitTarihi])
+  @@map("log")
+}
+
+// ---------------------------------------------------------------------------
+// SUBE_DB — sube_id ile ayni veritabaninda (cok kiracili)
+// ---------------------------------------------------------------------------
+
+model Ayar {
+  id               Int      @id @default(autoincrement())
+  subeId           Int      @default(0) @map("sube_id") // 0 = merkez; >0 = sube ayarlari
+  anahtar          String   @db.VarChar(100)
+  deger            Json
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+
+  @@unique([subeId, anahtar])
+  @@index([anahtar])
+  @@map("ayarlar")
 }
 
 model KullaniciKisayol {
@@ -105,42 +280,71 @@ model KullaniciKisayol {
   @@map("kullanici_kisayol")
 }
 
-model Rol {
-  id         Int      @id @default(autoincrement())
-  kod        String   @unique @db.VarChar(50)
-  baslik     String   @db.VarChar(191)
-  aciklama   String   @default("") @db.VarChar(500)
-  sistemRolu Boolean  @default(false) @map("sistem_rolu")
-  olusturma  DateTime @default(now()) @map("olusturma")
-  guncelleme DateTime @updatedAt @map("guncelleme")
+model KullaniciSekmeAyar {
+  kullaniciId Int  @id @map("kullanici_id")
+  ayarlar     Json @default("{}")
 
-  yetkiler RolYetki[]
+  kullanici Kullanici @relation(fields: [kullaniciId], references: [id], onDelete: Cascade)
 
-  @@map("rol")
+  @@map("kullanici_sekme_ayar")
 }
 
-model Yetki {
-  kod    String @id @db.VarChar(50)
-  etiket String @db.VarChar(191)
+/// Sube operasyon personeli (garson, kasiyer vb.)
+model SubePersonel {
+  id               Int      @id @default(autoincrement())
+  subeId           Int      @map("sube_id")
+  rolKodu          String   @map("rol_kodu") @db.VarChar(50)
+  adSoyad          String   @map("ad_soyad") @db.VarChar(191)
+  gsm              String?  @db.VarChar(20)
+  eposta           String?  @db.VarChar(191)
+  sifreHash        String?  @map("sifre_hash") @db.VarChar(255)
+  urunId           Int?     @map("urun_id")
+  departmanId      Int?     @map("departman_id")
+  fiyatId          Int?     @map("fiyat_id")
+  maksimumIskonto  Decimal? @map("maksimum_iskonto") @db.Decimal(5, 2)
+  masaId           Int?     @map("masa_id")
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
 
-  roller RolYetki[]
+  sube Sube @relation(fields: [subeId], references: [id], onDelete: Cascade)
+  urun Urun? @relation(fields: [urunId], references: [id], onDelete: SetNull)
 
-  @@map("yetki")
+  @@index([subeId])
+  @@index([rolKodu])
+  @@index([urunId])
+  @@map("sube_kullanicilar")
 }
 
-model RolYetki {
-  rolId     Int    @map("rol_id")
-  yetkiKodu String @map("yetki_kodu") @db.VarChar(50)
+model Urun {
+  id               Int      @id @default(autoincrement())
+  subeId           Int      @map("sube_id")
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
 
-  rol   Rol   @relation(fields: [rolId], references: [id], onDelete: Cascade)
-  yetki Yetki @relation(fields: [yetkiKodu], references: [kod], onDelete: Cascade)
+  sube Sube @relation(fields: [subeId], references: [id], onDelete: Cascade)
+  personeller SubePersonel[]
 
-  @@id([rolId, yetkiKodu])
-  @@map("rol_yetki")
+  @@index([subeId])
+  @@map("urunler")
+}
+
+model Fiyat {
+  id               Int      @id @default(autoincrement())
+  subeId           Int      @map("sube_id")
+  kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
+  guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
+  durum            Boolean  @default(true)
+
+  sube Sube @relation(fields: [subeId], references: [id], onDelete: Cascade)
+
+  @@index([subeId])
+  @@map("fiyatlar")
 }
 
 // ---------------------------------------------------------------------------
-// Eklentiler
+// Eklentiler (ayri tablolar — ayarlar icine alinmaz)
 // ---------------------------------------------------------------------------
 
 model EklentiKatalog {
@@ -164,7 +368,8 @@ model EklentiKatalog {
 
 model EklentiKurulum {
   id            Int           @id @default(autoincrement())
-  eklentiKodu   String        @unique @map("eklenti_kodu") @db.VarChar(100)
+  subeId        Int           @default(0) @map("sube_id")
+  eklentiKodu   String        @map("eklenti_kodu") @db.VarChar(100)
   durum         EklentiDurum  @default(kurulu)
   kaynak        EklentiKaynak @default(katalog)
   ayarlarJson   Json          @default("{}") @map("ayarlar_json")
@@ -173,39 +378,26 @@ model EklentiKurulum {
 
   eklenti EklentiKatalog @relation(fields: [eklentiKodu], references: [kod], onDelete: Cascade)
 
+  @@unique([subeId, eklentiKodu])
   @@map("eklenti_kurulum")
 }
 
 // ---------------------------------------------------------------------------
-// Sistem kayitlari
+// Panel kayitlari
 // ---------------------------------------------------------------------------
-
-model IslemLogu {
-  id             Int      @id @default(autoincrement())
-  kullaniciId    Int?     @map("kullanici_id")
-  kullaniciAd    String   @map("kullanici_ad") @db.VarChar(191)
-  kullaniciEmail String   @map("kullanici_email") @db.VarChar(191)
-  islem          String   @db.VarChar(500)
-  modulId        String?  @map("modul_id") @db.VarChar(50)
-  aksiyonId      String?  @map("aksiyon_id") @db.VarChar(50)
-  olusturma      DateTime @default(now()) @map("olusturma")
-
-  kullanici Kullanici? @relation(fields: [kullaniciId], references: [id], onDelete: SetNull)
-
-  @@index([olusturma])
-  @@map("islem_logu")
-}
 
 model YedekKaydi {
   id             Int              @id @default(autoincrement())
+  subeId         Int?             @map("sube_id")
   kullaniciId    Int?             @map("kullanici_id")
   kullaniciAd    String           @map("kullanici_ad") @db.VarChar(191)
   kullaniciEmail String           @map("kullanici_email") @db.VarChar(191)
   dosyaAdi       String           @map("dosya_adi") @db.VarChar(255)
   tip            YedekIslemTipi
   format         YedeklemeFormati @default(json)
-  olusturma      DateTime         @default(now()) @map("olusturma")
+  olusturma      DateTime         @default(now()) @map("kayit_tarihi")
 
+  sube      Sube?      @relation(fields: [subeId], references: [id], onDelete: SetNull)
   kullanici Kullanici? @relation(fields: [kullaniciId], references: [id], onDelete: SetNull)
 
   @@index([olusturma])
@@ -214,12 +406,15 @@ model YedekKaydi {
 
 model Bildirim {
   id        Int          @id @default(autoincrement())
+  subeId    Int?         @map("sube_id")
   tip       BildirimTipi
   baslik    String       @db.VarChar(191)
   mesaj     String       @db.VarChar(1000)
   okundu    Boolean      @default(false)
   link      String?      @db.VarChar(500)
-  olusturma DateTime     @default(now()) @map("olusturma")
+  olusturma DateTime     @default(now()) @map("kayit_tarihi")
+
+  sube Sube? @relation(fields: [subeId], references: [id], onDelete: Cascade)
 
   @@index([okundu, olusturma])
   @@map("bildirim")

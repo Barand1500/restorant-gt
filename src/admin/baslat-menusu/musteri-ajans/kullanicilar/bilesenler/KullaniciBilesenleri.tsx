@@ -1,5 +1,4 @@
 import type { AdminKullanici, KullaniciFormDegeri } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
-import { pinTemizle } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { AdminAnahtarDugme } from '@/admin/ortak/AdminFormBilesenleri';
 
@@ -97,17 +96,6 @@ export function KullaniciDuzenleFormu({
           required={!seciliId}
           minLength={seciliId ? undefined : 6}
           autoComplete={seciliId ? 'new-password' : 'new-password'}
-        />
-        <input
-          className={formInputSinifi}
-          type="password"
-          inputMode="numeric"
-          pattern="\d{4,6}"
-          maxLength={6}
-          placeholder={seciliId ? 'PIN (4-6 rakam, boş = değişmez)' : 'PIN (4-6 rakam)'}
-          value={form.pin}
-          onChange={(e) => onChange({ ...form, pin: pinTemizle(e.target.value) })}
-          autoComplete="off"
         />
 
         <select
