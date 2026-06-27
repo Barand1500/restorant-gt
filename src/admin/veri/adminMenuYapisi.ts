@@ -2,6 +2,13 @@ import type { AdminModul } from '@/admin/ortak/tipler/admin';
 
 export const adminModulleri: AdminModul[] = [
   {
+    id: 'master',
+    baslik: 'Master',
+    ikon: '🗄️',
+    kategori: 'Master',
+    yol: '/gt-admin/master',
+  },
+  {
     id: 'kullanicilar',
     baslik: 'Kullanıcılar',
     ikon: '👥',
@@ -58,7 +65,7 @@ export const adminGizliModuller: AdminModul[] = [
   },
 ];
 
-export const adminKategoriler = ['Müşteri / Ajans', 'Sistem'];
+export const adminKategoriler = ['Master', 'Müşteri / Ajans', 'Sistem'];
 
 export function modulBul(id: string): AdminModul | undefined {
   return adminModulleri.find((m) => m.id === id) ?? adminGizliModuller.find((m) => m.id === id);

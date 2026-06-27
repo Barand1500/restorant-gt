@@ -9,6 +9,32 @@ export interface ModulRehber {
 }
 
 export const ADMIN_MODUL_REHBERLERI: Record<string, ModulRehber> = {
+  master: {
+    baslik: 'Master Rehberi',
+    altBaslik: 'Organizasyon ve lisans yönetimi',
+    bolumBaslik: 'Master',
+    kartlar: [
+      {
+        ikon: '🤝',
+        baslik: 'Bayi → Firma → Şube',
+        aciklama: 'Distribütör ağını, müşteri firmalarını ve lokasyonları tek hiyerarşide yönetin.',
+        renk: 'mavi',
+      },
+      {
+        ikon: '🎫',
+        baslik: 'Paket ve Lisans',
+        aciklama: 'Satılabilir paketleri tanımlayın, firmalara lisans atayın ve süre takibi yapın.',
+        renk: 'mor',
+      },
+      {
+        ikon: '🧩',
+        baslik: 'Modüller',
+        aciklama: 'Panele bağlı yazılım modülleri ve prefix tanımları burada yönetilir.',
+        renk: 'turuncu',
+      },
+    ],
+  },
+
   kullanicilar: {
     baslik: 'Kullanıcı Rehberi',
     altBaslik: 'Panel kullanıcıları',

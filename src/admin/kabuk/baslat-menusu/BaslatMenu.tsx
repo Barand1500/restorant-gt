@@ -5,6 +5,7 @@ import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import { BaslatMenuArama } from './BaslatMenuArama';
 
 const KATEGORI_IKON: Record<string, string> = {
+  Master: '🗄️',
   'Hızlı Erişim': '⚡',
   'Site Yönetimi': '🏠',
   'İçerik Yönetimi': '📝',
