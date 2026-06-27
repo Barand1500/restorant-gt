@@ -1,0 +1,95 @@
+#!/bin/bash
+set -euo pipefail
+
+# Restorant GT — CloudPanel deploy
+# Sunucu klasor yapisi:
+#   ~/htdocs/restoran.guzelteknoloji.com/
+#     deploy.sh
+#     repo/       <- git clone (restorant-gt)
+#     frontend/   <- nginx root
+#     backend/    <- PM2 (port 3006, .env burada kalir)
+#
+# Ilk kurulum:
+#   cd ~/htdocs/restoran.guzelteknoloji.com
+#   git clone https://github.com/Barand1500/restorant-gt.git repo
+#   cp repo/backend/.env.example backend/.env && nano backend/.env
+#   chmod +x deploy.sh && ./deploy.sh
+#
+# Nginx (CloudPanel vhost):
+#   location /api/ { proxy_pass http://127.0.0.1:3006/api/; ... }
+#   location /uploads/ { proxy_pass http://127.0.0.1:3006/uploads/; ... }
+
+# --- AYARLAR ---
+SITE="/home/guzelteknoloji-restoran/htdocs/restoran.guzelteknoloji.com"
+PM2_NAME="restorant-api"
+GIT_BRANCH="main"
+API_PORT="3006"
+# Ilk kurulumda veya sema sifirlanacaksa: DB_RESET=1 ./deploy.sh
+DB_RESET="${DB_RESET:-0}"
+# ---------------
+
+echo ""
+echo "=== RESTORANT DEPLOY BASLIYOR ==="
+echo ""
+
+if [ ! -d "$SITE/repo/.git" ]; then
+  echo "HATA: $SITE/repo klasorunde git projesi yok."
+  echo "  cd $SITE"
+  echo "  git clone https://github.com/Barand1500/restorant-gt.git repo"
+  exit 1
+fi
+
+if [ ! -f "$SITE/backend/.env" ]; then
+  echo "HATA: $SITE/backend/.env yok."
+  echo "  cp $SITE/repo/backend/.env.example $SITE/backend/.env"
+  echo "  nano $SITE/backend/.env"
+  exit 1
+fi
+
+echo "[1/6] Git guncelleniyor..."
+cd "$SITE/repo"
+git fetch origin "$GIT_BRANCH"
+git reset --hard "origin/$GIT_BRANCH"
+
+echo "[2/6] Frontend build..."
+cd "$SITE/repo"
+npm ci
+VITE_API_URL=/api npm run build
+rsync -a --delete "$SITE/repo/frontend/" "$SITE/frontend/"
+
+echo "[3/6] Backend build..."
+cd "$SITE/repo/backend"
+npm ci
+npm run build
+rsync -a \
+  --exclude='node_modules' \
+  --exclude='.env' \
+  --exclude='uploads' \
+  "$SITE/repo/backend/" "$SITE/backend/"
+
+echo "[4/6] Backend bagimliliklari (sunucu)..."
+cd "$SITE/backend"
+npm ci
+
+echo "[5/6] Veritabani..."
+npx prisma generate
+if [ "$DB_RESET" = "1" ]; then
+  echo "  DB_RESET=1 — force-reset + seed"
+  npx prisma db push --force-reset
+  npm run db:seed
+else
+  npx prisma db push
+fi
+
+echo "[6/6] PM2 ($PM2_NAME, port $API_PORT)..."
+if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
+  pm2 restart "$PM2_NAME" --update-env
+else
+  pm2 start ecosystem.config.cjs
+fi
+pm2 save
+
+echo ""
+echo "=== DEPLOY TAMAMLANDI ==="
+curl -sf "http://127.0.0.1:${API_PORT}/api/health" && echo "" || echo "UYARI: health check basarisiz"
+echo ""
