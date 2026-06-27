@@ -1,0 +1,114 @@
+RESTORANT GT — BACKEND KURULUM (SUNUCU)
+=========================================
+
+ONEMLI: npm ci --production KULLANMAYIN!
+Build icin TypeScript ve @types paketleri gerekir.
+
+HIZLI KURULUM (tek komut)
+-------------------------
+cd ~/htdocs/restoran.guzelteknoloji.com/backend
+
+# 1) Once .env olustur (asagiya bak)
+cp .env.example .env
+nano .env
+
+# 2) Kurulum scripti
+chmod +x sunucu-kur.sh
+./sunucu-kur.sh
+
+ADIM ADIM
+---------
+
+1) .env dosyasi (MUTLAKA ILK ADIM — Prisma bunu ister):
+
+   cp .env.example .env
+   nano .env
+
+   Ornek:
+   DATABASE_URL="mysql://KULLANICI:SIFRE@localhost:3306/restorant_gt"
+   PORT=3001
+   NODE_ENV=production
+   JWT_SECRET=buraya-uzun-rastgele-anahtar-yazin
+   CORS_ORIGIN=https://restoran.guzelteknoloji.com
+
+   MySQL veritabanini panelden once olusturun (ornek: restorant_gt).
+
+2) Bagimliliklar — TAM kurulum (production DEGIL):
+
+   npm ci
+
+3) Veritabani + tohum:
+
+   npm run db:push
+   npm run db:seed
+
+4) Derleme:
+
+   npm run build
+
+5) PM2 kurulumu ve baslatma:
+
+   # PM2 yoksa (global):
+   npm install -g pm2
+
+   # veya global yetki yoksa npx ile:
+   npx pm2 start ecosystem.config.cjs
+   npx pm2 save
+   npx pm2 status
+
+   # Sunucu yeniden basladiginda otomatik acilsin:
+   npx pm2 startup
+   # cikan komutu kopyalayip calistirin, sonra:
+   npx pm2 save
+
+   PM2 komutlari:
+   npx pm2 logs restorant-api
+   npx pm2 restart restorant-api
+   npx pm2 stop restorant-api
+
+6) Nginx — /api -> backend:
+
+   location /api/ {
+       proxy_pass http://127.0.0.1:3001/api/;
+       proxy_http_version 1.1;
+       proxy_set_header Host $host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+   }
+
+7) Test:
+
+   curl http://127.0.0.1:3001/api/health
+   curl https://restoran.guzelteknoloji.com/api/health
+
+VARSAYILAN GIRIS (seed sonrasi)
+-------------------------------
+E-posta: admin@restorant.local
+Sifre:   admin123
+PIN:     1234
+
+SIK YAPILAN HATALAR
+-------------------
+- DATABASE_URL bulunamadi -> .env dosyasi yok veya yanlis dizinde
+- tsx ENOENT -> npm ci --production kullanildi; npm ci kullanin
+- tsc hatalari -> npm ci --production ile @types yuklenmedi; npm ci kullanin
+- PM2 yok -> npm install -g pm2 veya npx pm2 kullanin
+
+RAR YUKLEME
+-----------
+RAR'a ASLA node_modules ve dist EKLEMEYIN!
+Windows node_modules Linux'ta calismaz (Prisma engine, tsc izin hatasi).
+
+Sunucuda:
+  chmod +x sunucu-fix.sh
+  ./sunucu-fix.sh
+
+veya elle:
+  rm -rf node_modules
+  npm ci
+  npx prisma generate
+  npx prisma db push --force-reset
+  node prisma/seed.mjs
+  npm run build
+  npx pm2 restart restorant-api --update-env

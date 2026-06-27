@@ -8,12 +8,10 @@ import {
   adminKullaniciGuncelle,
   adminKullaniciOlustur,
   adminKullaniciSil,
-  adminKullaniciSiteleriGetir,
   adminKullanicilariGetir,
   pinGecerliMi,
   VARSAYILAN_ROL_ETIKETLERI,
   type AdminKullanici,
-  type AdminSiteOzet,
   type KullaniciFormDegeri,
 } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
 
@@ -23,7 +21,6 @@ const bosForm: KullaniciFormDegeri = {
   sifre: '',
   pin: '',
   rol: 'MUSTERI_ADMIN',
-  siteId: '',
   aktif: true,
 };
 
@@ -34,7 +31,6 @@ function kullanicidanForm(k: AdminKullanici): KullaniciFormDegeri {
     sifre: '',
     pin: '',
     rol: k.rol,
-    siteId: k.siteId ?? '',
     aktif: k.aktif,
   };
 }
@@ -43,7 +39,6 @@ export function KullanicilarSayfasi() {
   const { kullanici: oturum } = useAuth();
   const { kullaniciYonetimiVar } = useYetkiler();
   const [kullanicilar, setKullanicilar] = useState<AdminKullanici[]>([]);
-  const [siteler, setSiteler] = useState<AdminSiteOzet[]>([]);
   const [form, setForm] = useState<KullaniciFormDegeri>(bosForm);
   const [seciliId, setSeciliId] = useState<string | null>(null);
   const [sifreDegisti, setSifreDegisti] = useState(false);
@@ -64,18 +59,11 @@ export function KullanicilarSayfasi() {
     setYukleniyor(true);
     setHata('');
     try {
-      const [liste, siteListesi, rolVeri] = await Promise.all([
-        adminKullanicilariGetir(),
-        adminKullaniciSiteleriGetir(),
-        adminRolleriGetir(),
-      ]);
+      const [liste, rolVeri] = await Promise.all([adminKullanicilariGetir(), adminRolleriGetir()]);
       setKullanicilar(liste);
-      setSiteler(siteListesi);
       const roller = rolVeri.roller.map((r) => ({ kod: r.kod, baslik: r.baslik }));
       setTumRoller(roller);
-      setRolBasliklari(
-        Object.fromEntries(rolVeri.roller.map((r) => [r.kod, r.baslik]))
-      );
+      setRolBasliklari(Object.fromEntries(rolVeri.roller.map((r) => [r.kod, r.baslik])));
     } catch (err) {
       setHata(err instanceof Error ? err.message : 'Kullanıcılar alınamadı');
     } finally {
@@ -91,9 +79,9 @@ export function KullanicilarSayfasi() {
   const yeniBaslat = useCallback(() => {
     setSeciliId(null);
     const varsayilanRol = atanabilirRoller[0]?.kod ?? 'MUSTERI_ADMIN';
-    setForm({ ...bosForm, rol: varsayilanRol, siteId: siteler[0]?.id ?? '' });
+    setForm({ ...bosForm, rol: varsayilanRol });
     setSifreDegisti(false);
-  }, [siteler, atanabilirRoller]);
+  }, [atanabilirRoller]);
 
   const kaydet = useCallback(async () => {
     if (!form.ad.trim() || !form.email.trim()) {
@@ -160,7 +148,7 @@ export function KullanicilarSayfasi() {
     <div>
       <h1 className="text-xl font-bold text-white">Kullanıcılar</h1>
       <p className="mt-1 text-sm text-slate-400">
-        Site kullanıcılarını oluşturun, rollerini atayın ve erişimlerini yönetin.
+        Panel kullanıcılarını oluşturun, rollerini atayın ve erişimlerini yönetin.
       </p>
       {hata && <p className="mt-4 text-sm text-red-400">{hata}</p>}
       {kaydediliyor && <p className="mt-4 text-sm text-slate-400">İşlem yapılıyor...</p>}
@@ -182,8 +170,6 @@ export function KullanicilarSayfasi() {
           <KullaniciDuzenleFormu
             form={form}
             seciliId={seciliId}
-            siteler={siteler}
-            cagiranRol={oturum?.rol ?? ''}
             atanabilirRoller={atanabilirRoller}
             onSifreDegisti={setSifreDegisti}
             onChange={setForm}

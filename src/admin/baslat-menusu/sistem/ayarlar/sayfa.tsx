@@ -123,7 +123,10 @@ export function SistemAyarlariSayfasi() {
   useEffect(() => {
     void (async () => {
       try {
-        const [veri, sayfaListesi] = await Promise.all([sistemAyarlariGetir(), adminSayfalariGetir()]);
+        const [veri, sayfaListesi] = await Promise.all([
+          sistemAyarlariGetir(),
+          adminSayfalariGetir().catch(() => [] as AdminSayfa[]),
+        ]);
         setSayfalar(sayfaListesi);
         setSiteAdi(veri.site.ad);
         setSiteSlug(veri.site.slug);

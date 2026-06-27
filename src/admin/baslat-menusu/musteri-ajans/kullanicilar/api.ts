@@ -7,19 +7,10 @@ export interface AdminKullanici {
   email: string;
   ad: string;
   rol: RolKodu;
-  siteId: string | null;
   aktif: boolean;
   pin?: string | null;
   olusturma: string;
   guncelleme: string;
-  siteAd: string | null;
-  siteSlug: string | null;
-}
-
-export interface AdminSiteOzet {
-  id: string;
-  ad: string;
-  slug: string;
 }
 
 export interface KullaniciFormDegeri {
@@ -28,7 +19,6 @@ export interface KullaniciFormDegeri {
   sifre: string;
   pin: string;
   rol: RolKodu;
-  siteId: string;
   aktif: boolean;
 }
 
@@ -45,14 +35,7 @@ export async function adminKullanicilariGetir(): Promise<AdminKullanici[]> {
   const veri = await adminJsonFetch<{ kullanicilar: AdminKullanici[] }>('/kullanicilar', {
     headers: adminHeaders(),
   });
-  return veri.kullanicilar;
-}
-
-export async function adminKullaniciSiteleriGetir(): Promise<AdminSiteOzet[]> {
-  const veri = await adminJsonFetch<{ siteler: AdminSiteOzet[] }>('/kullanicilar/siteler', {
-    headers: adminHeaders(),
-  });
-  return veri.siteler;
+  return veri.kullanicilar ?? [];
 }
 
 export async function adminKullaniciOlustur(form: KullaniciFormDegeri): Promise<AdminKullanici> {
@@ -96,7 +79,6 @@ function payloadHazirla(form: KullaniciFormDegeri, sifreDahil: boolean) {
     ad: form.ad.trim(),
     rol: form.rol,
     aktif: form.aktif,
-    siteId: form.siteId || null,
   };
   if (sifreDahil && form.sifre.trim()) {
     payload.sifre = form.sifre;

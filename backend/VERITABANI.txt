@@ -1,0 +1,71 @@
+RESTORANT GT — VERITABANI TABLOLARI
+====================================
+
+ID kurali: Sayisal otomatik artan (1, 2, 3...)
+Istisna: yetki.kod ve eklenti_katalog.kod metin anahtar (degismez kod)
+
+KALAN TABLOLAR (panelde kullanilan)
+-----------------------------------
+
+1) site_ayar
+   Ne ise yarar: Sistem ayarlari sayfasindaki tum ayarlar (tek satir, site_id=1).
+   Onemli alanlar: bakim modu, 404, panel dili, yedekleme, guvenlik,
+                   sag tik paneli, script ayarlari (JSON)
+
+2) kullanici
+   Ne ise yarar: Panele giris yapan admin kullanicilar.
+   Onemli alanlar: email, ad, sifre_hash, pin_hash, rol_kodu, aktif
+   Ornek: id=1 admin@restorant.local
+
+3) kullanici_kisayol
+   Ne ise yarar: Klavye kisayol haritasi.
+   Onemli alanlar: harita (JSON)
+
+4) rol
+   Ne ise yarar: Roller ve yetkiler sayfasi.
+   Onemli alanlar:
+   - kod: Rolun sabit program kodu (SUPER_ADMIN, EDITOR). Kullanici.rol_kodu
+     bu degere baglanir; yetki kontrolu bu kod uzerinden yapilir.
+   - baslik: Panelde gorunen ad ("Super Admin")
+   - sistem_rolu: true ise seed ile gelen varsayilan rol; panelde silinemez
+
+5) yetki
+   Ne ise yarar: Yetki tanimlari (goruntuleme, ekleme, duzenleme...)
+   Anahtar: kod (metin, ornek: goruntuleme)
+
+6) rol_yetki
+   Ne ise yarar: Hangi rolun hangi yetkilere sahip oldugu (coktan coga).
+
+7) eklenti_katalog
+   Ne ise yarar: Kurulabilir eklenti listesi.
+   Anahtar: kod (metin)
+
+8) eklenti_kurulum
+    Ne ise yarar: Kurulu / aktif eklentiler.
+
+9) islem_logu
+    Ne ise yarar: Log takibi paneli — kim ne yapti.
+
+10) yedek_kaydi
+    Ne ise yarar: Veri yedekleme gecmisi (indir / geri yukle).
+
+11) bildirim
+    Ne ise yarar: Panel bildirim zili.
+
+SILINEN TABLOLAR
+----------------------------------------
+- site (coklu site altyapisi kaldirildi)
+- kullanici_tercih (dashboard hizli erisim artik tarayici localStorage)
+- sayfa, widget, blog_yazi, medya_dosyasi, form_tanimi, form_gonderim
+
+SUNUCUDA YENIDEN OLUSTURMA
+--------------------------
+Eski site tablolari varsa veya sema uyusmuyorsa:
+
+  cd backend
+  npm run db:push -- --force-reset
+  node prisma/seed.mjs
+
+DIKKAT: --force-reset tum veriyi siler!
+
+Mevcut veriyi korumak icin once yedek alin. site tablosu db push ile kaldirilir.

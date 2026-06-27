@@ -4,13 +4,35 @@ import { BACKEND_YOK } from '@/yapilandirma/uygulama';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 const TOKEN_KEY = 'gt_admin_token';
+const HIZLI_ERISIM_KEY = 'gt_admin_hizli_erisim';
+
+function hizliErisimOku(kullaniciId: string | number): string[] {
+  try {
+    const ham = localStorage.getItem(`${HIZLI_ERISIM_KEY}_${kullaniciId}`);
+    if (!ham) return [];
+    const dizi = JSON.parse(ham) as unknown;
+    return Array.isArray(dizi) ? dizi.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function hizliErisimKaydetLocal(kullaniciId: string | number, ids: string[]) {
+  localStorage.setItem(`${HIZLI_ERISIM_KEY}_${kullaniciId}`, JSON.stringify(ids));
+}
+
+function kullaniciTercihleriEkle(k: AuthKullanici): AuthKullanici {
+  return {
+    ...k,
+    tercihler: { dashboardHizliErisim: hizliErisimOku(k.id) },
+  };
+}
 
 const OFFLINE_KULLANICI: AuthKullanici = {
   id: '1',
   email: 'admin@restorant.local',
   ad: 'Restorant Admin',
   rol: 'SUPER_ADMIN',
-  siteId: null,
   tercihler: { dashboardHizliErisim: [] },
   yetkiler: [],
 };
@@ -60,7 +82,7 @@ export async function girisYap(email: string, sifre: string): Promise<AuthYanit>
 
   const veri = await jsonYanitOku<{ mesaj?: string } & AuthYanit>(yanit);
   if (!yanit.ok) throw new Error(veri.mesaj ?? 'Giris basarisiz');
-  return veri;
+  return { ...veri, kullanici: kullaniciTercihleriEkle(veri.kullanici) };
 }
 
 export async function benGetir(): Promise<AuthKullanici> {
@@ -77,7 +99,7 @@ export async function benGetir(): Promise<AuthKullanici> {
 
   const veri = await jsonYanitOku<{ mesaj?: string; kullanici: AuthKullanici }>(yanit);
   if (!yanit.ok) throw new Error(veri.mesaj ?? 'Oturum gecersiz');
-  return veri.kullanici;
+  return kullaniciTercihleriEkle(veri.kullanici);
 }
 
 export async function profilGuncelle(form: ProfilGuncelleForm): Promise<AuthKullanici> {
@@ -106,17 +128,7 @@ export async function profilGuncelle(form: ProfilGuncelleForm): Promise<AuthKull
 }
 
 export async function tercihlerKaydet(tercihler: KullaniciTercihleri): Promise<AuthKullanici> {
-  if (BACKEND_YOK) {
-    return { ...offlineKullanici(), tercihler };
-  }
-
-  const yanit = await fetch(`${API_URL}/admin/auth/tercihler`, {
-    method: 'PATCH',
-    headers: authHeaders(),
-    body: JSON.stringify(tercihler),
-  });
-
-  const veri = await jsonYanitOku<{ mesaj?: string; kullanici: AuthKullanici }>(yanit);
-  if (!yanit.ok) throw new Error(veri.mesaj ?? 'Tercihler kaydedilemedi');
-  return veri.kullanici;
+  const mevcut = BACKEND_YOK ? offlineKullanici() : await benGetir().catch(() => offlineKullanici());
+  hizliErisimKaydetLocal(mevcut.id, tercihler.dashboardHizliErisim ?? []);
+  return kullaniciTercihleriEkle(mevcut);
 }

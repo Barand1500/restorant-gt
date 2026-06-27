@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/baglamlar/AuthContext';
-import { UYGULAMA_ADI, UYGULAMA_KISA } from '@/yapilandirma/uygulama';
+import { UYGULAMA_ADI, UYGULAMA_KISA, BACKEND_YOK } from '@/yapilandirma/uygulama';
 import { useAdminTema } from '@/baglamlar/AdminTemaContext';
 import '@/stiller/adminTema.css';
 
@@ -42,7 +42,9 @@ export function GirisSayfasi() {
             {UYGULAMA_KISA}
           </span>
           <h1 className="ap-heading mt-4 text-xl font-bold">{UYGULAMA_ADI}</h1>
-          <p className="ap-muted mt-1 text-sm">Frontend only</p>
+          <p className="ap-muted mt-1 text-sm">
+            {BACKEND_YOK ? 'Gelistirme modu (offline)' : 'Yonetim paneline giris'}
+          </p>
         </div>
 
         <form onSubmit={formGonder} className="space-y-4">
@@ -79,7 +81,9 @@ export function GirisSayfasi() {
         </form>
 
         <p className="ap-muted mt-6 text-center text-xs">
-          Offline mod — herhangi bir şifre ile giriş yapabilirsiniz.
+          {BACKEND_YOK
+            ? 'Offline mod — herhangi bir sifre ile giris yapabilirsiniz.'
+            : 'Varsayilan: admin@restorant.local / admin123'}
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { AdminKullanici, AdminSiteOzet, KullaniciFormDegeri } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
+import type { AdminKullanici, KullaniciFormDegeri } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
 import { pinTemizle } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/api';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { AdminAnahtarDugme } from '@/admin/ortak/AdminFormBilesenleri';
@@ -37,7 +37,6 @@ export function KullaniciListesi({ kullanicilar, seciliId, rolBasliklari, onSec 
                 <span className="mt-1 flex flex-wrap gap-2 text-[10px]">
                   <span className="ap-etiket ap-etiket-gri">{rolBasliklari[k.rol] ?? k.rol}</span>
                   {!k.aktif && <span className="text-red-400">Pasif</span>}
-                  {k.siteAd && <span className="ap-muted">{k.siteAd}</span>}
                 </span>
               </button>
             </li>
@@ -51,8 +50,6 @@ export function KullaniciListesi({ kullanicilar, seciliId, rolBasliklari, onSec 
 interface KullaniciDuzenleFormuProps {
   form: KullaniciFormDegeri;
   seciliId: string | null;
-  siteler: AdminSiteOzet[];
-  cagiranRol: string;
   atanabilirRoller: AtanabilirRol[];
   onSifreDegisti: (v: boolean) => void;
   onChange: (form: KullaniciFormDegeri) => void;
@@ -61,14 +58,10 @@ interface KullaniciDuzenleFormuProps {
 export function KullaniciDuzenleFormu({
   form,
   seciliId,
-  siteler,
-  cagiranRol,
   atanabilirRoller,
   onSifreDegisti,
   onChange,
 }: KullaniciDuzenleFormuProps) {
-  const siteGerekli = form.rol !== 'SUPER_ADMIN' && form.rol !== 'AJANS_ADMIN';
-
   return (
     <div className="ap-editor-panel">
       <div className="ap-editor-baslik">
@@ -128,22 +121,6 @@ export function KullaniciDuzenleFormu({
             </option>
           ))}
         </select>
-
-        {cagiranRol === 'SUPER_ADMIN' && siteler.length > 0 && (
-          <select
-            className={formInputSinifi}
-            value={form.siteId}
-            onChange={(e) => onChange({ ...form, siteId: e.target.value })}
-            required={siteGerekli}
-          >
-            <option value="">{siteGerekli ? 'Site seçin' : 'Site yok (global admin)'}</option>
-            {siteler.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.ad} ({s.slug})
-              </option>
-            ))}
-          </select>
-        )}
 
         <AdminAnahtarDugme
           etiket="Aktif kullanıcı"

@@ -41,8 +41,12 @@ export interface SayfaFormDegeri {
 }
 
 export async function adminSayfalariGetir(): Promise<AdminSayfa[]> {
-  const veri = await adminJsonFetch<{ sayfalar: AdminSayfa[] }>('/sayfalar', { headers: adminHeaders() });
-  return sayfaHiyerarsisiTamamla(veri.sayfalar.map(normalizeSayfa));
+  try {
+    const veri = await adminJsonFetch<{ sayfalar?: AdminSayfa[] }>('/sayfalar', { headers: adminHeaders() });
+    return sayfaHiyerarsisiTamamla((veri.sayfalar ?? []).map(normalizeSayfa));
+  } catch {
+    return [];
+  }
 }
 
 export async function adminSayfaOlustur(form: SayfaFormDegeri): Promise<AdminSayfa> {

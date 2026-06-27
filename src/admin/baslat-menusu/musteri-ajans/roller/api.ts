@@ -63,7 +63,13 @@ export interface YetkiTanimi {
 }
 
 export async function adminRolleriGetir(): Promise<{ roller: RolTanimi[]; yetkiler: YetkiTanimi[] }> {
-  return adminJsonFetch('/roller', { headers: adminHeaders() });
+  const veri = await adminJsonFetch<{ roller?: RolTanimi[]; yetkiler?: YetkiTanimi[] }>('/roller', {
+    headers: adminHeaders(),
+  });
+  return {
+    roller: veri.roller ?? [],
+    yetkiler: veri.yetkiler ?? GECERLI_YETKI_LISTESI,
+  };
 }
 
 export async function adminRolleriKaydet(

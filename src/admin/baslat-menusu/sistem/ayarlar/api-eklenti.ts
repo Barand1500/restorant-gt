@@ -6,7 +6,7 @@ export async function eklentileriGetir(): Promise<EklentiKart[]> {
   const yanit = await adminJsonFetch<{ eklentiler: EklentiKart[] }>('/eklentiler', {
     headers: adminHeaders(),
   });
-  return yanit.eklentiler;
+  return yanit.eklentiler ?? [];
 }
 
 export async function eklentiKur(kod: string): Promise<void> {

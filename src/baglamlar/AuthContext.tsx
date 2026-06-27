@@ -36,6 +36,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Eski offline oturumunu temizle
+    if (tokenAl() === 'offline-token') {
+      tokenSil();
+    }
+
     const token = tokenAl();
     if (!token) {
       setYukleniyor(false);

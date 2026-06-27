@@ -44,8 +44,9 @@ export function SistemEklentiSekme() {
   }, [yenile, hataBildir]);
 
   const filtrelenmis = useMemo(() => {
+    const liste = eklentiler ?? [];
     const q = arama.trim().toLowerCase();
-    return eklentiler.filter((e) => {
+    return liste.filter((e) => {
       const sekmeUygun =
         sekme === 'kurulu'
           ? e.kurulu

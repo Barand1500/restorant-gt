@@ -2,6 +2,31 @@ import type { SistemAyarlariForm } from '@/admin/baslat-menusu/sistem/ayarlar/ti
 
 const OFFLINE_SISTEM_ANAHTAR = 'restorant-offline-sistem-ayarlari';
 
+const OFFLINE_YETKILER = [
+  { kod: 'goruntuleme', etiket: 'Görüntüleme' },
+  { kod: 'ekleme', etiket: 'Ekleme' },
+  { kod: 'duzenleme', etiket: 'Düzenleme' },
+  { kod: 'silme', etiket: 'Silme' },
+  { kod: 'kullanici_yonetimi', etiket: 'Kullanıcı Yönetimi' },
+] as const;
+
+const OFFLINE_ROLLER = [
+  {
+    kod: 'SUPER_ADMIN',
+    baslik: 'Super Admin',
+    aciklama: 'Tum sitelere tam erisim',
+    yetkiler: ['goruntuleme', 'ekleme', 'duzenleme', 'silme', 'kullanici_yonetimi'],
+    sistemRolu: true,
+  },
+  {
+    kod: 'EDITOR',
+    baslik: 'Editor',
+    aciklama: 'Icerik duzenleme',
+    yetkiler: ['goruntuleme', 'ekleme', 'duzenleme'],
+    sistemRolu: true,
+  },
+];
+
 /** Backend olmadan admin sayfalarının boş açılması için minimal yanıtlar */
 export function offlineAdminYanit(path: string, method: string, body?: BodyInit | null): unknown {
   const m = method.toUpperCase();
@@ -15,22 +40,12 @@ export function offlineAdminYanit(path: string, method: string, body?: BodyInit 
           email: 'admin@restorant.local',
           ad: 'Admin',
           rol: 'SUPER_ADMIN',
-          siteId: null,
           aktif: true,
         },
       };
     }
     if (p.includes('/roller')) {
-      return {
-        roller: [],
-        yetkiler: [
-          { kod: 'goruntuleme', etiket: 'Görüntüleme' },
-          { kod: 'ekleme', etiket: 'Ekleme' },
-          { kod: 'duzenleme', etiket: 'Düzenleme' },
-          { kod: 'silme', etiket: 'Silme' },
-          { kod: 'kullanici_yonetimi', etiket: 'Kullanıcı Yönetimi' },
-        ],
-      };
+      return { roller: OFFLINE_ROLLER, yetkiler: [...OFFLINE_YETKILER] };
     }
     if (p.includes('/sistem-ayarlari')) {
       if (m === 'PUT' && typeof body === 'string') {
@@ -49,24 +64,17 @@ export function offlineAdminYanit(path: string, method: string, body?: BodyInit 
 
   if (p.includes('/kullanicilar/siteler')) return { siteler: [] };
   if (p.includes('/kullanicilar')) return { kullanicilar: [] };
+  if (p.includes('/sayfalar') || p.endsWith('/menu')) return { sayfalar: [] };
   if (p.includes('/roller/yetkiler')) return { yetkiler: [] };
   if (p.includes('/roller')) {
-    return {
-      roller: [],
-      yetkiler: [
-        { kod: 'goruntuleme', etiket: 'Görüntüleme' },
-        { kod: 'ekleme', etiket: 'Ekleme' },
-        { kod: 'duzenleme', etiket: 'Düzenleme' },
-        { kod: 'silme', etiket: 'Silme' },
-        { kod: 'kullanici_yonetimi', etiket: 'Kullanıcı Yönetimi' },
-      ],
-    };
+    return { roller: OFFLINE_ROLLER, yetkiler: [...OFFLINE_YETKILER] };
   }
   if (p.includes('/loglar')) return { loglar: [], toplam: 0 };
   if (p.includes('/yedek/varsayilan-dosya-adi')) return { dosyaAdi: 'restorant-yedek.json' };
   if (p.includes('/yedek/gecmis')) return { kayitlar: [], sonKayit: null };
   if (p.includes('/sistem-ayarlari')) return offlineSistemAyarlari();
-  if (p.includes('/bildirim')) return { bildirimler: [] };
+  if (p.includes('/bildirim')) return { bildirimler: [], okunmamisSayi: 0 };
+  if (p.includes('/eklentiler')) return { eklentiler: [] };
 
   return {};
 }

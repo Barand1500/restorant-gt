@@ -1,0 +1,226 @@
+// Restorant GT — MySQL (tek restoran, site tablosu yok)
+// ID'ler: Int autoincrement (1'den baslar)
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum YedeklemeFormati {
+  json
+  sql
+  rar
+  zip
+}
+
+enum YedekIslemTipi {
+  indir
+  geri_yukle
+}
+
+enum BildirimTipi {
+  sistem
+}
+
+enum EklentiDurum {
+  kurulu
+  aktif
+  pasif
+}
+
+enum EklentiKaynak {
+  katalog
+  yukleme
+}
+
+// ---------------------------------------------------------------------------
+// Site ayarlari (tek satir, site tablosu yok)
+// ---------------------------------------------------------------------------
+
+model SiteAyar {
+  siteId Int @id @default(1) @map("site_id")
+
+  bakimModu         Boolean @default(false) @map("bakim_modu")
+  bakimBaslik       String  @default("Bakim Calismasi") @map("bakim_baslik") @db.VarChar(191)
+  bakimMesaji       String  @default("Site gecici olarak bakimda.") @map("bakim_mesaji") @db.VarChar(1000)
+  bakimGorselUrl    String? @map("bakim_gorsel_url") @db.VarChar(500)
+  bakimTahminiSure  String? @map("bakim_tahmini_sure") @db.VarChar(100)
+  bakimIpBeyazListe Json    @default("[]") @map("bakim_ip_beyaz_liste")
+
+  logSaklamaGun  Int    @default(90) @map("log_saklama_gun")
+  panelDili      String @default("tr") @map("panel_dili") @db.VarChar(10)
+  panelCeviriler Json   @default("{}") @map("panel_ceviriler")
+
+  sayfa404 Json @default("{}") @map("sayfa_404")
+
+  otomatikYedekleme    Boolean          @default(false) @map("otomatik_yedekleme")
+  otomatikYedeklemeGun Int              @default(7) @map("otomatik_yedekleme_gun")
+  yedeklemeFormati     YedeklemeFormati @default(json) @map("yedekleme_formati")
+
+  guvenlikBasliklari Boolean @default(true) @map("guvenlik_basliklari")
+  robotsEngelle      Boolean @default(false) @map("robots_engelle")
+
+  sagTikPaneli   Json @default("{}") @map("sag_tik_paneli")
+  scriptAyarlari Json @default("{}") @map("script_ayarlari")
+
+  guncelleme DateTime @updatedAt @map("guncelleme")
+
+  @@map("site_ayar")
+}
+
+// ---------------------------------------------------------------------------
+// Kimlik ve yetkilendirme
+// ---------------------------------------------------------------------------
+
+model Kullanici {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique @db.VarChar(191)
+  ad         String   @db.VarChar(191)
+  sifreHash  String   @map("sifre_hash") @db.VarChar(255)
+  pinHash    String?  @map("pin_hash") @db.VarChar(255)
+  rolKodu    String   @map("rol_kodu") @db.VarChar(50)
+  aktif      Boolean  @default(true)
+  olusturma  DateTime @default(now()) @map("olusturma")
+  guncelleme DateTime @updatedAt @map("guncelleme")
+
+  kisayolAyari   KullaniciKisayol?
+  islemLoglari   IslemLogu[]
+  yedekKayitlari YedekKaydi[]
+
+  @@index([rolKodu])
+  @@map("kullanici")
+}
+
+model KullaniciKisayol {
+  kullaniciId Int  @id @map("kullanici_id")
+  harita      Json @default("{}")
+
+  kullanici Kullanici @relation(fields: [kullaniciId], references: [id], onDelete: Cascade)
+
+  @@map("kullanici_kisayol")
+}
+
+model Rol {
+  id         Int      @id @default(autoincrement())
+  kod        String   @unique @db.VarChar(50)
+  baslik     String   @db.VarChar(191)
+  aciklama   String   @default("") @db.VarChar(500)
+  sistemRolu Boolean  @default(false) @map("sistem_rolu")
+  olusturma  DateTime @default(now()) @map("olusturma")
+  guncelleme DateTime @updatedAt @map("guncelleme")
+
+  yetkiler RolYetki[]
+
+  @@map("rol")
+}
+
+model Yetki {
+  kod    String @id @db.VarChar(50)
+  etiket String @db.VarChar(191)
+
+  roller RolYetki[]
+
+  @@map("yetki")
+}
+
+model RolYetki {
+  rolId     Int    @map("rol_id")
+  yetkiKodu String @map("yetki_kodu") @db.VarChar(50)
+
+  rol   Rol   @relation(fields: [rolId], references: [id], onDelete: Cascade)
+  yetki Yetki @relation(fields: [yetkiKodu], references: [kod], onDelete: Cascade)
+
+  @@id([rolId, yetkiKodu])
+  @@map("rol_yetki")
+}
+
+// ---------------------------------------------------------------------------
+// Eklentiler
+// ---------------------------------------------------------------------------
+
+model EklentiKatalog {
+  kod           String   @id @db.VarChar(100)
+  ad            String   @db.VarChar(191)
+  aciklama      String   @db.VarChar(1000)
+  gelistirici   String   @db.VarChar(191)
+  ikon          String   @db.VarChar(50)
+  kategori      String   @db.VarChar(50)
+  surum         String   @db.VarChar(30)
+  puan          Float    @default(0)
+  etkinKurulum  Int      @default(0) @map("etkin_kurulum")
+  sonGuncelleme DateTime @default(now()) @map("son_guncelleme")
+  publicHook    String?  @map("public_hook") @db.VarChar(100)
+  manifestJson  Json?    @map("manifest_json")
+
+  kurulumlar EklentiKurulum[]
+
+  @@map("eklenti_katalog")
+}
+
+model EklentiKurulum {
+  id            Int           @id @default(autoincrement())
+  eklentiKodu   String        @unique @map("eklenti_kodu") @db.VarChar(100)
+  durum         EklentiDurum  @default(kurulu)
+  kaynak        EklentiKaynak @default(katalog)
+  ayarlarJson   Json          @default("{}") @map("ayarlar_json")
+  kurulumTarihi DateTime      @default(now()) @map("kurulum_tarihi")
+  guncelleme    DateTime      @updatedAt @map("guncelleme")
+
+  eklenti EklentiKatalog @relation(fields: [eklentiKodu], references: [kod], onDelete: Cascade)
+
+  @@map("eklenti_kurulum")
+}
+
+// ---------------------------------------------------------------------------
+// Sistem kayitlari
+// ---------------------------------------------------------------------------
+
+model IslemLogu {
+  id             Int      @id @default(autoincrement())
+  kullaniciId    Int?     @map("kullanici_id")
+  kullaniciAd    String   @map("kullanici_ad") @db.VarChar(191)
+  kullaniciEmail String   @map("kullanici_email") @db.VarChar(191)
+  islem          String   @db.VarChar(500)
+  modulId        String?  @map("modul_id") @db.VarChar(50)
+  aksiyonId      String?  @map("aksiyon_id") @db.VarChar(50)
+  olusturma      DateTime @default(now()) @map("olusturma")
+
+  kullanici Kullanici? @relation(fields: [kullaniciId], references: [id], onDelete: SetNull)
+
+  @@index([olusturma])
+  @@map("islem_logu")
+}
+
+model YedekKaydi {
+  id             Int              @id @default(autoincrement())
+  kullaniciId    Int?             @map("kullanici_id")
+  kullaniciAd    String           @map("kullanici_ad") @db.VarChar(191)
+  kullaniciEmail String           @map("kullanici_email") @db.VarChar(191)
+  dosyaAdi       String           @map("dosya_adi") @db.VarChar(255)
+  tip            YedekIslemTipi
+  format         YedeklemeFormati @default(json)
+  olusturma      DateTime         @default(now()) @map("olusturma")
+
+  kullanici Kullanici? @relation(fields: [kullaniciId], references: [id], onDelete: SetNull)
+
+  @@index([olusturma])
+  @@map("yedek_kaydi")
+}
+
+model Bildirim {
+  id        Int          @id @default(autoincrement())
+  tip       BildirimTipi
+  baslik    String       @db.VarChar(191)
+  mesaj     String       @db.VarChar(1000)
+  okundu    Boolean      @default(false)
+  link      String?      @db.VarChar(500)
+  olusturma DateTime     @default(now()) @map("olusturma")
+
+  @@index([okundu, olusturma])
+  @@map("bildirim")
+}

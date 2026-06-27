@@ -7,7 +7,6 @@ export interface AuthKullanici {
   email: string;
   ad: string;
   rol: string;
-  siteId: string | null;
   tercihler?: KullaniciTercihleri;
   yetkiler?: import('@/admin/baslat-menusu/musteri-ajans/roller/api').YetkiKodu[];
 }

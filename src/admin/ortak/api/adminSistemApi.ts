@@ -6,7 +6,6 @@ const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 export interface AdminLogKayit {
   id: string;
-  siteId: string;
   kullaniciId?: string | null;
   kullaniciAd: string;
   kullaniciEmail: string;
@@ -24,7 +23,6 @@ export interface LogKaydetPayload {
 
 export interface YedekKaydi {
   id: string;
-  siteId: string;
   kullaniciId: string | null;
   kullaniciAd: string;
   kullaniciEmail: string;
