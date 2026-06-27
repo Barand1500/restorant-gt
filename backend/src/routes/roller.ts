@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import type { Response } from 'express';
-import { MERKEZ_SUBE_ID } from '../lib/ayarlar.js';
 import { rolSatirlarindanOzet, yetkiListesiYanit } from '../lib/mappers.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
@@ -12,8 +11,8 @@ router.use(authZorunlu);
 async function rolleriGetir() {
   const [satirlar, moduller] = await Promise.all([
     prisma.rol.findMany({
-      where: { subeId: MERKEZ_SUBE_ID },
-      orderBy: [{ rolKodu: 'asc' }, { modulId: 'asc' }],
+      where: { durum: true },
+      orderBy: [{ rolAdi: 'asc' }, { modulId: 'asc' }],
     }),
     prisma.modul.findMany({ where: { durum: true }, orderBy: { prefix: 'asc' } }),
   ]);
@@ -27,7 +26,7 @@ async function rolleriGetir() {
       prefix: m.prefix,
     })),
     matris: satirlar.map((s) => ({
-      rolKodu: s.rolKodu,
+      rolKodu: s.rolAdi,
       modulId: s.modulId,
       yetkiler: Array.isArray(s.yetki) ? s.yetki : [],
     })),
@@ -40,13 +39,7 @@ router.get('/', async (_req: AuthRequest, res: Response) => {
 
 router.put('/', async (req: AuthRequest, res: Response) => {
   const { roller } = req.body as {
-    roller?: {
-      kod: string;
-      baslik: string;
-      aciklama: string;
-      yetkiler: string[];
-      sistemRolu?: boolean;
-    }[];
+    roller?: { kod: string; baslik: string; yetkiler: string[] }[];
   };
 
   if (!Array.isArray(roller)) {
@@ -62,35 +55,29 @@ router.put('/', async (req: AuthRequest, res: Response) => {
 
   await prisma.rol.deleteMany({
     where: {
-      subeId: MERKEZ_SUBE_ID,
-      sistemRolu: false,
-      rolKodu: { notIn: [...gelenKodlar] },
+      rolAdi: { notIn: [...gelenKodlar] },
     },
   });
 
   for (const rol of roller) {
+    const rolAdi = rol.kod;
+    const rolBaslik = rol.baslik || rol.kod;
     for (const modul of moduller) {
       await prisma.rol.upsert({
         where: {
-          rolKodu_modulId_subeId: {
-            rolKodu: rol.kod,
+          modulId_rolAdi: {
+            rolAdi,
             modulId: modul.id,
-            subeId: MERKEZ_SUBE_ID,
           },
         },
         create: {
-          rolKodu: rol.kod,
-          rolAdi: rol.baslik,
+          rolAdi,
           modulId: modul.id,
           yetki: rol.yetkiler ?? [],
-          subeId: MERKEZ_SUBE_ID,
-          sistemRolu: rol.sistemRolu ?? false,
-          aciklama: rol.aciklama ?? '',
         },
         update: {
-          rolAdi: rol.baslik,
           yetki: rol.yetkiler ?? [],
-          aciklama: rol.aciklama ?? '',
+          durum: true,
         },
       });
     }

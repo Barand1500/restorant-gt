@@ -55,7 +55,7 @@ router.get('/gecmis', async (_req: AuthRequest, res: Response) => {
 
 async function yedekVerisiAl() {
   const ayarlar = await tumAyarlarOku(MERKEZ_SUBE_ID);
-  const satirlar = await prisma.rol.findMany({ where: { subeId: MERKEZ_SUBE_ID } });
+  const satirlar = await prisma.rol.findMany({ where: { durum: true } });
   const eklentiler = await prisma.eklentiKurulum.findMany({ where: { subeId: MERKEZ_SUBE_ID } });
   return {
     surum: '3.0',

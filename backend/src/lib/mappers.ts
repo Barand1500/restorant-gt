@@ -1,5 +1,5 @@
 import type { Kullanici, Rol } from '@prisma/client';
-import { MERKEZ_SUBE_ID, tumAyarlarOku } from './ayarlar.js';
+import { tumAyarlarOku } from './ayarlar.js';
 import { prisma } from './prisma.js';
 
 const VARSAYILAN_SITE = {
@@ -20,9 +20,17 @@ const YETKI_ETIKETLERI: Record<string, string> = {
 
 export const GECERLI_YETKILER = Object.keys(YETKI_ETIKETLERI);
 
+export async function rolAdiBul(kullanici: Kullanici): Promise<string> {
+  const rol = await prisma.rol.findUnique({ where: { id: kullanici.rolId } });
+  return rol?.rolAdi ?? 'GORUNTULEME';
+}
+
 export async function kullaniciYetkileriAl(kullanici: Kullanici): Promise<string[]> {
+  const anaRol = await prisma.rol.findUnique({ where: { id: kullanici.rolId } });
+  if (!anaRol) return [];
+
   const satirlar = await prisma.rol.findMany({
-    where: { rolKodu: kullanici.rolKodu, subeId: MERKEZ_SUBE_ID, durum: true },
+    where: { rolAdi: anaRol.rolAdi, durum: true },
   });
 
   const birlesik = new Set<string>();
@@ -33,26 +41,35 @@ export async function kullaniciYetkileriAl(kullanici: Kullanici): Promise<string
   return [...birlesik];
 }
 
+export async function rolIdCoz(rolKodu: string): Promise<number> {
+  const rol = await prisma.rol.findFirst({
+    where: { rolAdi: rolKodu, durum: true },
+    orderBy: { id: 'asc' },
+  });
+  if (!rol) throw new Error(`Gecersiz rol: ${rolKodu}`);
+  return rol.id;
+}
+
 export function tarihIso(d: Date): string {
   return d.toISOString();
 }
 
-export function kullaniciYanit(k: Kullanici, yetkiler: string[]) {
+export async function kullaniciYanit(k: Kullanici, yetkiler: string[]) {
   return {
     id: k.id,
     email: k.email,
     ad: k.ad,
-    rol: k.rolKodu,
+    rol: await rolAdiBul(k),
     yetkiler,
   };
 }
 
-export function adminKullaniciYanit(k: Kullanici) {
+export async function adminKullaniciYanit(k: Kullanici) {
   return {
     id: k.id,
     email: k.email,
     ad: k.ad,
-    rol: k.rolKodu,
+    rol: await rolAdiBul(k),
     aktif: k.aktif,
     olusturma: tarihIso(k.olusturma),
     guncelleme: tarihIso(k.guncelleme),
@@ -60,7 +77,7 @@ export function adminKullaniciYanit(k: Kullanici) {
 }
 
 export async function sistemAyarlariYanitOlustur(surum: string) {
-  const ayarlar = await tumAyarlarOku(MERKEZ_SUBE_ID);
+  const ayarlar = await tumAyarlarOku(0);
   const bakim = ayarlar.bakim as {
     modu?: boolean;
     baslik?: string;
@@ -119,22 +136,17 @@ export async function sistemAyarlariYanitOlustur(surum: string) {
 }
 
 export function rolSatirlarindanOzet(satirlar: Rol[]) {
-  const gruplar = new Map<
-    string,
-    { kod: string; baslik: string; aciklama: string; yetkiler: Set<string>; sistemRolu: boolean }
-  >();
+  const gruplar = new Map<string, { kod: string; baslik: string; yetkiler: Set<string> }>();
 
   for (const satir of satirlar) {
-    const mevcut = gruplar.get(satir.rolKodu) ?? {
-      kod: satir.rolKodu,
+    const mevcut = gruplar.get(satir.rolAdi) ?? {
+      kod: satir.rolAdi,
       baslik: satir.rolAdi,
-      aciklama: satir.aciklama,
       yetkiler: new Set<string>(),
-      sistemRolu: satir.sistemRolu,
     };
     const liste = Array.isArray(satir.yetki) ? (satir.yetki as string[]) : [];
     for (const y of liste) mevcut.yetkiler.add(y);
-    gruplar.set(satir.rolKodu, mevcut);
+    gruplar.set(satir.rolAdi, mevcut);
   }
 
   return [...gruplar.values()]
@@ -142,9 +154,9 @@ export function rolSatirlarindanOzet(satirlar: Rol[]) {
     .map((g) => ({
       kod: g.kod,
       baslik: g.baslik,
-      aciklama: g.aciklama,
+      aciklama: '',
       yetkiler: [...g.yetkiler].filter((y) => GECERLI_YETKILER.includes(y)),
-      sistemRolu: g.sistemRolu,
+      sistemRolu: true,
     }));
 }
 

@@ -22,7 +22,7 @@ const SISTEM_ROLLERI = [
   { rolAdi: 'GORUNTULEME', yetkiler: ['goruntuleme'] },
 ];
 
-function sifreHashle(sifre: string) {
+function sifreHashle(sifre) {
   const tuz = randomBytes(16).toString('hex');
   const hash = scryptSync(sifre, tuz, 64).toString('hex');
   return `scrypt:${tuz}:${hash}`;
@@ -32,7 +32,7 @@ async function varsayilanAyarlarOlustur(subeId = 0) {
   const mevcut = await prisma.ayar.count({ where: { subeId } });
   if (mevcut > 0) return;
 
-  const kayitlar: { anahtar: string; deger: unknown }[] = [
+  const kayitlar = [
     { anahtar: 'site_aktif', deger: true },
     { anahtar: 'domain', deger: '' },
     {
@@ -70,14 +70,14 @@ async function varsayilanAyarlarOlustur(subeId = 0) {
   ];
 
   for (const k of kayitlar) {
-    await prisma.ayar.create({ data: { subeId, anahtar: k.anahtar, deger: k.deger as object } });
+    await prisma.ayar.create({ data: { subeId, anahtar: k.anahtar, deger: k.deger } });
   }
 }
 
 async function main() {
   console.log('Veritabani tohum verisi yukleniyor...');
 
-  const modulIds: number[] = [];
+  const modulIds = [];
   for (const m of PANEL_MODULLERI) {
     const kayit = await prisma.modul.upsert({
       where: { prefix: m.prefix },

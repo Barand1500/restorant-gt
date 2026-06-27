@@ -23,19 +23,24 @@ router.post('/giris', async (req, res) => {
     return res.status(401).json({ mesaj: 'Gecersiz e-posta veya sifre' });
   }
 
+  await prisma.kullanici.update({
+    where: { id: kullanici.id },
+    data: { sonGirisTarihi: new Date() },
+  });
+
   const yetkiler = await kullaniciYetkileriAl(kullanici);
   const token = tokenUret(kullanici.id, kullanici.email);
 
   return res.json({
     token,
-    kullanici: kullaniciYanit(kullanici, yetkiler),
+    kullanici: await kullaniciYanit(kullanici, yetkiler),
   });
 });
 
 router.get('/ben', authZorunlu, async (req: AuthRequest, res: Response) => {
   const k = req.kullanici!;
   return res.json({
-    kullanici: kullaniciYanit(k, req.yetkiler ?? []),
+    kullanici: await kullaniciYanit(k, req.yetkiler ?? []),
   });
 });
 
@@ -70,7 +75,7 @@ router.patch('/profil', authZorunlu, async (req: AuthRequest, res: Response) => 
   });
 
   const yetkiler = await kullaniciYetkileriAl(guncel);
-  return res.json({ kullanici: kullaniciYanit(guncel, yetkiler) });
+  return res.json({ kullanici: await kullaniciYanit(guncel, yetkiler) });
 });
 
 export default router;

@@ -62,6 +62,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   await prisma.log.create({
     data: {
       kullaniciId: k.id,
+      logTipi: modulId ? String(modulId) : 'panel',
       mesaj: metin,
       ipAdresi: istemciIp(req),
     },
