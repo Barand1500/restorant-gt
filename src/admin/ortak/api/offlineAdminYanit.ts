@@ -88,6 +88,7 @@ interface OfflinePaket {
   personelSayisi: number;
   masaSayisi: number;
   fiyat: number;
+  paraBirimi?: string;
   aktif: boolean;
   aktifLisansSayisi: number;
   kayitTarihi: string;
@@ -758,6 +759,7 @@ function offlinePaketOku(): OfflinePaket[] {
       personelSayisi: 20,
       masaSayisi: 100,
       fiyat: 0,
+      paraBirimi: 'TRY',
       aktif: true,
       aktifLisansSayisi: 1,
       kayitTarihi: simdi,
@@ -771,7 +773,12 @@ function offlinePaketKaydet(liste: OfflinePaket[]) {
 }
 
 function offlinePaketListe() {
-  return { paketler: offlinePaketOku() };
+  return {
+    paketler: offlinePaketOku().map((p) => ({
+      ...p,
+      paraBirimi: p.paraBirimi ?? 'TRY',
+    })),
+  };
 }
 
 function offlinePaketYaz(body: BodyInit | null | undefined, method: string, path: string) {
@@ -796,6 +803,7 @@ function offlinePaketYaz(body: BodyInit | null | undefined, method: string, path
       personelSayisi: girdi.personelSayisi ?? 10,
       masaSayisi: girdi.masaSayisi ?? 50,
       fiyat: girdi.fiyat ?? 0,
+      paraBirimi: girdi.paraBirimi ?? 'TRY',
       aktif: true,
       aktifLisansSayisi: 0,
       kayitTarihi: simdi,
@@ -817,6 +825,7 @@ function offlinePaketYaz(body: BodyInit | null | undefined, method: string, path
       ...(girdi.personelSayisi !== undefined ? { personelSayisi: girdi.personelSayisi } : {}),
       ...(girdi.masaSayisi !== undefined ? { masaSayisi: girdi.masaSayisi } : {}),
       ...(girdi.fiyat !== undefined ? { fiyat: girdi.fiyat } : {}),
+      ...(girdi.paraBirimi !== undefined ? { paraBirimi: girdi.paraBirimi } : {}),
       ...('aktif' in girdi ? { aktif: Boolean(girdi.aktif) } : {}),
       guncellemeTarihi: simdi,
     };

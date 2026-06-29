@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
-import { formInputSinifi } from '@/formlar/FormAlani';
+import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
 import type { MasterPaket, PaketFormGirdi } from '@/admin/baslat-menusu/master/paketler/api';
+import {
+  PAKET_PARA_BIRIMLERI,
+  VARSAYILAN_PARA_BIRIMI,
+  gecerliParaBirimi,
+  paketParaBirimiNormallestir,
+  type PaketParaBirimi,
+} from '@/admin/baslat-menusu/master/paketler/paraBirimi';
 import { SistemModal } from '@/admin/ortak/SistemModal';
 
 interface PaketKayitModalProps {
@@ -17,6 +24,7 @@ interface PaketFormMetin {
   personelSayisi: string;
   masaSayisi: string;
   fiyat: string;
+  paraBirimi: PaketParaBirimi;
 }
 
 const bosFormMetin: PaketFormMetin = {
@@ -25,6 +33,7 @@ const bosFormMetin: PaketFormMetin = {
   personelSayisi: '10',
   masaSayisi: '50',
   fiyat: '0',
+  paraBirimi: VARSAYILAN_PARA_BIRIMI,
 };
 
 function tamSayiKabul(metin: string): boolean {
@@ -56,9 +65,12 @@ function metindenGirdi(form: PaketFormMetin): { girdi?: PaketFormGirdi; hata?: s
   if (form.fiyat.trim() === '' || Number.isNaN(fiyat) || fiyat < 0) {
     return { hata: 'Geçerli bir fiyat girin' };
   }
+  if (!gecerliParaBirimi(form.paraBirimi)) {
+    return { hata: 'Geçerli bir para birimi seçin' };
+  }
 
   return {
-    girdi: { paketAdi, subeSayisi, personelSayisi, masaSayisi, fiyat },
+    girdi: { paketAdi, subeSayisi, personelSayisi, masaSayisi, fiyat, paraBirimi: form.paraBirimi },
   };
 }
 
@@ -75,6 +87,7 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
         personelSayisi: String(duzenlenen.personelSayisi),
         masaSayisi: String(duzenlenen.masaSayisi),
         fiyat: String(duzenlenen.fiyat),
+        paraBirimi: paketParaBirimiNormallestir(duzenlenen.paraBirimi),
       });
     } else {
       setForm(bosFormMetin);
@@ -166,17 +179,37 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
             />
           </div>
           <div>
-            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Aylık fiyat (₺)</label>
-            <input
-              type="text"
-              inputMode="decimal"
-              className={formInputSinifi}
-              value={form.fiyat}
-              onChange={(e) => {
-                const v = e.target.value.replace(',', '.');
-                if (ondalikKabul(v)) setForm((f) => ({ ...f, fiyat: v }));
-              }}
-            />
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Fiyat</label>
+            <div className="ap-master-fiyat-satiri">
+              <input
+                type="text"
+                inputMode="decimal"
+                className={formInputSinifi}
+                value={form.fiyat}
+                onChange={(e) => {
+                  const v = e.target.value.replace(',', '.');
+                  if (ondalikKabul(v)) setForm((f) => ({ ...f, fiyat: v }));
+                }}
+              />
+              <select
+                className={`${formSelectSinifi} ap-master-para-birimi-sec`}
+                value={form.paraBirimi}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    paraBirimi: paketParaBirimiNormallestir(e.target.value),
+                  }))
+                }
+                aria-label="Para birimi"
+                title={PAKET_PARA_BIRIMLERI.find((pb) => pb.kod === form.paraBirimi)?.etiket}
+              >
+                {PAKET_PARA_BIRIMLERI.map((pb) => (
+                  <option key={pb.kod} value={pb.kod}>
+                    {pb.sembol}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 

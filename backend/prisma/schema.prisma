@@ -176,6 +176,7 @@ model Paket {
   personelSayisi   Int      @default(10) @map("personel_sayisi")
   masaSayisi       Int      @default(50) @map("masa_sayisi")
   fiyat            Decimal  @default(0) @db.Decimal(12, 2)
+  paraBirimi       String   @default("TRY") @map("para_birimi") @db.VarChar(3)
   kayitTarihi      DateTime @default(now()) @map("kayit_tarihi")
   guncellemeTarihi DateTime @updatedAt @map("guncelleme_tarihi")
   durum            Boolean  @default(true)

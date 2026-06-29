@@ -128,6 +128,7 @@ async function main() {
       personelSayisi: 20,
       masaSayisi: 100,
       fiyat: 0,
+      paraBirimi: 'TRY',
       durum: true,
     },
     update: { paketAdi: 'Temel Paket', durum: true },

@@ -167,7 +167,7 @@ export const MASTER_SEKME_REHBERLERI: Record<MasterSekmeId, ModulRehber> = {
         renk: 'yesil',
       },
     ],
-    ipucu: 'Kota alanları sayısal girilir; fiyat Türk Lirası olarak kaydedilir.',
+    ipucu: 'Kota alanları sayısal girilir; fiyat ve para birimi paket kaydında saklanır.',
   },
 
   lisanslar: {

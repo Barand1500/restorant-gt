@@ -15,6 +15,7 @@ import {
   type MasterPaket,
   type PaketFormGirdi,
 } from '@/admin/baslat-menusu/master/paketler/api';
+import { paketParaBirimiNormallestir, paketParaBirimiSembol } from '@/admin/baslat-menusu/master/paketler/paraBirimi';
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
@@ -155,6 +156,7 @@ export function PaketlerSekme() {
       personelSayisi: taslak?.personelSayisi ?? paket.personelSayisi,
       masaSayisi: taslak?.masaSayisi ?? paket.masaSayisi,
       fiyat: taslak?.fiyat ?? paket.fiyat,
+      paraBirimi: paketParaBirimiNormallestir(taslak?.paraBirimi ?? paket.paraBirimi),
     };
   }
 
@@ -408,7 +410,7 @@ export function PaketlerSekme() {
 
                 <p className="ap-master-paket-fiyat">
                   <span className="ap-master-paket-fiyat-deger font-bold">
-                    ₺
+                    {paketParaBirimiSembol(p.paraBirimi)}
                     <KartHucre
                       alan="fiyat"
                       gosterim={p.fiyat.toLocaleString('tr-TR')}
@@ -421,7 +423,6 @@ export function PaketlerSekme() {
                       className="inline"
                     />
                   </span>
-                  <span className="ap-muted ap-master-paket-fiyat-birim"> / ay</span>
                 </p>
 
                 <ul className="ap-master-paket-ozellikler">

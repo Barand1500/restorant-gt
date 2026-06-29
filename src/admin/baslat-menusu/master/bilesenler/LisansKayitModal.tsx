@@ -3,6 +3,7 @@ import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
 import type { LisansFormGirdi, MasterLisans } from '@/admin/baslat-menusu/master/lisanslar/api';
 import type { MasterFirma } from '@/admin/baslat-menusu/master/firmalar/api';
 import type { MasterPaket } from '@/admin/baslat-menusu/master/paketler/api';
+import { paketParaBirimiSembol } from '@/admin/baslat-menusu/master/paketler/paraBirimi';
 import { SistemModal } from '@/admin/ortak/SistemModal';
 
 interface LisansKayitModalProps {
@@ -127,7 +128,8 @@ export function LisansKayitModal({
               </option>
               {aktifPaketler.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.paketAdi} — ₺{p.fiyat}
+                  {p.paketAdi} — {paketParaBirimiSembol(p.paraBirimi)}
+                  {p.fiyat}
                 </option>
               ))}
             </select>

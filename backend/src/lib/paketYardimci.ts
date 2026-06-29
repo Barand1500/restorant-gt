@@ -9,6 +9,7 @@ export function paketYanitOlustur(p: Paket) {
     personelSayisi: p.personelSayisi,
     masaSayisi: p.masaSayisi,
     fiyat: Number(p.fiyat),
+    paraBirimi: p.paraBirimi,
     aktif: p.durum,
     kayitTarihi: p.kayitTarihi.toISOString(),
     guncellemeTarihi: p.guncellemeTarihi.toISOString(),

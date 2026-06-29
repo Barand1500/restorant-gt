@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Response } from 'express';
 import { Prisma } from '@prisma/client';
 import { paketListesiGetir, paketLisansSayilariGetir, paketYanitOlustur } from '../lib/paketYardimci.js';
+import { paraBirimiDogrula } from '../lib/paraBirimiYardimci.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
@@ -35,6 +36,9 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
   if (Number.isNaN(fiyat) || fiyat < 0) return res.status(400).json({ mesaj: 'Gecersiz fiyat' });
 
+  const paraBirimi = paraBirimiDogrula(body.paraBirimi);
+  if (!paraBirimi) return res.status(400).json({ mesaj: 'Gecersiz para birimi' });
+
   const kayit = await prisma.paket.create({
     data: {
       paketAdi,
@@ -42,6 +46,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       personelSayisi,
       masaSayisi,
       fiyat: new Prisma.Decimal(fiyat),
+      paraBirimi,
       durum: body.aktif === false ? false : true,
     },
   });
@@ -82,6 +87,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     const f = Number(body.fiyat);
     if (Number.isNaN(f) || f < 0) return res.status(400).json({ mesaj: 'Gecersiz fiyat' });
     data.fiyat = new Prisma.Decimal(f);
+  }
+  if (body.paraBirimi !== undefined) {
+    const pb = paraBirimiDogrula(body.paraBirimi, '');
+    if (!pb) return res.status(400).json({ mesaj: 'Gecersiz para birimi' });
+    data.paraBirimi = pb;
   }
   if (body.aktif !== undefined) data.durum = Boolean(body.aktif);
 
