@@ -1,12 +1,23 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
+import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
+import { MasterTabloSayfalama } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSayfalama';
+import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import {
+  MasterUstFiltreSatiri,
+  useMasterKartDurumFiltre,
+} from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
+import {
+  PaketKayitPanel,
+  BOS_PAKET_PANEL,
   ondalikKabul,
-  PaketKayitModal,
+  paketPaneldenGirdi,
+  pakettenPanel,
   tamSayiKabul,
-} from '@/admin/baslat-menusu/master/bilesenler/PaketKayitModal';
-import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
+  type PaketPanelForm,
+} from '@/admin/baslat-menusu/master/bilesenler/PaketKayitPanel';
+import { BOS_PAKET_TASLAK, PaketYeniKart } from '@/admin/baslat-menusu/master/bilesenler/PaketYeniKart';
 import {
   masterPaketGuncelle,
   masterPaketOlustur,
@@ -15,27 +26,18 @@ import {
   type MasterPaket,
   type PaketFormGirdi,
 } from '@/admin/baslat-menusu/master/paketler/api';
+import {
+  PAKET_KART_ALANLARI,
+  PAKET_KART_VARSAYILAN_SIRA,
+  paketKartAlanlariKaydet,
+  paketKartAlanlariOku,
+} from '@/admin/baslat-menusu/master/paketler/paketKartAlanlari';
 import { paketParaBirimiNormallestir, paketParaBirimiSembol } from '@/admin/baslat-menusu/master/paketler/paraBirimi';
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 
 type PaketInlineAlan = 'paketAdi' | 'subeSayisi' | 'personelSayisi' | 'masaSayisi' | 'fiyat';
-
-function DuzenleIkonu() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M13.5 6.5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 interface KartHucreProps {
   alan: PaketInlineAlan;
@@ -108,14 +110,23 @@ export function PaketlerSekme() {
   const [hata, setHata] = useState('');
   const [arama, setArama] = useState('');
   const [filtre, setFiltre] = useState<'tumu' | 'aktif' | 'pasif'>('tumu');
+  const [gorunurAlanlar, setGorunurAlanlar] = useState(() => paketKartAlanlariOku());
+  const [sayfa, setSayfa] = useState(0);
+  const [sayfaBoyutu, setSayfaBoyutu] = useState(10);
   const [seciliId, setSeciliId] = useState<number | null>(null);
-  const [modalAcik, setModalAcik] = useState(false);
+  const [eklemeAcik, setEklemeAcik] = useState(false);
+  const [yeniTaslak, setYeniTaslak] = useState<PaketPanelForm>(BOS_PAKET_TASLAK);
   const [duzenlenen, setDuzenlenen] = useState<MasterPaket | null>(null);
+  const [panelForm, setPanelForm] = useState<PaketPanelForm>(BOS_PAKET_PANEL);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [islemId, setIslemId] = useState<number | null>(null);
   const [taslakMap, setTaslakMap] = useState<Record<number, Partial<PaketFormGirdi>>>({});
   const [duzenlemeHucre, setDuzenlemeHucre] = useState<{ paketId: number; alan: PaketInlineAlan } | null>(null);
   const [duzenlemeMetin, setDuzenlemeMetin] = useState('');
+
+  const panelAcik = duzenlenen != null;
+
+  useMasterKartDurumFiltre(filtre, setFiltre);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -134,6 +145,10 @@ export function PaketlerSekme() {
     void yukle();
   }, [yukle]);
 
+  useEffect(() => {
+    setSayfa(0);
+  }, [arama, filtre, sayfaBoyutu]);
+
   const liste = useMemo(() => {
     const q = arama.trim().toLowerCase();
     return paketler.filter((p) => {
@@ -143,6 +158,11 @@ export function PaketlerSekme() {
       return p.paketAdi.toLowerCase().includes(q);
     });
   }, [paketler, arama, filtre]);
+
+  const sayfalanmisListe = useMemo(() => {
+    const bas = sayfa * sayfaBoyutu;
+    return liste.slice(bas, bas + sayfaBoyutu);
+  }, [liste, sayfa, sayfaBoyutu]);
 
   const seciliTaslak = seciliId != null ? taslakMap[seciliId] : undefined;
   const seciliDegisiklikVar = seciliTaslak != null && Object.keys(seciliTaslak).length > 0;
@@ -161,10 +181,11 @@ export function PaketlerSekme() {
   }
 
   const hucreBasla = useCallback((paketId: number, alan: PaketInlineAlan, mevcut: string) => {
+    if (eklemeAcik || panelAcik) return;
     setSeciliId(paketId);
     setDuzenlemeHucre({ paketId, alan });
     setDuzenlemeMetin(mevcut);
-  }, []);
+  }, [eklemeAcik, panelAcik]);
 
   const hucreBitir = useCallback(() => {
     if (!duzenlemeHucre) {
@@ -198,15 +219,38 @@ export function PaketlerSekme() {
     setDuzenlemeMetin('');
   }, [duzenlemeHucre, duzenlemeMetin]);
 
-  const yeniPaket = useCallback(() => {
+  const panelIptal = useCallback(() => {
     setDuzenlenen(null);
-    setModalAcik(true);
+    setPanelForm(BOS_PAKET_PANEL);
+    setDuzenlemeHucre(null);
+    setDuzenlemeMetin('');
+  }, []);
+
+  const iptalEkle = useCallback(() => {
+    setEklemeAcik(false);
+    setYeniTaslak(BOS_PAKET_TASLAK);
+    setDuzenlemeHucre(null);
+    setDuzenlemeMetin('');
+  }, []);
+
+  const yeniPaket = useCallback(() => {
+    setEklemeAcik(true);
+    setYeniTaslak(BOS_PAKET_TASLAK);
+    setDuzenlenen(null);
+    setPanelForm(BOS_PAKET_PANEL);
+    setSeciliId(null);
+    setDuzenlemeHucre(null);
+    setDuzenlemeMetin('');
+    setSayfa(0);
   }, []);
 
   const paketDuzenle = useCallback((paket: MasterPaket) => {
-    setSeciliId(paket.id);
+    setEklemeAcik(false);
     setDuzenlenen(paket);
-    setModalAcik(true);
+    setPanelForm(pakettenPanel(paket));
+    setSeciliId(paket.id);
+    setDuzenlemeHucre(null);
+    setDuzenlemeMetin('');
   }, []);
 
   const inlineKaydet = useCallback(async () => {
@@ -250,6 +294,55 @@ export function PaketlerSekme() {
     }
   }, [seciliId, seciliDegisiklikVar, seciliTaslak, yukle, basariBildir, hataBildir]);
 
+  const yeniKaydet = useCallback(async () => {
+    const sonuc = paketPaneldenGirdi(yeniTaslak);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
+    setKaydediliyor(true);
+    try {
+      const { paket } = await masterPaketOlustur(sonuc.girdi);
+      setEklemeAcik(false);
+      setYeniTaslak(BOS_PAKET_TASLAK);
+      await yukle();
+      setSeciliId(paket.id);
+      basariBildir(`${sonuc.girdi.paketAdi} eklendi.`);
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
+    } finally {
+      setKaydediliyor(false);
+    }
+  }, [yeniTaslak, yukle, basariBildir, hataBildir]);
+
+  const panelKaydet = useCallback(async () => {
+    if (!duzenlenen) return;
+
+    const sonuc = paketPaneldenGirdi(panelForm);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
+    setKaydediliyor(true);
+    try {
+      await masterPaketGuncelle(duzenlenen.id, sonuc.girdi);
+      setTaslakMap((onceki) => {
+        const yeni = { ...onceki };
+        delete yeni[duzenlenen.id];
+        return yeni;
+      });
+      basariBildir(`${sonuc.girdi.paketAdi} güncellendi.`);
+      panelIptal();
+      await yukle();
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
+    } finally {
+      setKaydediliyor(false);
+    }
+  }, [panelForm, duzenlenen, panelIptal, yukle, basariBildir, hataBildir]);
+
   const paketSil = useCallback(async () => {
     if (seciliId == null) return;
     const paket = paketler.find((p) => p.id === seciliId);
@@ -261,7 +354,7 @@ export function PaketlerSekme() {
       await masterPaketSil(seciliId);
       setSeciliId(null);
       setDuzenlenen(null);
-      setModalAcik(false);
+      setEklemeAcik(false);
       setTaslakMap((onceki) => {
         const yeni = { ...onceki };
         delete yeni[seciliId];
@@ -276,12 +369,27 @@ export function PaketlerSekme() {
     }
   }, [seciliId, paketler, yukle, basariBildir, hataBildir]);
 
+  const alanlariDegistir = useCallback((sira: string[]) => {
+    setGorunurAlanlar(sira);
+    paketKartAlanlariKaydet(sira);
+  }, []);
+
+  const islemde = kaydediliyor || islemId !== null;
+
   useModulAksiyonlari(
-    { ekle: yeniPaket, sil: paketSil, kaydet: inlineKaydet },
     {
-      ekle: !kaydediliyor && !modalAcik,
-      sil: seciliId != null && !kaydediliyor && !islemId && !seciliDegisiklikVar,
-      kaydet: seciliDegisiklikVar && !kaydediliyor && !modalAcik,
+      ekle: yeniPaket,
+      sil: eklemeAcik ? iptalEkle : panelAcik ? panelIptal : paketSil,
+      kaydet: eklemeAcik ? yeniKaydet : panelAcik ? panelKaydet : inlineKaydet,
+    },
+    {
+      ekle: !islemde && !eklemeAcik && !panelAcik,
+      sil: (eklemeAcik || panelAcik || seciliId != null) && !islemde && !seciliDegisiklikVar,
+      kaydet: eklemeAcik
+        ? !kaydediliyor
+        : panelAcik
+          ? !kaydediliyor
+          : seciliDegisiklikVar && !kaydediliyor,
     }
   );
 
@@ -298,204 +406,212 @@ export function PaketlerSekme() {
     }
   }
 
-  async function kaydet(girdi: PaketFormGirdi) {
-    setKaydediliyor(true);
-    try {
-      if (duzenlenen) {
-        await masterPaketGuncelle(duzenlenen.id, girdi);
-        setTaslakMap((onceki) => {
-          const yeni = { ...onceki };
-          delete yeni[duzenlenen.id];
-          return yeni;
-        });
-        basariBildir(`${girdi.paketAdi} güncellendi.`);
-      } else {
-        await masterPaketOlustur(girdi);
-        basariBildir(`${girdi.paketAdi} eklendi.`);
-      }
-      setModalAcik(false);
-      setDuzenlenen(null);
-      await yukle();
-    } catch (err) {
-      hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
-    } finally {
-      setKaydediliyor(false);
-    }
-  }
-
   if (yukleniyor) return <YukleniyorDurumu mesaj="Paketler yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
 
+  const kartGoster = eklemeAcik || liste.length > 0;
+
   return (
     <div className="ap-master-sekme">
-      <div className="ap-master-sekme-filtre">
-        {(
-          [
-            ['tumu', 'Tümü'],
-            ['aktif', 'Aktif'],
-            ['pasif', 'Pasif'],
-          ] as const
-        ).map(([id, etiket]) => (
-          <button
-            key={id}
-            type="button"
-            className={`ap-master-filtre-btn ${filtre === id ? 'ap-master-filtre-btn-aktif' : ''}`}
-            onClick={() => setFiltre(id)}
-          >
-            {etiket}
-          </button>
-        ))}
-      </div>
+      <MasterUstFiltreSatiri
+        arama={arama}
+        onArama={setArama}
+        placeholder="Paket adı ara…"
+        sag={
+          <MasterTabloSutunAyarlari
+            baslik="Paket kartı alanları"
+            sutunlar={PAKET_KART_ALANLARI}
+            gorunurSira={gorunurAlanlar}
+            varsayilanSira={PAKET_KART_VARSAYILAN_SIRA}
+            onDegistir={alanlariDegistir}
+          />
+        }
+      />
 
-      <div className="ap-master-ust">
-        <MasterArama placeholder="Paket adı ara…" value={arama} onChange={setArama} />
-      </div>
+      {panelAcik && (
+        <PaketKayitPanel
+          acik
+          yeniKayit={false}
+          duzenlenen={duzenlenen}
+          form={panelForm}
+          onFormDegistir={setPanelForm}
+          kaydediliyor={kaydediliyor}
+        />
+      )}
 
-      {seciliDegisiklikVar && (
+      {seciliDegisiklikVar && !panelAcik && !eklemeAcik && (
         <p className="ap-muted mb-2 text-xs">
           Kaydedilmemiş değişiklikler var — alttaki <strong className="ap-heading">Kaydet</strong> ile onaylayın.
         </p>
       )}
 
-      {liste.length === 0 ? (
+      {!kartGoster ? (
         <div className="ap-master-bos-durum">
           <p className="ap-muted text-sm">
-            {arama || filtre !== 'tumu' ? 'Filtreye uygun paket bulunamadı.' : 'Henüz paket kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
+            {arama || filtre !== 'tumu'
+              ? 'Filtreye uygun paket bulunamadı.'
+              : 'Henüz paket kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
       ) : (
-        <div className="ap-master-paket-grid">
-          {liste.map((ham) => {
-            const p = paketBirlestir(ham);
-            const kartDegisti = taslakMap[ham.id] != null && Object.keys(taslakMap[ham.id]).length > 0;
+        <>
+          <div className="ap-master-paket-grid">
+            {eklemeAcik && (
+              <PaketYeniKart
+                taslak={yeniTaslak}
+                gorunurAlanlar={gorunurAlanlar}
+                kaydediliyor={kaydediliyor}
+                onTaslakDegistir={setYeniTaslak}
+              />
+            )}
 
-            return (
-              <article
-                key={p.id}
-                className={[
-                  'ap-master-paket-kart',
-                  !p.aktif ? 'ap-master-modul-kart-pasif' : undefined,
-                  seciliId === p.id ? 'ap-master-paket-kart-secili' : undefined,
-                  kartDegisti ? 'ap-master-paket-kart-degisti' : undefined,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() => setSeciliId(p.id)}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="ap-heading ap-master-paket-baslik min-w-0 flex-1 font-bold">
-                    <KartHucre
-                      alan="paketAdi"
-                      gosterim={p.paketAdi}
-                      duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'paketAdi'}
-                      inputDeger={duzenlemeMetin}
-                      onBasla={() => hucreBasla(p.id, 'paketAdi', p.paketAdi)}
-                      onDegistir={setDuzenlemeMetin}
-                      onBitir={hucreBitir}
-                    />
-                  </h3>
-                  <button
-                    type="button"
-                    className="ap-master-tablo-ikon-btn shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      paketDuzenle(ham);
-                    }}
-                    aria-label="Paket düzenle"
-                    title="Tüm alanları düzenle"
-                  >
-                    <DuzenleIkonu />
-                  </button>
-                </div>
+            {sayfalanmisListe.map((ham) => {
+              const p = paketBirlestir(ham);
+              const kartDegisti = taslakMap[ham.id] != null && Object.keys(taslakMap[ham.id]).length > 0;
 
-                <p className="ap-master-paket-fiyat">
-                  <span className="ap-master-paket-fiyat-deger font-bold">
-                    {paketParaBirimiSembol(p.paraBirimi)}
-                    <KartHucre
-                      alan="fiyat"
-                      gosterim={p.fiyat.toLocaleString('tr-TR')}
-                      duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'fiyat'}
-                      inputDeger={duzenlemeMetin}
-                      onBasla={() => hucreBasla(p.id, 'fiyat', String(p.fiyat))}
-                      onDegistir={setDuzenlemeMetin}
-                      onBitir={hucreBitir}
-                      ondalik
-                      className="inline"
-                    />
-                  </span>
-                </p>
+              return (
+                <article
+                  key={p.id}
+                  className={[
+                    'ap-master-paket-kart',
+                    !p.aktif ? 'ap-master-modul-kart-pasif' : undefined,
+                    seciliId === p.id ? 'ap-master-paket-kart-secili' : undefined,
+                    kartDegisti ? 'ap-master-paket-kart-degisti' : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => {
+                    if (eklemeAcik) iptalEkle();
+                    if (panelAcik) panelIptal();
+                    setSeciliId(p.id);
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="ap-heading ap-master-paket-baslik min-w-0 flex-1 font-bold">
+                      <KartHucre
+                        alan="paketAdi"
+                        gosterim={p.paketAdi}
+                        duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'paketAdi'}
+                        inputDeger={duzenlemeMetin}
+                        onBasla={() => hucreBasla(p.id, 'paketAdi', p.paketAdi)}
+                        onDegistir={setDuzenlemeMetin}
+                        onBitir={hucreBitir}
+                      />
+                    </h3>
+                    <button
+                      type="button"
+                      className="ap-master-tablo-ikon-btn shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        paketDuzenle(ham);
+                      }}
+                      aria-label="Paket düzenle"
+                      title="Tüm alanları düzenle"
+                    >
+                      <DuzenleIkonu />
+                    </button>
+                  </div>
 
-                <ul className="ap-master-paket-ozellikler">
-                  <li>
-                    <KartHucre
-                      alan="subeSayisi"
-                      gosterim={String(p.subeSayisi)}
-                      duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'subeSayisi'}
-                      inputDeger={duzenlemeMetin}
-                      onBasla={() => hucreBasla(p.id, 'subeSayisi', String(p.subeSayisi))}
-                      onDegistir={setDuzenlemeMetin}
-                      onBitir={hucreBitir}
-                      className="inline font-semibold"
-                    />{' '}
-                    şube
-                  </li>
-                  <li>
-                    <KartHucre
-                      alan="personelSayisi"
-                      gosterim={String(p.personelSayisi)}
-                      duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'personelSayisi'}
-                      inputDeger={duzenlemeMetin}
-                      onBasla={() => hucreBasla(p.id, 'personelSayisi', String(p.personelSayisi))}
-                      onDegistir={setDuzenlemeMetin}
-                      onBitir={hucreBitir}
-                      className="inline font-semibold"
-                    />{' '}
-                    personel
-                  </li>
-                  <li>
-                    <KartHucre
-                      alan="masaSayisi"
-                      gosterim={String(p.masaSayisi)}
-                      duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'masaSayisi'}
-                      inputDeger={duzenlemeMetin}
-                      onBasla={() => hucreBasla(p.id, 'masaSayisi', String(p.masaSayisi))}
-                      onDegistir={setDuzenlemeMetin}
-                      onBitir={hucreBitir}
-                      className="inline font-semibold"
-                    />{' '}
-                    masa
-                  </li>
-                  <li>{p.aktifLisansSayisi} aktif lisans</li>
-                </ul>
+                  {gorunurAlanlar.includes('fiyat') && (
+                    <p className="ap-master-paket-fiyat">
+                      <span className="ap-master-paket-fiyat-deger font-bold">
+                        {paketParaBirimiSembol(p.paraBirimi)}
+                        <KartHucre
+                          alan="fiyat"
+                          gosterim={p.fiyat.toLocaleString('tr-TR')}
+                          duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'fiyat'}
+                          inputDeger={duzenlemeMetin}
+                          onBasla={() => hucreBasla(p.id, 'fiyat', String(p.fiyat))}
+                          onDegistir={setDuzenlemeMetin}
+                          onBitir={hucreBitir}
+                          ondalik
+                          className="inline"
+                        />
+                      </span>
+                    </p>
+                  )}
 
-                <div className="ap-master-paket-toggle mt-3" onClick={(e) => e.stopPropagation()}>
-                  <DurumAnahtari
-                    etiket={p.aktif ? 'Satışta' : 'Pasif paket'}
-                    acik={p.aktif}
-                    devreDisi={islemId === p.id}
-                    onChange={(v) => void durumDegistir(ham, v)}
-                    renk={p.aktif ? 'yesil' : 'turuncu'}
-                    sadeceToggle
-                  />
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                  <ul className="ap-master-paket-ozellikler">
+                    {gorunurAlanlar.includes('subeSayisi') && (
+                      <li>
+                        <KartHucre
+                          alan="subeSayisi"
+                          gosterim={String(p.subeSayisi)}
+                          duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'subeSayisi'}
+                          inputDeger={duzenlemeMetin}
+                          onBasla={() => hucreBasla(p.id, 'subeSayisi', String(p.subeSayisi))}
+                          onDegistir={setDuzenlemeMetin}
+                          onBitir={hucreBitir}
+                          className="inline font-semibold"
+                        />{' '}
+                        şube
+                      </li>
+                    )}
+                    {gorunurAlanlar.includes('personelSayisi') && (
+                      <li>
+                        <KartHucre
+                          alan="personelSayisi"
+                          gosterim={String(p.personelSayisi)}
+                          duzenlemeAktif={
+                            duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'personelSayisi'
+                          }
+                          inputDeger={duzenlemeMetin}
+                          onBasla={() => hucreBasla(p.id, 'personelSayisi', String(p.personelSayisi))}
+                          onDegistir={setDuzenlemeMetin}
+                          onBitir={hucreBitir}
+                          className="inline font-semibold"
+                        />{' '}
+                        personel
+                      </li>
+                    )}
+                    {gorunurAlanlar.includes('masaSayisi') && (
+                      <li>
+                        <KartHucre
+                          alan="masaSayisi"
+                          gosterim={String(p.masaSayisi)}
+                          duzenlemeAktif={duzenlemeHucre?.paketId === p.id && duzenlemeHucre.alan === 'masaSayisi'}
+                          inputDeger={duzenlemeMetin}
+                          onBasla={() => hucreBasla(p.id, 'masaSayisi', String(p.masaSayisi))}
+                          onDegistir={setDuzenlemeMetin}
+                          onBitir={hucreBitir}
+                          className="inline font-semibold"
+                        />{' '}
+                        masa
+                      </li>
+                    )}
+                    {gorunurAlanlar.includes('aktifLisansSayisi') && (
+                      <li>{p.aktifLisansSayisi} aktif lisans</li>
+                    )}
+                  </ul>
+
+                  <div className="ap-master-paket-toggle mt-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="ap-master-toggle-mini">
+                      <DurumAnahtari
+                        etiket={p.aktif ? 'Satışta' : 'Pasif paket'}
+                        acik={p.aktif}
+                        devreDisi={islemId === p.id}
+                        onChange={(v) => void durumDegistir(ham, v)}
+                        renk={p.aktif ? 'yesil' : 'turuncu'}
+                        sadeceToggle
+                      />
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {liste.length > 0 && (
+            <MasterTabloSayfalama
+              toplam={liste.length}
+              sayfa={sayfa}
+              sayfaBoyutu={sayfaBoyutu}
+              onSayfaDegistir={setSayfa}
+              onSayfaBoyutuDegistir={setSayfaBoyutu}
+            />
+          )}
+        </>
       )}
-
-      <PaketKayitModal
-        acik={modalAcik}
-        duzenlenen={duzenlenen}
-        kaydediliyor={kaydediliyor}
-        onKapat={() => {
-          if (!kaydediliyor) {
-            setModalAcik(false);
-            setDuzenlenen(null);
-          }
-        }}
-        onKaydet={kaydet}
-      />
     </div>
   );
 }

@@ -43,6 +43,7 @@ export async function masterModulleriGetir(): Promise<ModulListeYanit> {
 export async function masterModulOlustur(girdi: {
   modulAdi: string;
   prefix?: string;
+  aktif?: boolean;
 }): Promise<{ modul: MasterModul }> {
   return adminJsonFetch('/moduller', {
     method: 'POST',

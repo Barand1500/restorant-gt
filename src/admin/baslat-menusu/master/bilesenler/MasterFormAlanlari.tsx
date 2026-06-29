@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { telefonFormatla, telefonRakamlari } from '@/araclar/telefonYardimci';
+import { epostaOnerileriUret } from '@/araclar/epostaOneriYardimci';
+import { iskontoIfadesiHesapla } from '@/araclar/iskontoYardimci';
+import { vergiDaireleriniFiltrele } from '@/veri/turkiyeVergiDaireleri';
 import {
   illeriFiltrele,
   ilceleriFiltrele,
@@ -216,6 +219,180 @@ function IlceAramaInput({
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+interface VergiDairesiAramaProps {
+  deger: string;
+  onDegistir: (v: string) => void;
+  etiket?: string;
+  kompakt?: boolean;
+  devreDisi?: boolean;
+}
+
+export function VergiDairesiArama({
+  deger,
+  onDegistir,
+  etiket = 'Vergi dairesi',
+  kompakt = false,
+  devreDisi,
+}: VergiDairesiAramaProps) {
+  const [acik, setAcik] = useState(false);
+  const kapsayiciRef = useRef<HTMLDivElement>(null);
+  const filtreli = acik ? vergiDaireleriniFiltrele(deger) : [];
+
+  useEffect(() => {
+    function disTik(e: MouseEvent) {
+      if (kapsayiciRef.current && !kapsayiciRef.current.contains(e.target as Node)) setAcik(false);
+    }
+    document.addEventListener('mousedown', disTik);
+    return () => document.removeEventListener('mousedown', disTik);
+  }, []);
+
+  return (
+    <div
+      ref={kapsayiciRef}
+      className={kompakt ? 'ap-master-il-arama ap-master-il-arama-kompakt' : 'ap-master-il-arama'}
+    >
+      {!kompakt && <label className="ap-muted mb-1 block text-xs font-semibold uppercase">{etiket}</label>}
+      <input
+        className={formInputSinifi}
+        value={deger}
+        placeholder="Vergi dairesi yazın…"
+        autoComplete="off"
+        spellCheck={false}
+        disabled={devreDisi}
+        aria-label={etiket}
+        onFocus={() => setAcik(true)}
+        onChange={(e) => {
+          onDegistir(e.target.value);
+          setAcik(true);
+        }}
+      />
+      {acik && filtreli.length > 0 && (
+        <ul className="ap-master-il-arama-liste" role="listbox">
+          {filtreli.map((ad) => (
+            <li key={ad}>
+              <button
+                type="button"
+                role="option"
+                className="ap-master-il-arama-oge"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onDegistir(ad);
+                  setAcik(false);
+                }}
+              >
+                {ad}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+interface EpostaOneriAlaniProps {
+  deger: string;
+  onDegistir: (v: string) => void;
+  etiket?: string;
+  devreDisi?: boolean;
+}
+
+export function EpostaOneriAlani({
+  deger,
+  onDegistir,
+  etiket = 'E-posta',
+  devreDisi,
+}: EpostaOneriAlaniProps) {
+  const [acik, setAcik] = useState(false);
+  const kapsayiciRef = useRef<HTMLDivElement>(null);
+  const oneriler = acik ? epostaOnerileriUret(deger) : [];
+
+  useEffect(() => {
+    function disTik(e: MouseEvent) {
+      if (kapsayiciRef.current && !kapsayiciRef.current.contains(e.target as Node)) setAcik(false);
+    }
+    document.addEventListener('mousedown', disTik);
+    return () => document.removeEventListener('mousedown', disTik);
+  }, []);
+
+  return (
+    <div ref={kapsayiciRef} className="ap-master-il-arama">
+      <label className="ap-muted mb-1 block text-xs font-semibold uppercase">{etiket}</label>
+      <input
+        type="email"
+        className={formInputSinifi}
+        value={deger}
+        placeholder="ornek@gmail.com"
+        autoComplete="off"
+        disabled={devreDisi}
+        onFocus={() => setAcik(true)}
+        onChange={(e) => {
+          onDegistir(e.target.value);
+          setAcik(true);
+        }}
+      />
+      {acik && oneriler.length > 0 && (
+        <ul className="ap-master-il-arama-liste" role="listbox">
+          {oneriler.map((o) => (
+            <li key={o}>
+              <button
+                type="button"
+                role="option"
+                className="ap-master-il-arama-oge"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onDegistir(o);
+                  setAcik(false);
+                }}
+              >
+                {o}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+interface IskontoIfadeAlaniProps {
+  deger: string;
+  onDegistir: (v: string) => void;
+  etiket?: string;
+  devreDisi?: boolean;
+}
+
+export function IskontoIfadeAlani({
+  deger,
+  onDegistir,
+  etiket = 'İskonto (%)',
+  devreDisi,
+}: IskontoIfadeAlaniProps) {
+  const [uyari, setUyari] = useState('');
+
+  return (
+    <div>
+      <label className="ap-muted mb-1 block text-xs font-semibold uppercase">{etiket}</label>
+      <input
+        type="text"
+        className={formInputSinifi}
+        placeholder="ör. 5 veya 20+20"
+        value={deger}
+        disabled={devreDisi}
+        onChange={(e) => {
+          onDegistir(e.target.value);
+          const h = iskontoIfadesiHesapla(e.target.value);
+          setUyari(e.target.value.trim() && h == null ? 'Geçersiz ifade (0–100)' : '');
+        }}
+      />
+      {uyari && <p className="ap-muted mt-1 text-xs text-amber-400">{uyari}</p>}
+      {!uyari && deger.includes('+') && iskontoIfadesiHesapla(deger) != null && (
+        <p className="ap-muted mt-1 text-xs">Toplam: %{iskontoIfadesiHesapla(deger)}</p>
       )}
     </div>
   );

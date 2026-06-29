@@ -41,7 +41,7 @@ export async function masterKullaniciYanitOlustur(k: MasterKullaniciKayit) {
 
 export async function masterKullaniciListesiGetir() {
   const kayitlar = await prisma.kullanici.findMany({
-    orderBy: [{ aktif: 'desc' }, { ad: 'asc' }],
+    orderBy: [{ id: 'asc' }],
     include: kullaniciInclude,
   });
   return Promise.all(kayitlar.map(masterKullaniciYanitOlustur));

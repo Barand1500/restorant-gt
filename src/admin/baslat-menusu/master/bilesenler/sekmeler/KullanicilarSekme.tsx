@@ -1,14 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { KullaniciKayitModal } from '@/admin/baslat-menusu/master/bilesenler/KullaniciKayitModal';
+import { iskontoIfadesiHesapla } from '@/araclar/iskontoYardimci';
+import {
+  KullaniciKayitPanel,
+  BOS_KULLANICI_PANEL,
+  kullaniciPaneldenGirdi,
+  kullanicidanPanel,
+  type KullaniciPanelForm,
+} from '@/admin/baslat-menusu/master/bilesenler/KullaniciKayitPanel';
 import {
   KullaniciExcelTablo,
   type AktifKullaniciHucre,
   type KullaniciDuzenlenebilirAlan,
 } from '@/admin/baslat-menusu/master/bilesenler/KullaniciExcelTablo';
-import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
+import { MasterTabloSayfalama } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSayfalama';
+import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
+import {
+  MasterUstFiltreSatiri,
+  useMasterKartDurumFiltre,
+} from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
 import { masterBayileriGetir } from '@/admin/baslat-menusu/master/bayiler/api';
 import { masterFirmalariGetir } from '@/admin/baslat-menusu/master/firmalar/api';
 import {
+  KULLANICI_TABLO_SUTUNLARI,
+  KULLANICI_TABLO_VARSAYILAN_SIRA,
   kullaniciTabloSutunlariKaydet,
   kullaniciTabloSutunlariOku,
 } from '@/admin/baslat-menusu/master/kullanicilar/kullaniciTabloSutunlari';
@@ -57,14 +71,22 @@ export function KullanicilarSekme() {
   const [hata, setHata] = useState('');
   const [arama, setArama] = useState('');
   const [filtre, setFiltre] = useState<'tumu' | 'aktif' | 'pasif'>('tumu');
-  const [modalAcik, setModalAcik] = useState(false);
+  const [sayfa, setSayfa] = useState(0);
+  const [sayfaBoyutu, setSayfaBoyutu] = useState(10);
+  const [eklemeAcik, setEklemeAcik] = useState(false);
   const [duzenlenen, setDuzenlenen] = useState<MasterKullanici | null>(null);
+  const [panelForm, setPanelForm] = useState<KullaniciPanelForm>(BOS_KULLANICI_PANEL);
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [islemId, setIslemId] = useState<number | null>(null);
   const [seciliId, setSeciliId] = useState<number | null>(null);
   const [aktifHucre, setAktifHucre] = useState<AktifKullaniciHucre | null>(null);
   const [hucreTaslak, setHucreTaslak] = useState('');
   const [hucreKaydediliyor, setHucreKaydediliyor] = useState(false);
   const [gorunurSutunlar, setGorunurSutunlar] = useState(kullaniciTabloSutunlariOku);
+
+  const panelAcik = eklemeAcik || duzenlenen != null;
+
+  useMasterKartDurumFiltre(filtre, setFiltre);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -78,7 +100,7 @@ export function KullanicilarSekme() {
         adminJsonFetch<{ roller: { kod: string; baslik: string }[] }>('/roller', { headers: adminHeaders() }),
       ]);
       setKullanicilar(kVeri.kullanicilar);
-      setBayiler(bVeri.bayiler);
+      setBayiler(bVeri.bayiler ?? []);
       setFirmalar(fVeri.firmalar);
       setSubeler(sVeri.subeler);
       setRoller(rolVeri.roller ?? []);
@@ -97,6 +119,10 @@ export function KullanicilarSekme() {
     void yukle();
   }, [yukle]);
 
+  useEffect(() => {
+    setSayfa(0);
+  }, [arama, filtre, sayfaBoyutu]);
+
   const liste = useMemo(() => {
     const q = arama.trim().toLowerCase();
     return kullanicilar.filter((k) => {
@@ -113,6 +139,11 @@ export function KullanicilarSekme() {
       );
     });
   }, [kullanicilar, arama, filtre]);
+
+  const sayfalanmisListe = useMemo(() => {
+    const bas = sayfa * sayfaBoyutu;
+    return liste.slice(bas, bas + sayfaBoyutu);
+  }, [liste, sayfa, sayfaBoyutu]);
 
   const seciliKullanici = useMemo(
     () => (seciliId !== null ? kullanicilar.find((k) => k.id === seciliId) ?? null : null),
@@ -160,8 +191,6 @@ export function KullanicilarSekme() {
           return;
         }
         girdi.email = ham;
-      } else if (alan === 'aktif') {
-        girdi.aktif = ham === 'true';
       } else if (alan === 'bayiId') {
         const bayiId = ham ? Number(ham) : null;
         girdi.bayiId = bayiId;
@@ -181,17 +210,17 @@ export function KullanicilarSekme() {
         if (!ham) {
           girdi.iskonto = null;
         } else {
-          const n = Number(ham);
-          if (Number.isNaN(n) || n < 0 || n > 100) {
-            hataBildir('İskonto 0-100 arasında olmalı');
+          const iskonto = iskontoIfadesiHesapla(ham);
+          if (iskonto == null) {
+            hataBildir('Geçerli bir iskonto girin (ör. 5 veya 20+20)');
             return;
           }
-          girdi.iskonto = n;
+          girdi.iskonto = iskonto;
         }
       } else if (alan === 'rol') {
         girdi.rol = ham;
-      } else {
-        girdi[alan] = ham || undefined;
+      } else if (alan === 'gsm') {
+        girdi.gsm = ham || undefined;
       }
 
       setHucreKaydediliyor(true);
@@ -208,30 +237,61 @@ export function KullanicilarSekme() {
     [aktifHucre, hucreTaslak, hucreKaydediliyor, kullanicilar, hataBildir]
   );
 
-  async function kaydet(girdi: KullaniciFormGirdi) {
+  const panelIptal = useCallback(() => {
+    setEklemeAcik(false);
+    setDuzenlenen(null);
+    setPanelForm(BOS_KULLANICI_PANEL);
+    hucreIptal();
+  }, []);
+
+  const panelKaydet = useCallback(async () => {
+    const sonuc = kullaniciPaneldenGirdi(panelForm, eklemeAcik);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
     setKaydediliyor(true);
     try {
       if (duzenlenen) {
-        await masterKullaniciGuncelle(duzenlenen.id, girdi);
-        basariBildir(`${girdi.ad} güncellendi.`);
+        await masterKullaniciGuncelle(duzenlenen.id, sonuc.girdi);
+        basariBildir(`${sonuc.girdi.ad} güncellendi.`);
       } else {
-        const { kullanici } = await masterKullaniciOlustur(girdi);
-        setSeciliId(kullanici.id);
-        basariBildir(`${girdi.ad} eklendi.`);
+        const yanit = await masterKullaniciOlustur(sonuc.girdi);
+        if (!yanit.kullanici) {
+          throw new Error('Kullanıcı oluşturulamadı');
+        }
+        setSeciliId(yanit.kullanici.id);
+        basariBildir(`${sonuc.girdi.ad} eklendi.`);
       }
-      setModalAcik(false);
-      setDuzenlenen(null);
+      panelIptal();
       await yukle();
     } catch (err) {
       hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
     } finally {
       setKaydediliyor(false);
     }
-  }
+  }, [panelForm, eklemeAcik, duzenlenen, panelIptal, yukle, basariBildir, hataBildir]);
 
   const yeniKullanici = useCallback(() => {
+    const ilkBayi = bayiler.find((b) => b.aktif)?.id ?? null;
+    setEklemeAcik(true);
     setDuzenlenen(null);
-    setModalAcik(true);
+    setPanelForm({
+      ...BOS_KULLANICI_PANEL,
+      rol: roller[0]?.kod ?? 'EDITOR',
+      bayiId: ilkBayi,
+    });
+    setSeciliId(null);
+    hucreIptal();
+  }, [bayiler, roller]);
+
+  const kullaniciDuzenle = useCallback((k: MasterKullanici) => {
+    setEklemeAcik(false);
+    setDuzenlenen(k);
+    setPanelForm(kullanicidanPanel(k));
+    setSeciliId(k.id);
+    hucreIptal();
   }, []);
 
   const kullaniciSil = useCallback(async () => {
@@ -255,49 +315,72 @@ export function KullanicilarSekme() {
     kullaniciTabloSutunlariKaydet(sira);
   }, []);
 
-  const islemde = kaydediliyor || hucreKaydediliyor;
+  async function durumDegistir(k: MasterKullanici, aktif: boolean) {
+    setIslemId(k.id);
+    try {
+      await masterKullaniciGuncelle(k.id, { aktif });
+      await yukle();
+      basariBildir(`${k.ad} ${aktif ? 'aktif' : 'pasif'} yapıldı.`);
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Durum güncellenemedi');
+    } finally {
+      setIslemId(null);
+    }
+  }
+
+  const islemde = kaydediliyor || hucreKaydediliyor || islemId !== null;
 
   useModulAksiyonlari(
-    { ekle: yeniKullanici, sil: kullaniciSil },
     {
-      kaydet: false,
-      ekle: !islemde && !aktifHucre,
-      sil: !!seciliKullanici && !islemde && !aktifHucre,
+      ekle: yeniKullanici,
+      kaydet: panelKaydet,
+      sil: panelAcik ? panelIptal : kullaniciSil,
+    },
+    {
+      kaydet: panelAcik && !kaydediliyor,
+      ekle: !islemde && !panelAcik && !aktifHucre,
+      sil: (panelAcik || !!seciliKullanici) && !islemde && !aktifHucre,
     }
   );
 
-  if (yukleniyor) return <YukleniyorDurumu mesaj="Kullanıcılar yükleniyor…" />;
+  if (yukleniyor && !panelAcik) return <YukleniyorDurumu mesaj="Kullanıcılar yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
+
+  const tabloGoster = panelAcik || liste.length > 0;
 
   return (
     <div className="ap-master-sekme">
-      <div className="ap-master-sekme-filtre">
-        {(
-          [
-            ['tumu', 'Tümü'],
-            ['aktif', 'Aktif'],
-            ['pasif', 'Pasif'],
-          ] as const
-        ).map(([id, etiket]) => (
-          <button
-            key={id}
-            type="button"
-            className={`ap-master-filtre-btn ${filtre === id ? 'ap-master-filtre-btn-aktif' : ''}`}
-            onClick={() => setFiltre(id)}
-          >
-            {etiket}
-          </button>
-        ))}
-      </div>
+      <MasterUstFiltreSatiri
+        arama={arama}
+        onArama={setArama}
+        placeholder="Ad, e-posta, rol, bayi veya şube ara…"
+        sag={
+          <MasterTabloSutunAyarlari
+            baslik="Kullanıcı tablosu sütunları"
+            sutunlar={KULLANICI_TABLO_SUTUNLARI}
+            gorunurSira={gorunurSutunlar}
+            varsayilanSira={KULLANICI_TABLO_VARSAYILAN_SIRA}
+            onDegistir={sutunlarDegistir}
+          />
+        }
+      />
 
-      <div className="ap-master-ust">
-        <MasterArama placeholder="Ad, e-posta, rol, bayi veya şube ara…" value={arama} onChange={setArama} />
-        <p className="ap-muted text-xs">
-          Restoran kullanıcıları için bayi / firma / şube atayın. ⚙️ ile sütunları özelleştirin; çift tıkla düzenleyin.
-        </p>
-      </div>
+      {panelAcik && (
+        <KullaniciKayitPanel
+          acik
+          yeniKayit={eklemeAcik}
+          duzenlenen={duzenlenen}
+          form={panelForm}
+          onFormDegistir={setPanelForm}
+          roller={roller}
+          bayiler={bayiler}
+          firmalar={firmalar}
+          subeler={subeler}
+          kaydediliyor={kaydediliyor}
+        />
+      )}
 
-      {liste.length === 0 ? (
+      {!tabloGoster ? (
         <div className="ap-master-bos-durum">
           <p className="ap-muted text-sm">
             {arama || filtre !== 'tumu'
@@ -306,46 +389,42 @@ export function KullanicilarSekme() {
           </p>
         </div>
       ) : (
-        <KullaniciExcelTablo
-          kullanicilar={liste}
-          roller={roller}
-          bayiler={bayiler}
-          firmalar={firmalar}
-          subeler={subeler}
-          seciliId={seciliId}
-          aktifHucre={aktifHucre}
-          hucreTaslak={hucreTaslak}
-          hucreKaydediliyor={hucreKaydediliyor}
-          gorunurSutunlar={gorunurSutunlar}
-          onSutunlarDegistir={sutunlarDegistir}
-          onSatirSec={setSeciliId}
-          onHucreBaslat={hucreBaslat}
-          onHucreTaslak={setHucreTaslak}
-          onHucreKaydet={hucreKaydet}
-          onHucreIptal={hucreIptal}
-          onModalDuzenle={(k) => {
-            setDuzenlenen(k);
-            setModalAcik(true);
-          }}
-        />
-      )}
+        <>
+          <KullaniciExcelTablo
+            kullanicilar={sayfalanmisListe}
+            roller={roller}
+            bayiler={bayiler}
+            firmalar={firmalar}
+            subeler={subeler}
+            seciliId={seciliId}
+            aktifHucre={aktifHucre}
+            hucreTaslak={hucreTaslak}
+            hucreKaydediliyor={hucreKaydediliyor}
+            islemId={islemId}
+            gorunurSutunlar={gorunurSutunlar}
+            onSatirSec={(id) => {
+              if (panelAcik) panelIptal();
+              setSeciliId(id);
+            }}
+            onHucreBaslat={hucreBaslat}
+            onHucreTaslak={setHucreTaslak}
+            onHucreKaydet={hucreKaydet}
+            onHucreIptal={hucreIptal}
+            onDurumDegistir={(k, aktif) => void durumDegistir(k, aktif)}
+            onPanelDuzenle={kullaniciDuzenle}
+          />
 
-      <KullaniciKayitModal
-        acik={modalAcik}
-        duzenlenen={duzenlenen}
-        roller={roller}
-        bayiler={bayiler}
-        firmalar={firmalar}
-        subeler={subeler}
-        kaydediliyor={kaydediliyor}
-        onKapat={() => {
-          if (!kaydediliyor) {
-            setModalAcik(false);
-            setDuzenlenen(null);
-          }
-        }}
-        onKaydet={kaydet}
-      />
+          {liste.length > 0 && (
+            <MasterTabloSayfalama
+              toplam={liste.length}
+              sayfa={sayfa}
+              sayfaBoyutu={sayfaBoyutu}
+              onSayfaDegistir={setSayfa}
+              onSayfaBoyutuDegistir={setSayfaBoyutu}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

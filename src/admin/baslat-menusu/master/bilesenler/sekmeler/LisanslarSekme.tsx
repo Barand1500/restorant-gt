@@ -1,14 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formSelectSinifi } from '@/formlar/FormAlani';
-import { LisansKayitModal } from '@/admin/baslat-menusu/master/bilesenler/LisansKayitModal';
+import {
+  LisansKayitPanel,
+  BOS_LISANS_PANEL,
+  lisansPaneldenGirdi,
+  lisanstanPanel,
+  type LisansPanelForm,
+} from '@/admin/baslat-menusu/master/bilesenler/LisansKayitPanel';
 import {
   LisansExcelTablo,
   type AktifLisansHucre,
   type LisansDuzenlenebilirAlan,
 } from '@/admin/baslat-menusu/master/bilesenler/LisansExcelTablo';
-import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
+import { MasterTabloSayfalama } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSayfalama';
+import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
+import {
+  MASTER_LISANS_DURUM_FILTRE,
+  MasterUstFiltreSatiri,
+  useMasterKartDurumFiltre,
+} from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
 import { masterFirmalariGetir } from '@/admin/baslat-menusu/master/firmalar/api';
 import {
+  LISANS_TABLO_SUTUNLARI,
+  LISANS_TABLO_VARSAYILAN_SIRA,
   lisansTabloSutunlariKaydet,
   lisansTabloSutunlariOku,
 } from '@/admin/baslat-menusu/master/lisanslar/lisansTabloSutunlari';
@@ -35,8 +49,6 @@ function hucreMevcutDeger(lisans: MasterLisans, alan: LisansDuzenlenebilirAlan):
       return lisans.baslangicTarihi.slice(0, 10);
     case 'bitisTarihi':
       return lisans.bitisTarihi ? lisans.bitisTarihi.slice(0, 10) : '';
-    case 'aktif':
-      return lisans.aktif ? 'true' : 'false';
     default:
       return '';
   }
@@ -52,14 +64,22 @@ export function LisanslarSekme() {
   const [arama, setArama] = useState('');
   const [firmaFiltre, setFirmaFiltre] = useState<number | ''>('');
   const [filtre, setFiltre] = useState<Filtre>('tumu');
-  const [modalAcik, setModalAcik] = useState(false);
+  const [sayfa, setSayfa] = useState(0);
+  const [sayfaBoyutu, setSayfaBoyutu] = useState(10);
+  const [eklemeAcik, setEklemeAcik] = useState(false);
   const [duzenlenen, setDuzenlenen] = useState<MasterLisans | null>(null);
+  const [panelForm, setPanelForm] = useState<LisansPanelForm>(BOS_LISANS_PANEL);
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [islemId, setIslemId] = useState<number | null>(null);
   const [seciliId, setSeciliId] = useState<number | null>(null);
   const [aktifHucre, setAktifHucre] = useState<AktifLisansHucre | null>(null);
   const [hucreTaslak, setHucreTaslak] = useState('');
   const [hucreKaydediliyor, setHucreKaydediliyor] = useState(false);
   const [gorunurSutunlar, setGorunurSutunlar] = useState(lisansTabloSutunlariOku);
+
+  const panelAcik = eklemeAcik || duzenlenen != null;
+
+  useMasterKartDurumFiltre(filtre, setFiltre, MASTER_LISANS_DURUM_FILTRE);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -88,6 +108,10 @@ export function LisanslarSekme() {
     void yukle();
   }, [yukle]);
 
+  useEffect(() => {
+    setSayfa(0);
+  }, [arama, filtre, firmaFiltre, sayfaBoyutu]);
+
   const liste = useMemo(() => {
     const q = arama.trim().toLowerCase();
     return lisanslar.filter((l) => {
@@ -102,6 +126,11 @@ export function LisanslarSekme() {
     });
   }, [lisanslar, arama, filtre, firmaFiltre]);
 
+  const sayfalanmisListe = useMemo(() => {
+    const bas = sayfa * sayfaBoyutu;
+    return liste.slice(bas, bas + sayfaBoyutu);
+  }, [liste, sayfa, sayfaBoyutu]);
+
   const seciliLisans = useMemo(
     () => (seciliId !== null ? lisanslar.find((l) => l.id === seciliId) ?? null : null),
     [lisanslar, seciliId]
@@ -115,10 +144,14 @@ export function LisanslarSekme() {
     setHucreTaslak('');
   }
 
-  const hucreBaslat = useCallback((lisans: MasterLisans, alan: LisansDuzenlenebilirAlan) => {
-    setAktifHucre({ lisansId: lisans.id, alan });
-    setHucreTaslak(hucreMevcutDeger(lisans, alan));
-  }, []);
+  const hucreBaslat = useCallback(
+    (lisans: MasterLisans, alan: LisansDuzenlenebilirAlan) => {
+      if (panelAcik) return;
+      setAktifHucre({ lisansId: lisans.id, alan });
+      setHucreTaslak(hucreMevcutDeger(lisans, alan));
+    },
+    [panelAcik]
+  );
 
   const hucreKaydet = useCallback(
     async (anlikDeger?: string) => {
@@ -154,8 +187,6 @@ export function LisanslarSekme() {
         girdi.baslangicTarihi = ham;
       } else if (alan === 'bitisTarihi') {
         girdi.bitisTarihi = ham || null;
-      } else if (alan === 'aktif') {
-        girdi.aktif = ham === 'true';
       }
 
       setHucreKaydediliyor(true);
@@ -172,30 +203,59 @@ export function LisanslarSekme() {
     [aktifHucre, hucreTaslak, hucreKaydediliyor, lisanslar, hataBildir]
   );
 
-  async function kaydet(girdi: LisansFormGirdi) {
+  const panelIptal = useCallback(() => {
+    setEklemeAcik(false);
+    setDuzenlenen(null);
+    setPanelForm(BOS_LISANS_PANEL);
+    hucreIptal();
+  }, []);
+
+  const panelKaydet = useCallback(async () => {
+    const sonuc = lisansPaneldenGirdi(panelForm);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
     setKaydediliyor(true);
     try {
       if (duzenlenen) {
-        await masterLisansGuncelle(duzenlenen.id, girdi);
+        await masterLisansGuncelle(duzenlenen.id, sonuc.girdi);
         basariBildir('Lisans güncellendi.');
       } else {
-        const { lisans } = await masterLisansOlustur(girdi);
+        const { lisans } = await masterLisansOlustur(sonuc.girdi);
         setSeciliId(lisans.id);
         basariBildir('Lisans oluşturuldu.');
       }
-      setModalAcik(false);
-      setDuzenlenen(null);
+      panelIptal();
       await yukle();
     } catch (err) {
       hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
     } finally {
       setKaydediliyor(false);
     }
-  }
+  }, [panelForm, duzenlenen, panelIptal, yukle, basariBildir, hataBildir]);
 
   const yeniLisans = useCallback(() => {
+    setEklemeAcik(true);
     setDuzenlenen(null);
-    setModalAcik(true);
+    setPanelForm({
+      ...BOS_LISANS_PANEL,
+      firmaId: aktifFirmalar[0]?.id ?? 0,
+      paketId: aktifPaketler[0]?.id ?? 0,
+      baslangicTarihi: new Date().toISOString().slice(0, 10),
+    });
+    setSeciliId(null);
+    hucreIptal();
+    setSayfa(0);
+  }, [aktifFirmalar, aktifPaketler]);
+
+  const lisansDuzenle = useCallback((l: MasterLisans) => {
+    setEklemeAcik(false);
+    setDuzenlenen(l);
+    setPanelForm(lisanstanPanel(l));
+    setSeciliId(l.id);
+    hucreIptal();
   }, []);
 
   const lisansSil = useCallback(async () => {
@@ -221,63 +281,86 @@ export function LisanslarSekme() {
     lisansTabloSutunlariKaydet(sira);
   }, []);
 
-  const islemde = kaydediliyor || hucreKaydediliyor;
+  async function durumDegistir(l: MasterLisans, aktif: boolean) {
+    setIslemId(l.id);
+    try {
+      await masterLisansGuncelle(l.id, { aktif });
+      await yukle();
+      const firmaAd = l.firmaTabela ?? l.firmaUnvan;
+      basariBildir(`${firmaAd} lisansı ${aktif ? 'aktif' : 'pasif'} yapıldı.`);
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Durum güncellenemedi');
+    } finally {
+      setIslemId(null);
+    }
+  }
+
+  const islemde = kaydediliyor || hucreKaydediliyor || islemId !== null;
 
   useModulAksiyonlari(
-    { ekle: yeniLisans, sil: lisansSil },
     {
-      kaydet: false,
-      ekle: !islemde && aktifFirmalar.length > 0 && aktifPaketler.length > 0 && !aktifHucre,
-      sil: !!seciliLisans && !islemde && !aktifHucre,
+      ekle: yeniLisans,
+      kaydet: panelKaydet,
+      sil: panelAcik ? panelIptal : lisansSil,
+    },
+    {
+      kaydet: panelAcik && !kaydediliyor,
+      ekle: !islemde && !panelAcik && !aktifHucre && aktifFirmalar.length > 0 && aktifPaketler.length > 0,
+      sil: (panelAcik || !!seciliLisans) && !islemde && !aktifHucre,
     }
   );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Lisanslar yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
 
+  const tabloGoster = panelAcik || liste.length > 0;
+
   return (
     <div className="ap-master-sekme">
-      <div className="ap-master-sekme-filtre">
-        {(
-          [
-            ['tumu', 'Tümü'],
-            ['aktif', 'Aktif'],
-            ['yakinda', 'Süresi yakın'],
-            ['pasif', 'Pasif'],
-          ] as const
-        ).map(([id, etiket]) => (
-          <button
-            key={id}
-            type="button"
-            className={`ap-master-filtre-btn ${filtre === id ? 'ap-master-filtre-btn-aktif' : ''}`}
-            onClick={() => setFiltre(id)}
-          >
-            {etiket}
-          </button>
-        ))}
-      </div>
+      <MasterUstFiltreSatiri
+        arama={arama}
+        onArama={setArama}
+        placeholder="Firma veya paket ara…"
+        sag={
+          <>
+            <select
+              className={`${formSelectSinifi} ap-master-ikincil-filtre`}
+              value={firmaFiltre}
+              onChange={(e) => setFirmaFiltre(e.target.value ? Number(e.target.value) : '')}
+              aria-label="Firma filtresi"
+            >
+              <option value="">Tüm firmalar</option>
+              {firmalar.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.tabelaAdi ?? f.unvan}
+                </option>
+              ))}
+            </select>
+            <MasterTabloSutunAyarlari
+              baslik="Lisans tablosu sütunları"
+              sutunlar={LISANS_TABLO_SUTUNLARI}
+              gorunurSira={gorunurSutunlar}
+              varsayilanSira={LISANS_TABLO_VARSAYILAN_SIRA}
+              onDegistir={sutunlarDegistir}
+            />
+          </>
+        }
+      />
 
-      <div className="ap-master-ust ap-master-ust-filtre">
-        <MasterArama placeholder="Firma veya paket ara…" value={arama} onChange={setArama} />
-        <select
-          className={formSelectSinifi}
-          value={firmaFiltre}
-          onChange={(e) => setFirmaFiltre(e.target.value ? Number(e.target.value) : '')}
-          aria-label="Firma filtresi"
-        >
-          <option value="">Tüm firmalar</option>
-          {firmalar.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.tabelaAdi ?? f.unvan}
-            </option>
-          ))}
-        </select>
-        <p className="ap-muted text-xs sm:col-span-2">
-          Satır seçmek için tıklayın; hücreyi çift tıklayarak düzenleyin. Sütunları ⚙️ ile özelleştirin.
-        </p>
-      </div>
+      {panelAcik && (
+        <LisansKayitPanel
+          acik
+          yeniKayit={eklemeAcik}
+          duzenlenen={duzenlenen}
+          form={panelForm}
+          onFormDegistir={setPanelForm}
+          firmalar={firmalar}
+          paketler={paketler}
+          kaydediliyor={kaydediliyor}
+        />
+      )}
 
-      {liste.length === 0 ? (
+      {!tabloGoster ? (
         <div className="ap-master-bos-durum">
           <p className="ap-muted text-sm">
             {arama || filtre !== 'tumu' || firmaFiltre !== ''
@@ -290,41 +373,39 @@ export function LisanslarSekme() {
           </p>
         </div>
       ) : (
-        <LisansExcelTablo
-          lisanslar={liste}
-          paketler={paketler}
-          seciliId={seciliId}
-          aktifHucre={aktifHucre}
-          hucreTaslak={hucreTaslak}
-          hucreKaydediliyor={hucreKaydediliyor}
-          gorunurSutunlar={gorunurSutunlar}
-          onSutunlarDegistir={sutunlarDegistir}
-          onSatirSec={setSeciliId}
-          onHucreBaslat={hucreBaslat}
-          onHucreTaslak={setHucreTaslak}
-          onHucreKaydet={hucreKaydet}
-          onHucreIptal={hucreIptal}
-          onModalDuzenle={(l) => {
-            setDuzenlenen(l);
-            setModalAcik(true);
-          }}
-        />
-      )}
+        <>
+          <LisansExcelTablo
+            lisanslar={sayfalanmisListe}
+            paketler={paketler}
+            seciliId={seciliId}
+            aktifHucre={aktifHucre}
+            hucreTaslak={hucreTaslak}
+            hucreKaydediliyor={hucreKaydediliyor}
+            islemId={islemId}
+            gorunurSutunlar={gorunurSutunlar}
+            onSatirSec={(id) => {
+              if (panelAcik) panelIptal();
+              setSeciliId(id);
+            }}
+            onHucreBaslat={hucreBaslat}
+            onHucreTaslak={setHucreTaslak}
+            onHucreKaydet={hucreKaydet}
+            onHucreIptal={hucreIptal}
+            onDurumDegistir={(l, aktif) => void durumDegistir(l, aktif)}
+            onPanelDuzenle={lisansDuzenle}
+          />
 
-      <LisansKayitModal
-        acik={modalAcik}
-        duzenlenen={duzenlenen}
-        firmalar={firmalar}
-        paketler={paketler}
-        kaydediliyor={kaydediliyor}
-        onKapat={() => {
-          if (!kaydediliyor) {
-            setModalAcik(false);
-            setDuzenlenen(null);
-          }
-        }}
-        onKaydet={kaydet}
-      />
+          {liste.length > 0 && (
+            <MasterTabloSayfalama
+              toplam={liste.length}
+              sayfa={sayfa}
+              sayfaBoyutu={sayfaBoyutu}
+              onSayfaDegistir={setSayfa}
+              onSayfaBoyutuDegistir={setSayfaBoyutu}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

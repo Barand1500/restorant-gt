@@ -42,7 +42,7 @@ export const lisansInclude = {
 
 export async function lisansListesiGetir() {
   const kayitlar = await prisma.lisans.findMany({
-    orderBy: [{ durum: 'desc' }, { bitisTarihi: 'asc' }],
+    orderBy: [{ id: 'asc' }],
     include: lisansInclude,
   });
   return kayitlar.map(lisansYanitOlustur);

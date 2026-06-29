@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
-import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
-import { ModulEkleModal } from '@/admin/baslat-menusu/master/bilesenler/ModulEkleModal';
+import {
+  MasterUstFiltreSatiri,
+  useMasterKartDurumFiltre,
+} from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
+import {
+  BOS_MODUL_TASLAK,
+  ModulYeniKart,
+  modulTaslakDogrula,
+  type ModulYeniTaslak,
+} from '@/admin/baslat-menusu/master/bilesenler/ModulYeniKart';
 import {
   masterModulGuncelle,
   masterModulOlustur,
@@ -21,10 +29,14 @@ export function ModullerSekme() {
   const [hata, setHata] = useState('');
   const [arama, setArama] = useState('');
   const [filtre, setFiltre] = useState<'tumu' | 'aktif' | 'pasif'>('tumu');
-  const [modalAcik, setModalAcik] = useState(false);
+  const [eklemeAcik, setEklemeAcik] = useState(false);
+  const [yeniTaslak, setYeniTaslak] = useState<ModulYeniTaslak>(BOS_MODUL_TASLAK);
+  const [prefixElle, setPrefixElle] = useState(false);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [islemId, setIslemId] = useState<number | null>(null);
   const [seciliId, setSeciliId] = useState<number | null>(null);
+
+  useMasterKartDurumFiltre(filtre, setFiltre);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -47,6 +59,8 @@ export function ModullerSekme() {
     void yukle();
   }, [yukle]);
 
+  const mevcutPrefixler = useMemo(() => moduller.map((m) => m.prefix), [moduller]);
+
   const liste = useMemo(() => {
     const q = arama.trim().toLowerCase();
     return moduller.filter((m) => {
@@ -62,25 +76,47 @@ export function ModullerSekme() {
     [moduller, seciliId]
   );
 
+  const ekleAc = useCallback(() => {
+    setEklemeAcik(true);
+    setYeniTaslak(BOS_MODUL_TASLAK);
+    setPrefixElle(false);
+    setSeciliId(null);
+  }, []);
+
+  const iptalEkle = useCallback(() => {
+    setEklemeAcik(false);
+    setYeniTaslak(BOS_MODUL_TASLAK);
+    setPrefixElle(false);
+  }, []);
+
   async function durumDegistir(modul: MasterModul, aktif: boolean) {
     setIslemId(modul.id);
     try {
       await masterModulGuncelle(modul.id, { aktif });
-      await yukle();
+      setModuller((onceki) => onceki.map((m) => (m.id === modul.id ? { ...m, aktif } : m)));
       modulKatalogYenile();
       basariBildir(`${modul.ad} ${aktif ? 'aktif' : 'pasif'} yapıldı.`);
     } catch (err) {
       hataBildir(err instanceof Error ? err.message : 'Durum güncellenemedi');
+      await yukle();
     } finally {
       setIslemId(null);
     }
   }
 
-  async function modulEkle(girdi: { modulAdi: string; prefix: string }) {
+  const yeniKaydet = useCallback(async () => {
+    const sonuc = modulTaslakDogrula(yeniTaslak, mevcutPrefixler);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
     setKaydediliyor(true);
     try {
-      const { modul } = await masterModulOlustur(girdi);
-      setModalAcik(false);
+      const { modul } = await masterModulOlustur(sonuc.girdi);
+      setEklemeAcik(false);
+      setYeniTaslak(BOS_MODUL_TASLAK);
+      setPrefixElle(false);
       await yukle();
       modulKatalogYenile();
       setSeciliId(modul.id);
@@ -90,9 +126,7 @@ export function ModullerSekme() {
     } finally {
       setKaydediliyor(false);
     }
-  }
-
-  const ekleAc = useCallback(() => setModalAcik(true), []);
+  }, [yeniTaslak, mevcutPrefixler, yukle, basariBildir, hataBildir]);
 
   const modulSil = useCallback(async () => {
     if (!seciliModul) return;
@@ -116,53 +150,51 @@ export function ModullerSekme() {
   const islemde = kaydediliyor || islemId !== null;
 
   useModulAksiyonlari(
-    { ekle: ekleAc, sil: modulSil },
     {
-      kaydet: false,
-      ekle: !islemde,
-      sil: !!seciliModul && !islemde,
+      ekle: ekleAc,
+      kaydet: yeniKaydet,
+      sil: eklemeAcik ? iptalEkle : modulSil,
+    },
+    {
+      kaydet: eklemeAcik && !kaydediliyor,
+      ekle: !islemde && !eklemeAcik,
+      sil: (eklemeAcik || !!seciliModul) && !islemde,
     }
   );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Modüller yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
 
+  const kartGoster = eklemeAcik || liste.length > 0;
+
   return (
     <div className="ap-master-sekme">
-      <div className="ap-master-sekme-filtre">
-        {(
-          [
-            ['tumu', 'Tümü'],
-            ['aktif', 'Aktif'],
-            ['pasif', 'Pasif'],
-          ] as const
-        ).map(([id, etiket]) => (
-          <button
-            key={id}
-            type="button"
-            className={`ap-master-filtre-btn ${filtre === id ? 'ap-master-filtre-btn-aktif' : ''}`}
-            onClick={() => setFiltre(id)}
-          >
-            {etiket}
-          </button>
-        ))}
-      </div>
+      <MasterUstFiltreSatiri
+        arama={arama}
+        onArama={setArama}
+        placeholder="Modül adı veya prefix ara…"
+        sag={null}
+      />
 
-      <div className="ap-master-ust">
-        <MasterArama placeholder="Modül adı veya prefix ara…" value={arama} onChange={setArama} />
-        <p className="ap-muted text-xs">
-          Modül seçmek için karta tıklayın. Ekleme ve silme alt aksiyon çubuğundan yapılır.
-        </p>
-      </div>
-
-      {liste.length === 0 ? (
+      {!kartGoster ? (
         <div className="ap-master-bos-durum">
           <p className="ap-muted text-sm">
-            {arama || filtre !== 'tumu' ? 'Filtreye uygun modül bulunamadı.' : 'Henüz modül kaydı yok.'}
+            {arama || filtre !== 'tumu' ? 'Filtreye uygun modül bulunamadı.' : 'Henüz modül kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
       ) : (
         <div className="ap-master-kart-grid">
+          {eklemeAcik && (
+            <ModulYeniKart
+              taslak={yeniTaslak}
+              mevcutPrefixler={mevcutPrefixler}
+              prefixElle={prefixElle}
+              kaydediliyor={kaydediliyor}
+              onTaslakDegistir={setYeniTaslak}
+              onPrefixElleDegistir={setPrefixElle}
+            />
+          )}
+
           {liste.map((m) => (
             <article
               key={m.id}
@@ -171,10 +203,14 @@ export function ModullerSekme() {
               className={`ap-master-kart ap-master-modul-kart ap-master-kart-tiklanabilir ${
                 seciliId === m.id ? 'ap-master-kart-secili' : ''
               } ${!m.aktif ? 'ap-master-modul-kart-pasif' : ''}`}
-              onClick={() => setSeciliId(m.id)}
+              onClick={() => {
+                if (eklemeAcik) iptalEkle();
+                setSeciliId(m.id);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
+                  if (eklemeAcik) iptalEkle();
                   setSeciliId(m.id);
                 }
               }}
@@ -187,32 +223,21 @@ export function ModullerSekme() {
               </div>
               <h3 className="ap-heading text-sm font-semibold">{m.ad}</h3>
               <p className="ap-muted mt-1 font-mono text-xs">{m.prefix}</p>
-              <p className="ap-muted mt-2 text-xs">{m.rolSayisi} rol tanımı</p>
 
-              <div className="ap-master-modul-toggle" onClick={(e) => e.stopPropagation()}>
+              <div className="ap-master-modul-toggle ap-master-modul-toggle-sade" onClick={(e) => e.stopPropagation()}>
                 <DurumAnahtari
-                  etiket="Modül durumu"
-                  aciklama={m.aktif ? 'Başlat menüsünde görünür' : 'Başlat menüsünden gizlenir'}
+                  etiket={m.aktif ? 'Aktif modül' : 'Pasif modül'}
                   acik={m.aktif}
                   devreDisi={islemId === m.id}
                   onChange={(v) => void durumDegistir(m, v)}
                   renk={m.aktif ? 'yesil' : 'turuncu'}
-                  ikon="🧩"
-                  kompakt
+                  sadeceToggle
                 />
               </div>
             </article>
           ))}
         </div>
       )}
-
-      <ModulEkleModal
-        acik={modalAcik}
-        mevcutPrefixler={moduller.map((m) => m.prefix)}
-        kaydediliyor={kaydediliyor}
-        onKapat={() => !kaydediliyor && setModalAcik(false)}
-        onEkle={modulEkle}
-      />
     </div>
   );
 }

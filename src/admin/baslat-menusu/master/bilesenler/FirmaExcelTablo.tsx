@@ -1,10 +1,9 @@
 import type { MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
 import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
-import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import { MasterDuzenlenebilirHucre } from '@/admin/baslat-menusu/master/bilesenler/MasterDuzenlenebilirHucre';
+import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
+import { iskontoGoster } from '@/araclar/iskontoYardimci';
 import {
-  FIRMA_TABLO_SUTUNLARI,
-  FIRMA_TABLO_VARSAYILAN_SIRA,
   firmaTabloSutunTanimiBul,
 } from '@/admin/baslat-menusu/master/firmalar/firmaTabloSutunlari';
 import {
@@ -26,7 +25,6 @@ export type FirmaDuzenlenebilirAlan = keyof Pick<
   | 'vergiDairesi'
   | 'vergiNo'
   | 'iskonto'
-  | 'aktif'
 >;
 
 export interface AktifHucre {
@@ -41,14 +39,15 @@ interface FirmaExcelTabloProps {
   aktifHucre: AktifHucre | null;
   hucreTaslak: string;
   hucreKaydediliyor: boolean;
+  islemId: number | null;
   gorunurSutunlar: string[];
-  onSutunlarDegistir: (sira: string[]) => void;
   onSatirSec: (id: number) => void;
   onHucreBaslat: (firma: MasterFirma, alan: FirmaDuzenlenebilirAlan) => void;
   onHucreTaslak: (v: string) => void;
   onHucreKaydet: (deger?: string) => void;
   onHucreIptal: () => void;
-  onModalDuzenle: (firma: MasterFirma) => void;
+  onDurumDegistir: (firma: MasterFirma, aktif: boolean) => void;
+  onPanelDuzenle: (firma: MasterFirma) => void;
 }
 
 export function FirmaExcelTablo({
@@ -58,14 +57,15 @@ export function FirmaExcelTablo({
   aktifHucre,
   hucreTaslak,
   hucreKaydediliyor,
+  islemId,
   gorunurSutunlar,
-  onSutunlarDegistir,
   onSatirSec,
   onHucreBaslat,
   onHucreTaslak,
   onHucreKaydet,
   onHucreIptal,
-  onModalDuzenle,
+  onDurumDegistir,
+  onPanelDuzenle,
 }: FirmaExcelTabloProps) {
   const aktifBayiler = bayiler.filter((b) => b.aktif);
   const bayiSecenekleri = aktifBayiler.map((b) => ({ value: b.id, label: b.unvan }));
@@ -133,15 +133,14 @@ export function FirmaExcelTablo({
       case 'vergiDairesi':
         return hucre(f, 'vergiDairesi', f.vergiDairesi ?? '');
       case 'vergiNo':
-        return hucre(f, 'vergiNo', f.vergiNo ?? '', { placeholder: 'VKN / TCKN' });
+        return hucre(f, 'vergiNo', f.vergiNo ?? '', { placeholder: 'En fazla 10 hane' });
       case 'iskonto':
         return hucre(f, 'iskonto', f.iskonto != null ? String(f.iskonto) : '', {
-          tip: 'number',
           gosterim:
             f.iskonto != null ? (
-              <span className="font-mono text-xs">%{f.iskonto}</span>
+              <span className="font-mono text-xs">{iskontoGoster(f.iskonto)}</span>
             ) : undefined,
-          placeholder: '0-100',
+          placeholder: 'ör. 5 veya 20+20',
         });
       case 'subeSayisi':
         return (
@@ -166,18 +165,24 @@ export function FirmaExcelTablo({
           </td>
         );
       case 'aktif':
-        return hucre(f, 'aktif', f.aktif ? 'true' : 'false', {
-          tip: 'select',
-          secenekler: [
-            { value: 'true', label: 'Aktif' },
-            { value: 'false', label: 'Pasif' },
-          ],
-          gosterim: (
-            <span className={`ap-master-durum ${f.aktif ? 'ap-master-durum-aktif' : ''}`}>
-              {f.aktif ? 'Aktif' : 'Pasif'}
-            </span>
-          ),
-        });
+        return (
+          <td
+            key={sutunId}
+            className="ap-master-excel-hucre ap-master-tablo-toggle-hucre"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ap-master-toggle-mini">
+              <DurumAnahtari
+                etiket={f.aktif ? 'Aktif firma' : 'Pasif firma'}
+                acik={f.aktif}
+                devreDisi={islemId === f.id}
+                onChange={(v) => onDurumDegistir(f, v)}
+                renk={f.aktif ? 'yesil' : 'turuncu'}
+                sadeceToggle
+              />
+            </div>
+          </td>
+        );
       default:
         return null;
     }
@@ -185,18 +190,6 @@ export function FirmaExcelTablo({
 
   return (
     <div className="ap-master-excel-wrap">
-      <div className="ap-master-excel-ust">
-        <p className="ap-muted text-xs">
-          {gorunurSutunlar.length} sütun görünüyor — çift tıklayarak hücre düzenleyin
-        </p>
-        <MasterTabloSutunAyarlari
-          baslik="Firma tablosu sütunları"
-          sutunlar={FIRMA_TABLO_SUTUNLARI}
-          gorunurSira={gorunurSutunlar}
-          varsayilanSira={FIRMA_TABLO_VARSAYILAN_SIRA}
-          onDegistir={onSutunlarDegistir}
-        />
-      </div>
       <div className="ap-master-excel-scroll">
         <table className="ap-master-excel-tablo">
           <thead>
@@ -221,7 +214,7 @@ export function FirmaExcelTablo({
                   <button
                     type="button"
                     className="ap-master-tablo-ikon-btn"
-                    onClick={() => onModalDuzenle(f)}
+                    onClick={() => onPanelDuzenle(f)}
                     aria-label="Firma düzenle"
                     title="Tüm alanları düzenle"
                   >

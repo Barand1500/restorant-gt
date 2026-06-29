@@ -36,7 +36,7 @@ export const subeInclude = {
 
 export async function subeListesiGetir() {
   const kayitlar = await prisma.sube.findMany({
-    orderBy: [{ durum: 'desc' }, { subeAdi: 'asc' }],
+    orderBy: [{ id: 'asc' }],
     include: subeInclude,
   });
   return kayitlar.map(subeYanitOlustur);

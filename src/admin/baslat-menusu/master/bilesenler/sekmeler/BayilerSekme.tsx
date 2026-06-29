@@ -1,8 +1,28 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
+import { iskontoGoster, iskontoIfadesiHesapla } from '@/araclar/iskontoYardimci';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
-import { BayiKayitModal } from '@/admin/baslat-menusu/master/bilesenler/BayiKayitModal';
-import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
+import {
+  BayiKayitPanel,
+  BOS_BAYI_PANEL,
+  bayiPaneldenGirdi,
+  bayidenPanel,
+  type BayiPanelForm,
+} from '@/admin/baslat-menusu/master/bilesenler/BayiKayitPanel';
+import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
+import { MasterTabloSayfalama } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSayfalama';
+import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
+import {
+  MasterUstFiltreSatiri,
+  useMasterKartDurumFiltre,
+} from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
+import {
+  BAYI_TABLO_SUTUNLARI,
+  BAYI_TABLO_VARSAYILAN_SIRA,
+  bayiTabloSutunlariKaydet,
+  bayiTabloSutunlariOku,
+  bayiTabloSutunTanimiBul,
+} from '@/admin/baslat-menusu/master/bayiler/bayiTabloSutunlari';
 import {
   bayiTarihGoster,
   masterBayiGuncelle,
@@ -18,11 +38,6 @@ import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 
 type BayiInlineAlan = 'unvan' | 'eposta' | 'konum' | 'ustBayi' | 'vergiDairesi' | 'vergiNo' | 'iskonto';
 
-function iskontoGoster(deger: number | null): string {
-  if (deger == null) return '—';
-  return `%${deger}`;
-}
-
 function konumGoster(il: string | null, ilce: string | null): string {
   const metin = [il, ilce].filter(Boolean).join(' / ');
   return metin || '—';
@@ -36,23 +51,7 @@ function konumAyristir(metin: string): { il?: string; ilce?: string } {
   return { il: parcalar[0] || undefined, ilce: parcalar.slice(1).join(' / ') || undefined };
 }
 
-function DuzenleIkonu() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M13.5 6.5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 interface TabloHucreProps {
-  bayiId: number;
   alan: BayiInlineAlan;
   gosterim: string;
   duzenlemeAktif: boolean;
@@ -62,6 +61,7 @@ interface TabloHucreProps {
   onBitir: () => void;
   className?: string;
   inputTipi?: 'text' | 'number';
+  maxLength?: number;
 }
 
 function TabloHucre({
@@ -74,13 +74,10 @@ function TabloHucre({
   onBitir,
   className = '',
   inputTipi = 'text',
+  maxLength,
 }: TabloHucreProps) {
   function tusBas(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      onBitir();
-    }
-    if (e.key === 'Escape') {
+    if (e.key === 'Enter' || e.key === 'Escape') {
       e.preventDefault();
       onBitir();
     }
@@ -92,6 +89,7 @@ function TabloHucre({
         type={inputTipi}
         className={`${formInputSinifi} ap-master-excel-input`}
         value={inputDeger}
+        maxLength={maxLength}
         onChange={(e) => onDegistir(e.target.value)}
         onBlur={onBitir}
         onKeyDown={tusBas}
@@ -184,13 +182,21 @@ export function BayilerSekme() {
   const [hata, setHata] = useState('');
   const [arama, setArama] = useState('');
   const [filtre, setFiltre] = useState<'tumu' | 'aktif' | 'pasif'>('tumu');
+  const [gorunurSutunlar, setGorunurSutunlar] = useState(() => bayiTabloSutunlariOku());
+  const [sayfa, setSayfa] = useState(0);
+  const [sayfaBoyutu, setSayfaBoyutu] = useState(10);
   const [seciliId, setSeciliId] = useState<number | null>(null);
-  const [modalAcik, setModalAcik] = useState(false);
+  const [eklemeAcik, setEklemeAcik] = useState(false);
   const [duzenlenen, setDuzenlenen] = useState<MasterBayi | null>(null);
+  const [panelForm, setPanelForm] = useState<BayiPanelForm>(BOS_BAYI_PANEL);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [islemId, setIslemId] = useState<number | null>(null);
   const [taslakMap, setTaslakMap] = useState<Record<number, Partial<BayiFormGirdi>>>({});
   const [duzenlemeHucre, setDuzenlemeHucre] = useState<{ bayiId: number; alan: BayiInlineAlan } | null>(null);
+
+  const panelAcik = eklemeAcik || duzenlenen != null;
+
+  useMasterKartDurumFiltre(filtre, setFiltre);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -209,6 +215,10 @@ export function BayilerSekme() {
     void yukle();
   }, [yukle]);
 
+  useEffect(() => {
+    setSayfa(0);
+  }, [arama, filtre, sayfaBoyutu]);
+
   const liste = useMemo(() => {
     const q = arama.trim().toLowerCase();
     return bayiler.filter((b) => {
@@ -225,8 +235,22 @@ export function BayilerSekme() {
     });
   }, [bayiler, arama, filtre]);
 
+  const sayfalanmisListe = useMemo(() => {
+    const bas = sayfa * sayfaBoyutu;
+    return liste.slice(bas, bas + sayfaBoyutu);
+  }, [liste, sayfa, sayfaBoyutu]);
+
   const seciliTaslak = seciliId != null ? taslakMap[seciliId] : undefined;
   const seciliDegisiklikVar = seciliTaslak != null && Object.keys(seciliTaslak).length > 0;
+
+  function sutunlariDegistir(sira: string[]) {
+    setGorunurSutunlar(sira);
+    bayiTabloSutunlariKaydet(sira);
+  }
+
+  function sutunBaslik(id: string) {
+    return bayiTabloSutunTanimiBul(id)?.etiket ?? id;
+  }
 
   function bayiBirlestir(bayi: MasterBayi): MasterBayi & { konumMetin: string; ustUnvanGoster: string } {
     const taslak = taslakMap[bayi.id];
@@ -281,30 +305,43 @@ export function BayilerSekme() {
       }
 
       if (alan === 'iskonto') {
-        const iskonto = ham.trim() === '' ? null : Number(ham);
-        return { ...onceki, [bayiId]: { ...mevcut, iskonto: Number.isNaN(iskonto) ? null : iskonto } };
+        const iskonto = ham.trim() === '' ? null : iskontoIfadesiHesapla(ham);
+        return { ...onceki, [bayiId]: { ...mevcut, iskonto } };
       }
 
-      const alanMap: Record<Exclude<BayiInlineAlan, 'konum' | 'iskonto' | 'ustBayi'>, keyof BayiFormGirdi> = {
+      if (alan === 'vergiNo') {
+        const vergiNo = ham.replace(/\D/g, '').slice(0, 10);
+        return { ...onceki, [bayiId]: { ...mevcut, vergiNo: vergiNo || undefined } };
+      }
+
+      const alanMap: Record<Exclude<BayiInlineAlan, 'konum' | 'iskonto' | 'ustBayi' | 'vergiNo'>, keyof BayiFormGirdi> = {
         unvan: 'unvan',
         eposta: 'eposta',
         vergiDairesi: 'vergiDairesi',
-        vergiNo: 'vergiNo',
       };
       const anahtar = alanMap[alan as keyof typeof alanMap];
       return { ...onceki, [bayiId]: { ...mevcut, [anahtar]: ham.trim() || undefined } };
     });
   }, [bayiler]);
 
-  const yeniBayi = useCallback(() => {
+  const panelIptal = useCallback(() => {
+    setEklemeAcik(false);
     setDuzenlenen(null);
-    setModalAcik(true);
+    setPanelForm(BOS_BAYI_PANEL);
+  }, []);
+
+  const yeniBayi = useCallback(() => {
+    setEklemeAcik(true);
+    setDuzenlenen(null);
+    setPanelForm(BOS_BAYI_PANEL);
+    setSeciliId(null);
   }, []);
 
   const bayiDuzenle = useCallback((bayi: MasterBayi) => {
-    setSeciliId(bayi.id);
+    setEklemeAcik(false);
     setDuzenlenen(bayi);
-    setModalAcik(true);
+    setPanelForm(bayidenPanel(bayi));
+    setSeciliId(bayi.id);
   }, []);
 
   const inlineKaydet = useCallback(async () => {
@@ -318,6 +355,11 @@ export function BayilerSekme() {
 
     if (seciliTaslak.iskonto != null && (seciliTaslak.iskonto < 0 || seciliTaslak.iskonto > 100)) {
       hataBildir('İskonto 0–100 arasında olmalı');
+      return;
+    }
+
+    if (seciliTaslak.vergiNo != null && seciliTaslak.vergiNo.replace(/\D/g, '').length > 10) {
+      hataBildir('Vergi no en fazla 10 haneli olmalı');
       return;
     }
 
@@ -338,6 +380,36 @@ export function BayilerSekme() {
     }
   }, [seciliId, seciliDegisiklikVar, seciliTaslak, yukle, basariBildir, hataBildir]);
 
+  const panelKaydet = useCallback(async () => {
+    const sonuc = bayiPaneldenGirdi(panelForm);
+    if (sonuc.hata || !sonuc.girdi) {
+      hataBildir(sonuc.hata ?? 'Geçersiz form');
+      return;
+    }
+
+    setKaydediliyor(true);
+    try {
+      if (duzenlenen) {
+        await masterBayiGuncelle(duzenlenen.id, sonuc.girdi);
+        setTaslakMap((onceki) => {
+          const yeni = { ...onceki };
+          delete yeni[duzenlenen.id];
+          return yeni;
+        });
+        basariBildir(`${sonuc.girdi.unvan} güncellendi.`);
+      } else {
+        await masterBayiOlustur(sonuc.girdi);
+        basariBildir(`${sonuc.girdi.unvan} eklendi.`);
+      }
+      panelIptal();
+      await yukle();
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
+    } finally {
+      setKaydediliyor(false);
+    }
+  }, [panelForm, duzenlenen, panelIptal, yukle, basariBildir, hataBildir]);
+
   const bayiSil = useCallback(async () => {
     if (seciliId == null) return;
     const bayi = bayiler.find((b) => b.id === seciliId);
@@ -349,7 +421,7 @@ export function BayilerSekme() {
       await masterBayiSil(seciliId);
       setSeciliId(null);
       setDuzenlenen(null);
-      setModalAcik(false);
+      setEklemeAcik(false);
       setTaslakMap((onceki) => {
         const yeni = { ...onceki };
         delete yeni[seciliId];
@@ -364,12 +436,18 @@ export function BayilerSekme() {
     }
   }, [seciliId, bayiler, yukle, basariBildir, hataBildir]);
 
+  const islemde = kaydediliyor || islemId !== null;
+
   useModulAksiyonlari(
-    { ekle: yeniBayi, sil: bayiSil, kaydet: inlineKaydet },
     {
-      ekle: !kaydediliyor && !modalAcik,
-      sil: seciliId != null && !kaydediliyor && !islemId && !seciliDegisiklikVar,
-      kaydet: seciliDegisiklikVar && !kaydediliyor && !modalAcik,
+      ekle: yeniBayi,
+      sil: panelAcik ? panelIptal : bayiSil,
+      kaydet: panelAcik ? panelKaydet : inlineKaydet,
+    },
+    {
+      ekle: !islemde && !panelAcik,
+      sil: (panelAcik || seciliId != null) && !islemde && !seciliDegisiklikVar,
+      kaydet: panelAcik ? !kaydediliyor : seciliDegisiklikVar && !kaydediliyor,
     }
   );
 
@@ -386,253 +464,274 @@ export function BayilerSekme() {
     }
   }
 
-  async function kaydet(girdi: BayiFormGirdi) {
-    setKaydediliyor(true);
-    try {
-      if (duzenlenen) {
-        await masterBayiGuncelle(duzenlenen.id, girdi);
-        setTaslakMap((onceki) => {
-          const yeni = { ...onceki };
-          delete yeni[duzenlenen.id];
-          return yeni;
-        });
-        basariBildir(`${girdi.unvan} güncellendi.`);
-      } else {
-        await masterBayiOlustur(girdi);
-        basariBildir(`${girdi.unvan} eklendi.`);
-      }
-      setModalAcik(false);
-      setDuzenlenen(null);
-      await yukle();
-    } catch (err) {
-      hataBildir(err instanceof Error ? err.message : 'Kayıt başarısız');
-    } finally {
-      setKaydediliyor(false);
+  function sutunHucre(b: ReturnType<typeof bayiBirlestir>, ham: MasterBayi, sutunId: string) {
+    switch (sutunId) {
+      case 'unvan':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre">
+            <TabloHucre
+              alan="unvan"
+              gosterim={b.unvan}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'unvan'}
+              inputDeger={b.unvan}
+              onBasla={() => hucreBasla(b.id, 'unvan')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'unvan', v)}
+              onBitir={hucreBitir}
+              className="ap-heading font-medium"
+            />
+            <TabloHucre
+              alan="eposta"
+              gosterim={b.eposta ?? '—'}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'eposta'}
+              inputDeger={b.eposta ?? ''}
+              onBasla={() => hucreBasla(b.id, 'eposta')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'eposta', v)}
+              onBitir={hucreBitir}
+              className="ap-muted ap-master-tablo-alt-satir block truncate"
+            />
+          </td>
+        );
+      case 'konum':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre ap-muted">
+            <TabloHucre
+              alan="konum"
+              gosterim={b.konumMetin}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'konum'}
+              inputDeger={b.konumMetin === '—' ? '' : b.konumMetin}
+              onBasla={() => hucreBasla(b.id, 'konum')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'konum', v)}
+              onBitir={hucreBitir}
+            />
+          </td>
+        );
+      case 'ustBayi':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre">
+            <UstBayiHucre
+              bayiId={b.id}
+              ustId={b.ustId}
+              gosterim={b.ustUnvanGoster}
+              secenekler={bayiler}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'ustBayi'}
+              onBasla={() => hucreBasla(b.id, 'ustBayi')}
+              onSec={(ustId) => ustBayiSec(b.id, ustId)}
+              onBitir={hucreBitir}
+            />
+          </td>
+        );
+      case 'vergiDairesi':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre ap-muted">
+            <TabloHucre
+              alan="vergiDairesi"
+              gosterim={b.vergiDairesi ?? '—'}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'vergiDairesi'}
+              inputDeger={b.vergiDairesi ?? ''}
+              onBasla={() => hucreBasla(b.id, 'vergiDairesi')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'vergiDairesi', v)}
+              onBitir={hucreBitir}
+            />
+          </td>
+        );
+      case 'vergiNo':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre ap-muted">
+            <TabloHucre
+              alan="vergiNo"
+              gosterim={b.vergiNo ?? '—'}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'vergiNo'}
+              inputDeger={b.vergiNo ?? ''}
+              onBasla={() => hucreBasla(b.id, 'vergiNo')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'vergiNo', v)}
+              onBitir={hucreBitir}
+              maxLength={10}
+            />
+          </td>
+        );
+      case 'iskonto':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre">
+            <TabloHucre
+              alan="iskonto"
+              gosterim={iskontoGoster(b.iskonto)}
+              duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'iskonto'}
+              inputDeger={b.iskonto != null ? String(b.iskonto) : ''}
+              onBasla={() => hucreBasla(b.id, 'iskonto')}
+              onDegistir={(v) => hucreGuncelle(b.id, 'iskonto', v)}
+              onBitir={hucreBitir}
+            />
+          </td>
+        );
+      case 'firmaSayisi':
+        return (
+          <td
+            key={sutunId}
+            className="ap-master-excel-hucre ap-master-excel-hucre-sayi ap-muted"
+            title="Bağlı müşteri firma adedi"
+          >
+            <span className="ap-master-etiket">{b.firmaSayisi}</span>
+            {b.altBayiSayisi > 0 && (
+              <span className="ap-master-tablo-alt-satir ml-1" title="Alt bayi sayısı">
+                · {b.altBayiSayisi} alt
+              </span>
+            )}
+          </td>
+        );
+      case 'kayitTarihi':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre-tarih">
+            {bayiTarihGoster(b.kayitTarihi)}
+          </td>
+        );
+      case 'guncellemeTarihi':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre-tarih">
+            {bayiTarihGoster(b.guncellemeTarihi)}
+          </td>
+        );
+      case 'aktif':
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre ap-master-tablo-toggle-hucre" onClick={(e) => e.stopPropagation()}>
+            <div className="ap-master-toggle-mini">
+              <DurumAnahtari
+                etiket={b.aktif ? 'Aktif bayi' : 'Pasif bayi'}
+                acik={b.aktif}
+                devreDisi={islemId === b.id}
+                onChange={(v) => void durumDegistir(ham, v)}
+                renk={b.aktif ? 'yesil' : 'turuncu'}
+                sadeceToggle
+              />
+            </div>
+          </td>
+        );
+      default:
+        return null;
     }
   }
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Bayiler yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
 
+  const tabloGoster = panelAcik || liste.length > 0;
+
   return (
     <div className="ap-master-sekme">
-      <div className="ap-master-sekme-filtre">
-        {(
-          [
-            ['tumu', 'Tümü'],
-            ['aktif', 'Aktif'],
-            ['pasif', 'Pasif'],
-          ] as const
-        ).map(([id, etiket]) => (
-          <button
-            key={id}
-            type="button"
-            className={`ap-master-filtre-btn ${filtre === id ? 'ap-master-filtre-btn-aktif' : ''}`}
-            onClick={() => setFiltre(id)}
-          >
-            {etiket}
-          </button>
-        ))}
-      </div>
+      <MasterUstFiltreSatiri
+        arama={arama}
+        onArama={setArama}
+        placeholder="Unvan, il, vergi no veya üst bayi ara…"
+        sag={
+          <MasterTabloSutunAyarlari
+            baslik="Bayi tablosu sütunları"
+            sutunlar={BAYI_TABLO_SUTUNLARI}
+            gorunurSira={gorunurSutunlar}
+            varsayilanSira={BAYI_TABLO_VARSAYILAN_SIRA}
+            onDegistir={sutunlariDegistir}
+          />
+        }
+      />
 
-      <div className="ap-master-ust">
-        <MasterArama placeholder="Unvan, il, vergi no veya üst bayi ara…" value={arama} onChange={setArama} />
-      </div>
+      {panelAcik && (
+        <BayiKayitPanel
+          acik
+          yeniKayit={eklemeAcik}
+          duzenlenen={duzenlenen}
+          form={panelForm}
+          onFormDegistir={setPanelForm}
+          ustBayiSecenekleri={bayiler}
+          kaydediliyor={kaydediliyor}
+        />
+      )}
 
-      {seciliDegisiklikVar && (
+      {seciliDegisiklikVar && !panelAcik && (
         <p className="ap-muted mb-2 text-xs">
           Kaydedilmemiş değişiklikler var — alttaki <strong className="ap-heading">Kaydet</strong> ile onaylayın.
         </p>
       )}
 
-      {liste.length === 0 ? (
+      {!tabloGoster ? (
         <div className="ap-master-bos-durum">
           <p className="ap-muted text-sm">
-            {arama || filtre !== 'tumu' ? 'Filtreye uygun bayi bulunamadı.' : 'Henüz bayi kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
+            {arama || filtre !== 'tumu'
+              ? 'Filtreye uygun bayi bulunamadı.'
+              : 'Henüz bayi kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
       ) : (
-        <div className="ap-master-excel-wrap">
-          <div className="ap-master-excel-ust">
-            <p className="ap-muted text-xs">11 sütun görünüyor — çift tıklayarak hücre düzenleyin</p>
-          </div>
-          <div className="ap-master-excel-scroll">
-          <table className="ap-master-excel-tablo ap-master-bayi-tablo">
-            <thead>
-              <tr>
-                <th>Unvan</th>
-                <th>Konum</th>
-                <th>Üst bayi</th>
-                <th>Vergi dairesi</th>
-                <th>Vergi no</th>
-                <th>İskonto</th>
-                <th
-                  className="ap-master-tablo-bilgi-baslik"
-                  title="Bu bayiye bağlı müşteri firma adedi — Firmalar sekmesinden yönetilir, burada salt okunur özet"
-                >
-                  Firma sayısı
-                </th>
-                <th>Kayıt</th>
-                <th>Güncelleme</th>
-                <th>Durum</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {liste.map((ham) => {
-                const b = bayiBirlestir(ham);
-                const satirDegisti = taslakMap[ham.id] != null && Object.keys(taslakMap[ham.id]).length > 0;
-
-                return (
-                  <tr
-                    key={b.id}
-                    className={[
-                      !b.aktif ? 'ap-master-tablo-pasif' : undefined,
-                      seciliId === b.id ? 'ap-master-excel-satir-secili' : undefined,
-                      satirDegisti ? 'ap-master-tablo-degisti' : undefined,
-                    ]
-                      .filter(Boolean)
-                      .join(' ') || undefined}
-                    onClick={() => setSeciliId(b.id)}
-                  >
-                    <td className="ap-master-excel-hucre">
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="unvan"
-                        gosterim={b.unvan}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'unvan'}
-                        inputDeger={b.unvan}
-                        onBasla={() => hucreBasla(b.id, 'unvan')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'unvan', v)}
-                        onBitir={hucreBitir}
-                        className="ap-heading font-medium"
-                      />
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="eposta"
-                        gosterim={b.eposta ?? '—'}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'eposta'}
-                        inputDeger={b.eposta ?? ''}
-                        onBasla={() => hucreBasla(b.id, 'eposta')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'eposta', v)}
-                        onBitir={hucreBitir}
-                        className="ap-muted ap-master-tablo-alt-satir block truncate"
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre ap-muted">
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="konum"
-                        gosterim={b.konumMetin}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'konum'}
-                        inputDeger={b.konumMetin === '—' ? '' : b.konumMetin}
-                        onBasla={() => hucreBasla(b.id, 'konum')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'konum', v)}
-                        onBitir={hucreBitir}
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre">
-                      <UstBayiHucre
-                        bayiId={b.id}
-                        ustId={b.ustId}
-                        gosterim={b.ustUnvanGoster}
-                        secenekler={bayiler}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'ustBayi'}
-                        onBasla={() => hucreBasla(b.id, 'ustBayi')}
-                        onSec={(ustId) => ustBayiSec(b.id, ustId)}
-                        onBitir={hucreBitir}
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre ap-muted">
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="vergiDairesi"
-                        gosterim={b.vergiDairesi ?? '—'}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'vergiDairesi'}
-                        inputDeger={b.vergiDairesi ?? ''}
-                        onBasla={() => hucreBasla(b.id, 'vergiDairesi')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'vergiDairesi', v)}
-                        onBitir={hucreBitir}
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre ap-muted">
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="vergiNo"
-                        gosterim={b.vergiNo ?? '—'}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'vergiNo'}
-                        inputDeger={b.vergiNo ?? ''}
-                        onBasla={() => hucreBasla(b.id, 'vergiNo')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'vergiNo', v)}
-                        onBitir={hucreBitir}
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre">
-                      <TabloHucre
-                        bayiId={b.id}
-                        alan="iskonto"
-                        gosterim={iskontoGoster(b.iskonto)}
-                        duzenlemeAktif={duzenlemeHucre?.bayiId === b.id && duzenlemeHucre.alan === 'iskonto'}
-                        inputDeger={b.iskonto != null ? String(b.iskonto) : ''}
-                        onBasla={() => hucreBasla(b.id, 'iskonto')}
-                        onDegistir={(v) => hucreGuncelle(b.id, 'iskonto', v)}
-                        onBitir={hucreBitir}
-                        inputTipi="number"
-                      />
-                    </td>
-                    <td className="ap-master-excel-hucre ap-master-excel-hucre-sayi ap-muted" title="Bağlı müşteri firma adedi">
-                      <span className="ap-master-etiket">{b.firmaSayisi}</span>
-                      {b.altBayiSayisi > 0 && (
-                        <span className="ap-master-tablo-alt-satir ml-1" title="Alt bayi sayısı">
-                          · {b.altBayiSayisi} alt
-                        </span>
-                      )}
-                    </td>
-                    <td className="ap-master-excel-hucre-tarih">{bayiTarihGoster(b.kayitTarihi)}</td>
-                    <td className="ap-master-excel-hucre-tarih">{bayiTarihGoster(b.guncellemeTarihi)}</td>
-                    <td className="ap-master-tablo-toggle-hucre" onClick={(e) => e.stopPropagation()}>
-                      <DurumAnahtari
-                        etiket={b.aktif ? 'Aktif bayi' : 'Pasif bayi'}
-                        acik={b.aktif}
-                        devreDisi={islemId === b.id}
-                        onChange={(v) => void durumDegistir(ham, v)}
-                        renk={b.aktif ? 'yesil' : 'turuncu'}
-                        sadeceToggle
-                      />
-                    </td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        className="ap-master-tablo-ikon-btn"
-                        onClick={() => bayiDuzenle(ham)}
-                        aria-label="Bayi düzenle"
-                        title="Tüm alanları düzenle"
+        <>
+          <div className="ap-master-excel-wrap">
+            <div className="ap-master-excel-scroll">
+              <table className="ap-master-excel-tablo ap-master-bayi-tablo">
+                <thead>
+                  <tr>
+                    {gorunurSutunlar.map((id) => (
+                      <th
+                        key={id}
+                        className={id === 'firmaSayisi' ? 'ap-master-tablo-bilgi-baslik' : undefined}
+                        title={
+                          id === 'firmaSayisi'
+                            ? 'Bu bayiye bağlı müşteri firma adedi — Firmalar sekmesinden yönetilir'
+                            : undefined
+                        }
                       >
-                        <DuzenleIkonu />
-                      </button>
-                    </td>
+                        {sutunBaslik(id)}
+                      </th>
+                    ))}
+                    <th className="ap-master-excel-th-aksiyon" />
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          </div>
-        </div>
-      )}
+                </thead>
+                <tbody>
+                  {sayfalanmisListe.map((ham) => {
+                    const b = bayiBirlestir(ham);
+                    const satirDegisti = taslakMap[ham.id] != null && Object.keys(taslakMap[ham.id]).length > 0;
 
-      <BayiKayitModal
-        acik={modalAcik}
-        duzenlenen={duzenlenen}
-        ustBayiSecenekleri={bayiler}
-        kaydediliyor={kaydediliyor}
-        onKapat={() => {
-          if (!kaydediliyor) {
-            setModalAcik(false);
-            setDuzenlenen(null);
-          }
-        }}
-        onKaydet={kaydet}
-      />
+                    return (
+                      <tr
+                        key={b.id}
+                        className={[
+                          !b.aktif ? 'ap-master-tablo-pasif' : undefined,
+                          seciliId === b.id ? 'ap-master-excel-satir-secili' : undefined,
+                          satirDegisti ? 'ap-master-tablo-degisti' : undefined,
+                        ]
+                          .filter(Boolean)
+                          .join(' ') || undefined}
+                        onClick={() => {
+                          if (panelAcik) panelIptal();
+                          setSeciliId(b.id);
+                        }}
+                      >
+                        {gorunurSutunlar.map((id) => sutunHucre(b, ham, id))}
+                        <td className="ap-master-excel-hucre ap-master-excel-th-aksiyon" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="ap-master-tablo-ikon-btn"
+                            onClick={() => bayiDuzenle(ham)}
+                            aria-label="Bayi düzenle"
+                            title="Tüm alanları düzenle"
+                          >
+                            <DuzenleIkonu />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {liste.length > 0 && (
+            <MasterTabloSayfalama
+              toplam={liste.length}
+              sayfa={sayfa}
+              sayfaBoyutu={sayfaBoyutu}
+              onSayfaDegistir={setSayfa}
+              onSayfaBoyutuDegistir={setSayfaBoyutu}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

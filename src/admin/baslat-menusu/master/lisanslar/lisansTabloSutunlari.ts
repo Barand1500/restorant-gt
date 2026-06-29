@@ -12,7 +12,6 @@ export const LISANS_TABLO_SUTUNLARI: LisansTabloSutunTanim[] = [
   { id: 'paketId', etiket: 'Paket' },
   { id: 'baslangicTarihi', etiket: 'Başlangıç' },
   { id: 'bitisTarihi', etiket: 'Bitiş' },
-  { id: 'durum', etiket: 'Lisans durumu', saltOkunur: true },
   { id: 'aktif', etiket: 'Durum' },
   { id: 'kayitTarihi', etiket: 'Kayıt tarihi', saltOkunur: true },
   { id: 'guncellemeTarihi', etiket: 'Güncelleme', saltOkunur: true },
@@ -25,7 +24,6 @@ export const LISANS_TABLO_VARSAYILAN_SIRA: string[] = [
   'paketId',
   'baslangicTarihi',
   'bitisTarihi',
-  'durum',
   'aktif',
 ];
 
@@ -35,7 +33,7 @@ export function lisansTabloSutunlariOku(): string[] {
     if (!ham) return [...LISANS_TABLO_VARSAYILAN_SIRA];
     const parsed = JSON.parse(ham) as string[];
     if (!Array.isArray(parsed)) return [...LISANS_TABLO_VARSAYILAN_SIRA];
-    const temiz = parsed.filter((id) => GECERLI_IDLER.has(id));
+    const temiz = parsed.filter((id) => GECERLI_IDLER.has(id) && id !== 'durum');
     if (!temiz.includes('firma')) temiz.unshift('firma');
     return temiz.length > 0 ? temiz : [...LISANS_TABLO_VARSAYILAN_SIRA];
   } catch {
@@ -44,7 +42,7 @@ export function lisansTabloSutunlariOku(): string[] {
 }
 
 export function lisansTabloSutunlariKaydet(sira: string[]) {
-  const temiz = sira.filter((id) => GECERLI_IDLER.has(id));
+  const temiz = sira.filter((id) => GECERLI_IDLER.has(id) && id !== 'durum');
   if (!temiz.includes('firma')) temiz.unshift('firma');
   localStorage.setItem(STORAGE_ANAHTAR, JSON.stringify(temiz));
 }

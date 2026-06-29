@@ -1,13 +1,8 @@
 import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
-import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import { MasterDuzenlenebilirHucre } from '@/admin/baslat-menusu/master/bilesenler/MasterDuzenlenebilirHucre';
+import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
+import { lisansTabloSutunTanimiBul } from '@/admin/baslat-menusu/master/lisanslar/lisansTabloSutunlari';
 import {
-  LISANS_TABLO_SUTUNLARI,
-  LISANS_TABLO_VARSAYILAN_SIRA,
-  lisansTabloSutunTanimiBul,
-} from '@/admin/baslat-menusu/master/lisanslar/lisansTabloSutunlari';
-import {
-  lisansDurumEtiketi,
   tarihGoster,
   type LisansFormGirdi,
   type MasterLisans,
@@ -16,7 +11,7 @@ import type { MasterPaket } from '@/admin/baslat-menusu/master/paketler/api';
 
 export type LisansDuzenlenebilirAlan = keyof Pick<
   LisansFormGirdi,
-  'paketId' | 'baslangicTarihi' | 'bitisTarihi' | 'aktif'
+  'paketId' | 'baslangicTarihi' | 'bitisTarihi'
 >;
 
 export interface AktifLisansHucre {
@@ -36,14 +31,15 @@ interface LisansExcelTabloProps {
   aktifHucre: AktifLisansHucre | null;
   hucreTaslak: string;
   hucreKaydediliyor: boolean;
+  islemId: number | null;
   gorunurSutunlar: string[];
-  onSutunlarDegistir: (sira: string[]) => void;
   onSatirSec: (id: number) => void;
   onHucreBaslat: (l: MasterLisans, alan: LisansDuzenlenebilirAlan) => void;
   onHucreTaslak: (v: string) => void;
   onHucreKaydet: (deger?: string) => void;
   onHucreIptal: () => void;
-  onModalDuzenle: (l: MasterLisans) => void;
+  onDurumDegistir: (l: MasterLisans, aktif: boolean) => void;
+  onPanelDuzenle: (l: MasterLisans) => void;
 }
 
 export function LisansExcelTablo({
@@ -53,14 +49,15 @@ export function LisansExcelTablo({
   aktifHucre,
   hucreTaslak,
   hucreKaydediliyor,
+  islemId,
   gorunurSutunlar,
-  onSutunlarDegistir,
   onSatirSec,
   onHucreBaslat,
   onHucreTaslak,
   onHucreKaydet,
   onHucreIptal,
-  onModalDuzenle,
+  onDurumDegistir,
+  onPanelDuzenle,
 }: LisansExcelTabloProps) {
   const aktifPaketler = paketler.filter((p) => p.aktif);
   const paketSecenekleri = aktifPaketler.map((p) => ({
@@ -135,34 +132,26 @@ export function LisansExcelTablo({
           ),
         });
       case 'durum':
+        return null;
+      case 'aktif':
         return (
-          <td key={sutunId} className="ap-master-excel-hucre ap-master-excel-hucre-salt">
-            <span
-              className={`ap-master-lisans-badge ${
-                l.durum === 'aktif'
-                  ? 'ap-master-lisans-aktif'
-                  : l.durum === 'yakinda'
-                    ? 'ap-master-lisans-uyari'
-                    : ''
-              }`}
-            >
-              {lisansDurumEtiketi(l.durum)}
-            </span>
+          <td
+            key={sutunId}
+            className="ap-master-excel-hucre ap-master-tablo-toggle-hucre"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="ap-master-toggle-mini">
+              <DurumAnahtari
+                etiket={l.aktif ? 'Aktif lisans' : 'Pasif lisans'}
+                acik={l.aktif}
+                devreDisi={islemId === l.id}
+                onChange={(v) => onDurumDegistir(l, v)}
+                renk={l.aktif ? 'yesil' : 'turuncu'}
+                sadeceToggle
+              />
+            </div>
           </td>
         );
-      case 'aktif':
-        return hucre(l, 'aktif', l.aktif ? 'true' : 'false', {
-          tip: 'select',
-          secenekler: [
-            { value: 'true', label: 'Aktif' },
-            { value: 'false', label: 'Pasif' },
-          ],
-          gosterim: (
-            <span className={`ap-master-durum ${l.aktif ? 'ap-master-durum-aktif' : ''}`}>
-              {l.aktif ? 'Aktif' : 'Pasif'}
-            </span>
-          ),
-        });
       case 'kayitTarihi':
         return (
           <td key={sutunId} className="ap-master-excel-hucre ap-master-excel-hucre-salt ap-master-excel-hucre-tarih">
@@ -182,18 +171,6 @@ export function LisansExcelTablo({
 
   return (
     <div className="ap-master-excel-wrap">
-      <div className="ap-master-excel-ust">
-        <p className="ap-muted text-xs">
-          {gorunurSutunlar.length} sütun — firmalara paket lisansı atayın ve süreleri takip edin
-        </p>
-        <MasterTabloSutunAyarlari
-          baslik="Lisans tablosu sütunları"
-          sutunlar={LISANS_TABLO_SUTUNLARI}
-          gorunurSira={gorunurSutunlar}
-          varsayilanSira={LISANS_TABLO_VARSAYILAN_SIRA}
-          onDegistir={onSutunlarDegistir}
-        />
-      </div>
       <div className="ap-master-excel-scroll">
         <table className="ap-master-excel-tablo">
           <thead>
@@ -218,7 +195,7 @@ export function LisansExcelTablo({
                   <button
                     type="button"
                     className="ap-master-tablo-ikon-btn"
-                    onClick={() => onModalDuzenle(l)}
+                    onClick={() => onPanelDuzenle(l)}
                     aria-label="Lisans düzenle"
                     title="Tüm alanları düzenle"
                   >

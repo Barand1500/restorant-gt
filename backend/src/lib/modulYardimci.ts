@@ -18,7 +18,7 @@ export function modulYanitOlustur(m: ModulSayim) {
 
 export async function modulListesiGetir() {
   const kayitlar = await prisma.modul.findMany({
-    orderBy: [{ durum: 'desc' }, { modulAdi: 'asc' }],
+    orderBy: [{ id: 'asc' }],
     include: { _count: { select: { roller: true } } },
   });
   return kayitlar.map(modulYanitOlustur);

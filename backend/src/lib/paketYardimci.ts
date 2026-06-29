@@ -18,7 +18,7 @@ export function paketYanitOlustur(p: Paket) {
 
 export async function paketListesiGetir() {
   const kayitlar = await prisma.paket.findMany({
-    orderBy: [{ durum: 'desc' }, { fiyat: 'asc' }],
+    orderBy: [{ id: 'asc' }],
   });
   return kayitlar.map(paketYanitOlustur);
 }

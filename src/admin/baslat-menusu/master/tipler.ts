@@ -19,14 +19,6 @@ export interface MasterSekmeTanim {
 
 export const MASTER_SEKMELER: MasterSekmeTanim[] = [
   {
-    id: 'moduller',
-    ad: 'Modüller',
-    ikon: '🧩',
-    baslik: 'Modül Kataloğu',
-    altBaslik: 'Panele bağlı yazılım modülleri ve prefix tanımları',
-    baglam: 'Her modülün kendi rol seti vardır',
-  },
-  {
     id: 'bayiler',
     ad: 'Bayiler',
     ikon: '🤝',
@@ -73,6 +65,14 @@ export const MASTER_SEKMELER: MasterSekmeTanim[] = [
     baslik: 'Firma Lisansları',
     altBaslik: 'Firmaya atanan paket ve geçerlilik süresi',
     baglam: 'Paket + firma eşleşmesi',
+  },
+  {
+    id: 'moduller',
+    ad: 'Modüller',
+    ikon: '🧩',
+    baslik: 'Modül Kataloğu',
+    altBaslik: 'Panele bağlı yazılım modülleri ve prefix tanımları',
+    baglam: 'Her modülün kendi rol seti vardır',
   },
 ];
 

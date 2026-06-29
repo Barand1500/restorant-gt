@@ -22,7 +22,11 @@ router.get('/', async (_req: AuthRequest, res: Response) => {
 });
 
 router.post('/', async (req: AuthRequest, res: Response) => {
-  const { modulAdi, prefix: hamPrefix } = req.body as { modulAdi?: string; prefix?: string };
+  const { modulAdi, prefix: hamPrefix, aktif } = req.body as {
+    modulAdi?: string;
+    prefix?: string;
+    aktif?: boolean;
+  };
 
   const ad = modulAdi?.trim();
   if (!ad || ad.length < 2) {
@@ -47,7 +51,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   const kayit = await prisma.modul.create({
-    data: { modulAdi: ad, prefix, durum: true },
+    data: { modulAdi: ad, prefix, durum: aktif !== false },
     include: { _count: { select: { roller: true } } },
   });
 

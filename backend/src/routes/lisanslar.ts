@@ -65,6 +65,15 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     data.paket = { connect: { id: paketId } };
   }
 
+  if (body.firmaId !== undefined) {
+    const firmaId = Number(body.firmaId);
+    if (!Number.isInteger(firmaId) || firmaId < 1) return res.status(400).json({ mesaj: 'Gecersiz firma' });
+    const firma = await prisma.firma.findUnique({ where: { id: firmaId } });
+    if (!firma) return res.status(400).json({ mesaj: 'Firma bulunamadi' });
+    if (!firma.durum) return res.status(400).json({ mesaj: 'Pasif firmaya lisans atanamaz' });
+    data.firma = { connect: { id: firmaId } };
+  }
+
   if (body.baslangicTarihi !== undefined) {
     const d = new Date(String(body.baslangicTarihi));
     if (Number.isNaN(d.getTime())) return res.status(400).json({ mesaj: 'Gecersiz baslangic tarihi' });

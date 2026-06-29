@@ -7,6 +7,7 @@ const OFFLINE_FIRMA_ANAHTAR = 'restorant-offline-firmalar';
 const OFFLINE_SUBE_ANAHTAR = 'restorant-offline-subeler';
 const OFFLINE_PAKET_ANAHTAR = 'restorant-offline-paketler';
 const OFFLINE_LISANS_ANAHTAR = 'restorant-offline-lisanslar';
+const OFFLINE_KULLANICI_ANAHTAR = 'restorant-offline-kullanicilar';
 
 interface OfflineModul {
   id: number;
@@ -110,6 +111,27 @@ interface OfflineLisans {
   guncellemeTarihi: string;
 }
 
+interface OfflineMasterKullanici {
+  id: number;
+  ad: string;
+  eposta: string;
+  gsm: string | null;
+  rol: string;
+  kullaniciTipi: 'merkez' | 'bayi' | 'firma' | 'sube';
+  bayiId: number | null;
+  bayiUnvan: string | null;
+  firmaId: number | null;
+  firmaUnvan: string | null;
+  firmaTabela: string | null;
+  subeId: number | null;
+  subeAdi: string | null;
+  iskonto: number | null;
+  aktif: boolean;
+  sonGirisTarihi: string | null;
+  kayitTarihi: string;
+  guncellemeTarihi: string;
+}
+
 const VARSAYILAN_OFFLINE_MODULLER: OfflineModul[] = [
   { id: 1, ad: 'Master', prefix: 'master', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
   { id: 2, ad: 'Kullanicilar', prefix: 'kullanicilar', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
@@ -149,15 +171,7 @@ export function offlineAdminYanit(path: string, method: string, body?: BodyInit 
 
   if (m !== 'GET') {
     if (p.includes('/kullanicilar')) {
-      return {
-        kullanici: {
-          id: '1',
-          email: 'admin@restorant.local',
-          ad: 'Admin',
-          rol: 'SUPER_ADMIN',
-          aktif: true,
-        },
-      };
+      return offlineKullaniciYaz(body, m, p);
     }
     if (p.includes('/roller')) {
       return { roller: OFFLINE_ROLLER, yetkiler: [...OFFLINE_YETKILER] };
@@ -284,14 +298,14 @@ function offlineModulYaz(body: BodyInit | null | undefined, method: string, path
   const simdi = new Date().toISOString();
 
   if (method === 'POST' && typeof body === 'string') {
-    const girdi = JSON.parse(body) as { modulAdi?: string; prefix?: string };
+    const girdi = JSON.parse(body) as { modulAdi?: string; prefix?: string; aktif?: boolean };
     const ad = girdi.modulAdi?.trim() ?? 'Yeni Modul';
     const prefix = girdi.prefix?.trim() ?? `modul_${liste.length + 1}`;
     const modul: OfflineModul = {
       id: Math.max(0, ...liste.map((m) => m.id)) + 1,
       ad,
       prefix,
-      aktif: true,
+      aktif: girdi.aktif !== false,
       rolSayisi: 6,
       kayitTarihi: simdi,
       guncellemeTarihi: simdi,
@@ -940,30 +954,192 @@ function offlineLisansYaz(body: BodyInit | null | undefined, method: string, pat
   return { mesaj: 'Kayıt (offline mod)' };
 }
 
-function offlineMasterKullaniciListe() {
+function offlineKullaniciVarsayilan(): OfflineMasterKullanici[] {
   const simdi = new Date().toISOString();
+  const bayiler = offlineBayiOku();
+  const firmalar = offlineFirmaOku();
+  const subeler = offlineSubeOku();
+  const bayi = bayiler[0];
+  const firma = firmalar[0];
+  const sube = subeler[0];
+  return [
+    {
+      id: 1,
+      ad: 'Sistem Admin',
+      eposta: 'admin@restorant.local',
+      gsm: null,
+      rol: 'SUPER_ADMIN',
+      kullaniciTipi: 'sube',
+      bayiId: bayi?.id ?? 1,
+      bayiUnvan: bayi?.unvan ?? 'Guzel Teknoloji',
+      firmaId: firma?.id ?? 1,
+      firmaUnvan: firma?.unvan ?? 'Demo Restoran Grubu',
+      firmaTabela: firma?.tabelaAdi ?? 'Demo Restoran',
+      subeId: sube?.id ?? 1,
+      subeAdi: sube?.subeAdi ?? 'Merkez Sube',
+      iskonto: 10,
+      aktif: true,
+      sonGirisTarihi: simdi,
+      kayitTarihi: simdi,
+      guncellemeTarihi: simdi,
+    },
+  ];
+}
+
+function offlineKullaniciOku(): OfflineMasterKullanici[] {
+  try {
+    const ham = localStorage.getItem(OFFLINE_KULLANICI_ANAHTAR);
+    if (ham) return JSON.parse(ham) as OfflineMasterKullanici[];
+  } catch {
+    /* bozuk kayıt */
+  }
+  return offlineKullaniciVarsayilan();
+}
+
+function offlineKullaniciKaydet(liste: OfflineMasterKullanici[]) {
+  localStorage.setItem(OFFLINE_KULLANICI_ANAHTAR, JSON.stringify(liste));
+}
+
+function offlineKullaniciIliskileriDoldur(
+  girdi: {
+    bayiId?: number | null;
+    firmaId?: number | null;
+    subeId?: number | null;
+    kullaniciTipi?: OfflineMasterKullanici['kullaniciTipi'];
+  },
+  mevcut?: Partial<OfflineMasterKullanici>
+): Pick<
+  OfflineMasterKullanici,
+  'kullaniciTipi' | 'bayiId' | 'bayiUnvan' | 'firmaId' | 'firmaUnvan' | 'firmaTabela' | 'subeId' | 'subeAdi'
+> {
+  const bayiler = offlineBayiOku();
+  const firmalar = offlineFirmaOku();
+  const subeler = offlineSubeOku();
+
+  const bayiId = girdi.bayiId !== undefined ? girdi.bayiId : (mevcut?.bayiId ?? null);
+  const firmaId = girdi.firmaId !== undefined ? girdi.firmaId : (mevcut?.firmaId ?? null);
+  const subeId = girdi.subeId !== undefined ? girdi.subeId : (mevcut?.subeId ?? null);
+
+  const bayi = bayiId != null ? bayiler.find((b) => b.id === bayiId) : null;
+  const firma = firmaId != null ? firmalar.find((f) => f.id === firmaId) : null;
+  const sube = subeId != null ? subeler.find((s) => s.id === subeId) : null;
+
+  let kullaniciTipi = girdi.kullaniciTipi ?? mevcut?.kullaniciTipi ?? 'merkez';
+  if (subeId) kullaniciTipi = 'sube';
+  else if (firmaId) kullaniciTipi = 'firma';
+  else if (bayiId) kullaniciTipi = 'bayi';
+  else kullaniciTipi = 'merkez';
+
   return {
-    kullanicilar: [
-      {
-        id: 1,
-        ad: 'Sistem Admin',
-        eposta: 'admin@restorant.local',
-        gsm: null,
-        rol: 'SUPER_ADMIN',
-        kullaniciTipi: 'merkez',
-        bayiId: 1,
-        bayiUnvan: 'Guzel Teknoloji',
-        firmaId: 1,
-        firmaUnvan: 'Demo Restoran Grubu',
-        firmaTabela: 'Demo Restoran',
-        subeId: 1,
-        subeAdi: 'Merkez Sube',
-        iskonto: 10,
-        aktif: true,
-        sonGirisTarihi: simdi,
-        kayitTarihi: simdi,
-        guncellemeTarihi: simdi,
-      },
-    ],
+    kullaniciTipi,
+    bayiId,
+    bayiUnvan: bayi?.unvan ?? null,
+    firmaId,
+    firmaUnvan: firma?.unvan ?? null,
+    firmaTabela: firma?.tabelaAdi ?? null,
+    subeId,
+    subeAdi: sube?.subeAdi ?? null,
   };
+}
+
+function offlineKullaniciYaz(body: BodyInit | null | undefined, method: string, path: string) {
+  const liste = offlineKullaniciOku();
+  const simdi = new Date().toISOString();
+
+  if (method === 'POST' && typeof body === 'string') {
+    const girdi = JSON.parse(body) as {
+      ad?: string;
+      email?: string;
+      rol?: string;
+      kullaniciTipi?: OfflineMasterKullanici['kullaniciTipi'];
+      bayiId?: number | null;
+      firmaId?: number | null;
+      subeId?: number | null;
+      gsm?: string;
+      iskonto?: number | null;
+      aktif?: boolean;
+    };
+    const eposta = girdi.email?.trim().toLowerCase() ?? '';
+    if (!eposta || !girdi.ad?.trim() || !girdi.rol?.trim()) {
+      return { mesaj: 'Zorunlu alanlar eksik' };
+    }
+    if (liste.some((k) => k.eposta.toLowerCase() === eposta)) {
+      return { mesaj: 'Bu e-posta zaten kayitli' };
+    }
+
+    const iliskiler = offlineKullaniciIliskileriDoldur(girdi);
+    const kullanici: OfflineMasterKullanici = {
+      id: Math.max(0, ...liste.map((k) => k.id)) + 1,
+      ad: girdi.ad.trim(),
+      eposta,
+      gsm: girdi.gsm?.trim() || null,
+      rol: girdi.rol.trim(),
+      ...iliskiler,
+      iskonto: girdi.iskonto ?? null,
+      aktif: girdi.aktif !== false,
+      sonGirisTarihi: null,
+      kayitTarihi: simdi,
+      guncellemeTarihi: simdi,
+    };
+    offlineKullaniciKaydet([...liste, kullanici]);
+    return { kullanici };
+  }
+
+  if (method === 'PATCH' && typeof body === 'string') {
+    const id = Number(path.split('/').pop());
+    const girdi = JSON.parse(body) as {
+      ad?: string;
+      email?: string;
+      rol?: string;
+      kullaniciTipi?: OfflineMasterKullanici['kullaniciTipi'];
+      bayiId?: number | null;
+      firmaId?: number | null;
+      subeId?: number | null;
+      gsm?: string;
+      iskonto?: number | null;
+      aktif?: boolean;
+    };
+    const idx = liste.findIndex((k) => k.id === id);
+    if (idx < 0) return { mesaj: 'Kullanici bulunamadi' };
+
+    if (girdi.email) {
+      const eposta = girdi.email.trim().toLowerCase();
+      if (liste.some((k) => k.id !== id && k.eposta.toLowerCase() === eposta)) {
+        return { mesaj: 'Bu e-posta zaten kayitli' };
+      }
+    }
+
+    const mevcut = liste[idx];
+    const iliskiler = offlineKullaniciIliskileriDoldur(girdi, mevcut);
+    const guncel: OfflineMasterKullanici = {
+      ...mevcut,
+      ...(girdi.ad !== undefined ? { ad: girdi.ad.trim() } : {}),
+      ...(girdi.email !== undefined ? { eposta: girdi.email.trim().toLowerCase() } : {}),
+      ...(girdi.rol !== undefined ? { rol: girdi.rol.trim() } : {}),
+      ...(girdi.gsm !== undefined ? { gsm: girdi.gsm?.trim() || null } : {}),
+      ...(girdi.iskonto !== undefined ? { iskonto: girdi.iskonto } : {}),
+      ...('aktif' in girdi ? { aktif: Boolean(girdi.aktif) } : {}),
+      ...iliskiler,
+      guncellemeTarihi: simdi,
+    };
+    const yeni = [...liste];
+    yeni[idx] = guncel;
+    offlineKullaniciKaydet(yeni);
+    return { kullanici: guncel };
+  }
+
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    if (id === 1) return { mesaj: 'Varsayilan admin silinemez' };
+    const yeni = liste.filter((k) => k.id !== id);
+    if (yeni.length === liste.length) return { mesaj: 'Kullanici bulunamadi' };
+    offlineKullaniciKaydet(yeni);
+    return { mesaj: 'Silindi' };
+  }
+
+  return { mesaj: 'Kayıt (offline mod)' };
+}
+
+function offlineMasterKullaniciListe() {
+  return { kullanicilar: offlineKullaniciOku() };
 }

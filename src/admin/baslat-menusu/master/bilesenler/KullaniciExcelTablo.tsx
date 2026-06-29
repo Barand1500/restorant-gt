@@ -1,13 +1,10 @@
 import type { MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
 import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
-import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import { MasterDuzenlenebilirHucre } from '@/admin/baslat-menusu/master/bilesenler/MasterDuzenlenebilirHucre';
+import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
+import { iskontoGoster } from '@/araclar/iskontoYardimci';
 import type { MasterFirma } from '@/admin/baslat-menusu/master/firmalar/api';
-import {
-  KULLANICI_TABLO_SUTUNLARI,
-  KULLANICI_TABLO_VARSAYILAN_SIRA,
-  kullaniciTabloSutunTanimiBul,
-} from '@/admin/baslat-menusu/master/kullanicilar/kullaniciTabloSutunlari';
+import { kullaniciTabloSutunTanimiBul } from '@/admin/baslat-menusu/master/kullanicilar/kullaniciTabloSutunlari';
 import {
   KULLANICI_TIP_ETIKET,
   sonGirisGoster,
@@ -36,14 +33,15 @@ interface KullaniciExcelTabloProps {
   aktifHucre: AktifKullaniciHucre | null;
   hucreTaslak: string;
   hucreKaydediliyor: boolean;
+  islemId: number | null;
   gorunurSutunlar: string[];
-  onSutunlarDegistir: (sira: string[]) => void;
   onSatirSec: (id: number) => void;
   onHucreBaslat: (k: MasterKullanici, alan: KullaniciDuzenlenebilirAlan) => void;
   onHucreTaslak: (v: string) => void;
   onHucreKaydet: (deger?: string) => void;
   onHucreIptal: () => void;
-  onModalDuzenle: (k: MasterKullanici) => void;
+  onDurumDegistir: (k: MasterKullanici, aktif: boolean) => void;
+  onPanelDuzenle: (k: MasterKullanici) => void;
 }
 
 export function KullaniciExcelTablo({
@@ -56,14 +54,15 @@ export function KullaniciExcelTablo({
   aktifHucre,
   hucreTaslak,
   hucreKaydediliyor,
+  islemId,
   gorunurSutunlar,
-  onSutunlarDegistir,
   onSatirSec,
   onHucreBaslat,
   onHucreTaslak,
   onHucreKaydet,
   onHucreIptal,
-  onModalDuzenle,
+  onDurumDegistir,
+  onPanelDuzenle,
 }: KullaniciExcelTabloProps) {
   const aktifBayiler = bayiler.filter((b) => b.aktif);
   const bayiSecenekleri = aktifBayiler.map((b) => ({ value: b.id, label: b.unvan }));
@@ -141,9 +140,8 @@ export function KullaniciExcelTablo({
         return hucre(k, 'firmaId', k.firmaId != null ? String(k.firmaId) : '', {
           tip: 'select',
           secenekler: [{ value: '', label: '—' }, ...firmaSecenekleri],
-          gosterim: k.firmaTabela || k.firmaUnvan ? (
-            <span>{k.firmaTabela ?? k.firmaUnvan}</span>
-          ) : undefined,
+          gosterim:
+            k.firmaTabela || k.firmaUnvan ? <span>{k.firmaTabela ?? k.firmaUnvan}</span> : undefined,
         });
       case 'subeId':
         return hucre(k, 'subeId', k.subeId != null ? String(k.subeId) : '', {
@@ -153,26 +151,27 @@ export function KullaniciExcelTablo({
         });
       case 'iskonto':
         return hucre(k, 'iskonto', k.iskonto != null ? String(k.iskonto) : '', {
-          tip: 'number',
-          placeholder: '0-100',
+          placeholder: 'ör. 5 veya 20+20',
           gosterim:
             k.iskonto != null ? (
-              <span className="font-mono text-xs">%{k.iskonto}</span>
+              <span className="font-mono text-xs">{iskontoGoster(k.iskonto)}</span>
             ) : undefined,
         });
       case 'aktif':
-        return hucre(k, 'aktif', k.aktif ? 'true' : 'false', {
-          tip: 'select',
-          secenekler: [
-            { value: 'true', label: 'Aktif' },
-            { value: 'false', label: 'Pasif' },
-          ],
-          gosterim: (
-            <span className={`ap-master-durum ${k.aktif ? 'ap-master-durum-aktif' : ''}`}>
-              {k.aktif ? 'Aktif' : 'Pasif'}
-            </span>
-          ),
-        });
+        return (
+          <td key={sutunId} className="ap-master-excel-hucre ap-master-tablo-toggle-hucre" onClick={(e) => e.stopPropagation()}>
+            <div className="ap-master-toggle-mini">
+              <DurumAnahtari
+                etiket={k.aktif ? 'Aktif kullanıcı' : 'Pasif kullanıcı'}
+                acik={k.aktif}
+                devreDisi={islemId === k.id}
+                onChange={(v) => onDurumDegistir(k, v)}
+                renk={k.aktif ? 'yesil' : 'turuncu'}
+                sadeceToggle
+              />
+            </div>
+          </td>
+        );
       case 'sonGirisTarihi':
         return (
           <td key={sutunId} className="ap-master-excel-hucre ap-master-excel-hucre-salt ap-master-excel-hucre-tarih">
@@ -186,18 +185,6 @@ export function KullaniciExcelTablo({
 
   return (
     <div className="ap-master-excel-wrap">
-      <div className="ap-master-excel-ust">
-        <p className="ap-muted text-xs">
-          {gorunurSutunlar.length} sütun — restoran kullanıcılarını bayi / firma / şube ile eşleştirin
-        </p>
-        <MasterTabloSutunAyarlari
-          baslik="Kullanıcı tablosu sütunları"
-          sutunlar={KULLANICI_TABLO_SUTUNLARI}
-          gorunurSira={gorunurSutunlar}
-          varsayilanSira={KULLANICI_TABLO_VARSAYILAN_SIRA}
-          onDegistir={onSutunlarDegistir}
-        />
-      </div>
       <div className="ap-master-excel-scroll">
         <table className="ap-master-excel-tablo">
           <thead>
@@ -222,7 +209,7 @@ export function KullaniciExcelTablo({
                   <button
                     type="button"
                     className="ap-master-tablo-ikon-btn"
-                    onClick={() => onModalDuzenle(k)}
+                    onClick={() => onPanelDuzenle(k)}
                     aria-label="Kullanıcı düzenle"
                     title="Tüm alanları düzenle"
                   >

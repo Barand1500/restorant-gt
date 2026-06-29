@@ -36,7 +36,7 @@ const bayiInclude = {
 
 export async function bayiListesiGetir() {
   const kayitlar = await prisma.bayi.findMany({
-    orderBy: [{ durum: 'desc' }, { unvan: 'asc' }],
+    orderBy: [{ id: 'asc' }],
     include: bayiInclude,
   });
   return kayitlar.map(bayiYanitOlustur);
