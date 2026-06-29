@@ -9048,14 +9048,46 @@ html:has(.admin-panel[data-tema='acik']) body {
   max-height: min(70vh, 420px);
   overflow-y: auto;
   border-radius: 0.75rem;
-  border: 1px solid var(--ap-border);
-  background: var(--ap-surface);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--ap-border, #cbd5e1);
+  background-color: #ffffff;
+  background-color: var(--ap-surface, #ffffff);
+  color: var(--ap-text, #334155);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
   padding: 0.85rem;
+  isolation: isolate;
+}
+
+.ap-master-sutun-ayar-tema-kok[data-tema='acik'] {
+  --ap-surface: #ffffff;
+  --ap-surface-2: #f8fafc;
+  --ap-border: #cbd5e1;
+  --ap-text: #334155;
+  --ap-muted: #64748b;
+  --ap-heading: #0f172a;
+  --ap-hover: #e2e8f0;
+  background-color: #ffffff;
+}
+
+.ap-master-sutun-ayar-tema-kok[data-tema='koyu'] {
+  --ap-surface: #1e293b;
+  --ap-surface-2: #334155;
+  --ap-border: #475569;
+  --ap-text: #e2e8f0;
+  --ap-muted: #94a3b8;
+  --ap-heading: #ffffff;
+  --ap-hover: #334155;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .ap-master-sutun-ayar-panel-portal {
   position: fixed;
+  z-index: 10050;
 }
 
 .ap-master-sutun-ayar-baslik {
@@ -9104,10 +9136,11 @@ html:has(.admin-panel[data-tema='acik']) body {
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 0.35rem;
-  border: 1px solid var(--ap-border);
+  border: 1px solid var(--ap-border, #cbd5e1);
+  background-color: var(--ap-surface-2, #f8fafc);
   font-size: 0.7rem;
   line-height: 1;
-  color: var(--ap-muted);
+  color: var(--ap-muted, #64748b);
 }
 
 .ap-master-sutun-ayar-tas-btn:hover:not(:disabled) {

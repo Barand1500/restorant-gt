@@ -18,6 +18,15 @@ interface MasterTabloSutunAyarlariProps {
 const PANEL_GENISLIK = 300;
 const KENAR_BOSLUK = 8;
 
+function adminTemaOku(): 'acik' | 'koyu' {
+  const tema = document.querySelector('.admin-panel')?.getAttribute('data-tema');
+  return tema === 'koyu' ? 'koyu' : 'acik';
+}
+
+function portalHedefiBul(): HTMLElement {
+  return (document.querySelector('.admin-panel') as HTMLElement | null) ?? document.body;
+}
+
 function panelKonumuHesapla(btn: HTMLButtonElement) {
   const rect = btn.getBoundingClientRect();
   const genislik = Math.min(window.innerWidth - KENAR_BOSLUK * 2, PANEL_GENISLIK);
@@ -60,6 +69,7 @@ export function MasterTabloSutunAyarlari({
   const btnRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelStil, setPanelStil] = useState<CSSProperties>({});
+  const [tema, setTema] = useState<'acik' | 'koyu'>('acik');
 
   const konumGuncelle = useCallback(() => {
     if (!btnRef.current) return;
@@ -76,6 +86,7 @@ export function MasterTabloSutunAyarlari({
 
   useLayoutEffect(() => {
     if (!acik) return;
+    setTema(adminTemaOku());
     konumGuncelle();
   }, [acik, konumGuncelle, gorunurSira.length, sutunlar.length]);
 
@@ -123,7 +134,12 @@ export function MasterTabloSutunAyarlari({
   }
 
   const panelIcerik = (
-    <div ref={panelRef} className="ap-master-sutun-ayar-panel ap-master-sutun-ayar-panel-portal" style={panelStil}>
+    <div
+      ref={panelRef}
+      className="ap-master-sutun-ayar-tema-kok ap-master-sutun-ayar-panel ap-master-sutun-ayar-panel-portal"
+      data-tema={tema}
+      style={panelStil}
+    >
       <div className="ap-master-sutun-ayar-baslik">
         <p className="ap-heading text-sm font-semibold">{baslik}</p>
         <button
@@ -213,7 +229,7 @@ export function MasterTabloSutunAyarlari({
         </svg>
       </button>
 
-      {acik && createPortal(panelIcerik, document.body)}
+      {acik && createPortal(panelIcerik, portalHedefiBul())}
     </div>
   );
 }
