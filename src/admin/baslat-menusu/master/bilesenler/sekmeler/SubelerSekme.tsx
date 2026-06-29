@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
-import { formSelectSinifi } from '@/formlar/FormAlani';
+import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
 import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
 import { SubeKayitModal } from '@/admin/baslat-menusu/master/bilesenler/SubeKayitModal';
@@ -101,7 +101,7 @@ function TabloHucre({
     return (
       <input
         type={inputTipi}
-        className="ap-master-tablo-input"
+        className={`${formInputSinifi} ap-master-excel-input`}
         value={inputDeger}
         onChange={(e) => onDegistir(e.target.value)}
         onBlur={onBitir}
@@ -115,7 +115,7 @@ function TabloHucre({
 
   return (
     <span
-      className={`ap-master-tablo-hucre-duzenlenebilir ${className}`}
+      className={`ap-master-excel-hucre-tiklanabilir ${className}`}
       onDoubleClick={(e) => {
         e.stopPropagation();
         onBasla();
@@ -143,7 +143,7 @@ function FirmaHucre({ firmaId, gosterim, secenekler, duzenlemeAktif, onBasla, on
   if (duzenlemeAktif) {
     return (
       <select
-        className={`${formSelectSinifi} ap-master-tablo-input`}
+        className={`${formSelectSinifi} ap-master-excel-input`}
         value={firmaId || ''}
         onChange={(e) => {
           onSec(Number(e.target.value));
@@ -165,7 +165,7 @@ function FirmaHucre({ firmaId, gosterim, secenekler, duzenlemeAktif, onBasla, on
 
   return (
     <span
-      className="ap-master-tablo-hucre-duzenlenebilir ap-muted text-sm"
+      className="ap-master-excel-hucre-tiklanabilir ap-muted"
       onDoubleClick={(e) => {
         e.stopPropagation();
         onBasla();
@@ -189,7 +189,7 @@ function SubeTipiHucre({ subeTipi, duzenlemeAktif, onBasla, onSec, onBitir }: Su
   if (duzenlemeAktif) {
     return (
       <select
-        className={`${formSelectSinifi} ap-master-tablo-input`}
+        className={`${formSelectSinifi} ap-master-excel-input`}
         value={subeTipi}
         onChange={(e) => {
           onSec(e.target.value as SubeTipi);
@@ -211,7 +211,7 @@ function SubeTipiHucre({ subeTipi, duzenlemeAktif, onBasla, onSec, onBitir }: Su
 
   return (
     <span
-      className="ap-master-tablo-hucre-duzenlenebilir text-sm"
+      className="ap-master-excel-hucre-tiklanabilir"
       onDoubleClick={(e) => {
         e.stopPropagation();
         onBasla();
@@ -512,15 +512,6 @@ export function SubelerSekme() {
             </option>
           ))}
         </select>
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil shrink-0"
-          onClick={yeniSube}
-          disabled={aktifFirmalar.length === 0}
-          title={aktifFirmalar.length === 0 ? 'Önce aktif bir firma ekleyin' : undefined}
-        >
-          + Şube Ekle
-        </button>
       </div>
 
       {seciliDegisiklikVar && (
@@ -534,12 +525,18 @@ export function SubelerSekme() {
           <p className="ap-muted text-sm">
             {arama || filtre !== 'tumu' || firmaFiltre !== ''
               ? 'Filtreye uygun şube bulunamadı.'
-              : 'Henüz şube kaydı yok.'}
+              : aktifFirmalar.length === 0
+                ? 'Önce aktif bir firma ekleyin.'
+                : 'Henüz şube kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
       ) : (
-        <div className="ap-seo-tablo-scroll">
-          <table className="ap-seo-tablo ap-master-bayi-tablo">
+        <div className="ap-master-excel-wrap">
+          <div className="ap-master-excel-ust">
+            <p className="ap-muted text-xs">11 sütun görünüyor — çift tıklayarak hücre düzenleyin</p>
+          </div>
+          <div className="ap-master-excel-scroll">
+          <table className="ap-master-excel-tablo ap-master-bayi-tablo">
             <thead>
               <tr>
                 <th>Şube adı</th>
@@ -565,14 +562,14 @@ export function SubelerSekme() {
                     key={s.id}
                     className={[
                       !s.aktif ? 'ap-master-tablo-pasif' : undefined,
-                      seciliId === s.id ? 'ap-master-tablo-secili' : undefined,
+                      seciliId === s.id ? 'ap-master-excel-satir-secili' : undefined,
                       satirDegisti ? 'ap-master-tablo-degisti' : undefined,
                     ]
                       .filter(Boolean)
                       .join(' ') || undefined}
                     onClick={() => setSeciliId(s.id)}
                   >
-                    <td className="ap-master-tablo-hucre">
+                    <td className="ap-master-excel-hucre">
                       <TabloHucre
                         alan="subeAdi"
                         gosterim={s.subeAdi}
@@ -591,10 +588,10 @@ export function SubelerSekme() {
                         onBasla={() => hucreBasla(s.id, 'eposta')}
                         onDegistir={(v) => hucreGuncelle(s.id, 'eposta', v)}
                         onBitir={hucreBitir}
-                        className="ap-muted mt-0.5 block truncate text-xs"
+                        className="ap-muted ap-master-tablo-alt-satir block truncate"
                       />
                     </td>
-                    <td className="ap-master-tablo-hucre">
+                    <td className="ap-master-excel-hucre">
                       <FirmaHucre
                         firmaId={s.firmaId}
                         gosterim={s.firmaGoster}
@@ -605,7 +602,7 @@ export function SubelerSekme() {
                         onBitir={hucreBitir}
                       />
                     </td>
-                    <td className="ap-master-tablo-hucre">
+                    <td className="ap-master-excel-hucre">
                       <SubeTipiHucre
                         subeTipi={s.subeTipi}
                         duzenlemeAktif={duzenlemeHucre?.subeId === s.id && duzenlemeHucre.alan === 'subeTipi'}
@@ -614,7 +611,7 @@ export function SubelerSekme() {
                         onBitir={hucreBitir}
                       />
                     </td>
-                    <td className="ap-muted ap-master-tablo-hucre text-sm">
+                    <td className="ap-muted ap-master-excel-hucre">
                       <TabloHucre
                         alan="konum"
                         gosterim={s.konumMetin}
@@ -625,7 +622,7 @@ export function SubelerSekme() {
                         onBitir={hucreBitir}
                       />
                     </td>
-                    <td className="ap-muted ap-master-tablo-hucre text-sm">
+                    <td className="ap-muted ap-master-excel-hucre">
                       <TabloHucre
                         alan="vergiDairesi"
                         gosterim={s.vergiDairesi ?? '—'}
@@ -636,7 +633,7 @@ export function SubelerSekme() {
                         onBitir={hucreBitir}
                       />
                     </td>
-                    <td className="ap-muted ap-master-tablo-hucre text-sm">
+                    <td className="ap-muted ap-master-excel-hucre">
                       <TabloHucre
                         alan="vergiNo"
                         gosterim={s.vergiNo ?? '—'}
@@ -647,7 +644,7 @@ export function SubelerSekme() {
                         onBitir={hucreBitir}
                       />
                     </td>
-                    <td className="ap-master-tablo-hucre">
+                    <td className="ap-master-excel-hucre">
                       <TabloHucre
                         alan="iskonto"
                         gosterim={iskontoGoster(s.iskonto)}
@@ -659,8 +656,8 @@ export function SubelerSekme() {
                         inputTipi="number"
                       />
                     </td>
-                    <td className="ap-muted text-xs whitespace-nowrap">{subeTarihGoster(s.kayitTarihi)}</td>
-                    <td className="ap-muted text-xs whitespace-nowrap">{subeTarihGoster(s.guncellemeTarihi)}</td>
+                    <td className="ap-master-excel-hucre-tarih">{subeTarihGoster(s.kayitTarihi)}</td>
+                    <td className="ap-master-excel-hucre-tarih">{subeTarihGoster(s.guncellemeTarihi)}</td>
                     <td className="ap-master-tablo-toggle-hucre" onClick={(e) => e.stopPropagation()}>
                       <DurumAnahtari
                         etiket={s.aktif ? 'Aktif şube' : 'Pasif şube'}
@@ -687,6 +684,7 @@ export function SubelerSekme() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { formInputSinifi } from '@/formlar/FormAlani';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
 import {
   ondalikKabul,
@@ -70,7 +71,7 @@ function KartHucre({
       <input
         type="text"
         inputMode={ondalik ? 'decimal' : 'numeric'}
-        className="ap-master-tablo-input w-full"
+        className={`${formInputSinifi} ap-master-excel-input w-full`}
         value={inputDeger}
         onChange={(e) => {
           const v = ondalik ? e.target.value.replace(',', '.') : e.target.value;
@@ -87,7 +88,7 @@ function KartHucre({
 
   return (
     <span
-      className={`ap-master-tablo-hucre-duzenlenebilir ${className}`}
+      className={`ap-master-excel-hucre-tiklanabilir ${className}`}
       onDoubleClick={(e) => {
         e.stopPropagation();
         onBasla();
@@ -346,9 +347,6 @@ export function PaketlerSekme() {
 
       <div className="ap-master-ust">
         <MasterArama placeholder="Paket adı ara…" value={arama} onChange={setArama} />
-        <button type="button" className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil" onClick={yeniPaket}>
-          + Yeni Paket
-        </button>
       </div>
 
       {seciliDegisiklikVar && (
@@ -359,7 +357,9 @@ export function PaketlerSekme() {
 
       {liste.length === 0 ? (
         <div className="ap-master-bos-durum">
-          <p className="ap-muted text-sm">Filtreye uygun paket bulunamadı.</p>
+          <p className="ap-muted text-sm">
+            {arama || filtre !== 'tumu' ? 'Filtreye uygun paket bulunamadı.' : 'Henüz paket kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
+          </p>
         </div>
       ) : (
         <div className="ap-master-paket-grid">
@@ -381,7 +381,7 @@ export function PaketlerSekme() {
                 onClick={() => setSeciliId(p.id)}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="ap-heading min-w-0 flex-1 text-lg font-bold">
+                  <h3 className="ap-heading ap-master-paket-baslik min-w-0 flex-1 font-bold">
                     <KartHucre
                       alan="paketAdi"
                       gosterim={p.paketAdi}
@@ -407,7 +407,7 @@ export function PaketlerSekme() {
                 </div>
 
                 <p className="ap-master-paket-fiyat">
-                  <span className="text-2xl font-bold">
+                  <span className="ap-master-paket-fiyat-deger font-bold">
                     ₺
                     <KartHucre
                       alan="fiyat"
@@ -421,7 +421,7 @@ export function PaketlerSekme() {
                       className="inline"
                     />
                   </span>
-                  <span className="ap-muted text-xs"> / ay</span>
+                  <span className="ap-muted ap-master-paket-fiyat-birim"> / ay</span>
                 </p>
 
                 <ul className="ap-master-paket-ozellikler">
