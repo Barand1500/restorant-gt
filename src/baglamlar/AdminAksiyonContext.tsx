@@ -60,6 +60,9 @@ interface ModulAksiyonKaydi {
 interface AdminAksiyonContextType {
   focusModulId: string;
   setFocusModulId: (id: string) => void;
+  /** Master alt sekmesi gibi modül içi rehber anahtarı (ör. master-firmalar) */
+  rehberModulId: string | null;
+  setRehberModulId: (id: string | null) => void;
   registerHandlers: (modulId: string, handlers: AksiyonHandlerlar) => void;
   clearHandlers: (modulId: string) => void;
   setAksiyonDurumlari: (modulId: string, durumlar: AksiyonDurumlari) => void;
@@ -78,6 +81,7 @@ const AdminAksiyonContext = createContext<AdminAksiyonContextType | null>(null);
 export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
   const kayitlarRef = useRef<Map<string, ModulAksiyonKaydi>>(new Map());
   const [focusModulId, setFocusModulId] = useState('dashboard');
+  const [rehberModulId, setRehberModulId] = useState<string | null>(null);
   const [aksiyonDurumlari, setAksiyonDurumlariState] = useState<AksiyonDurumlari>({});
   const [aksiyonGeriBildirim, setAksiyonGeriBildirim] = useState<AksiyonGeriBildirim | null>(null);
   const geriBildirimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,6 +171,8 @@ export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
       value={{
         focusModulId,
         setFocusModulId,
+        rehberModulId,
+        setRehberModulId,
         registerHandlers,
         clearHandlers,
         setAksiyonDurumlari,

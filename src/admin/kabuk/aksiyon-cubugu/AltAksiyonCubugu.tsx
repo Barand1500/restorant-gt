@@ -26,7 +26,8 @@ export function AltAksiyonCubugu({
   focusModulId = 'dashboard',
   onRehberAc,
 }: AltAksiyonCubuguProps) {
-  const rehber = modulRehberBul(focusModulId);
+  const { rehberModulId } = useAdminAksiyon();
+  const rehber = modulRehberBul(rehberModulId ?? focusModulId);
   const rehberKisayolu = kisayolAyarlariOku().rehber;
   const [acikPanel, setAcikPanel] = useState<AcikPanel>(null);
   const { okunmamisSayi, yenile } = useBildirimSayaci();

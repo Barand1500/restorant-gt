@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AdminRehberModal } from './AdminRehberModal';
 import { modulRehberBul } from '@/admin/veri/adminModulRehberleri';
 import { kisayolAyarlariOku } from '@/admin/baslat-menusu/sistem/kisayol-ayarlari/yardimci';
+import { useAdminAksiyon } from '@/baglamlar/AdminAksiyonContext';
 
 interface ModulRehberSistemiProps {
   modulId: string;
@@ -12,7 +13,9 @@ interface ModulRehberSistemiProps {
 
 export function ModulRehberSistemi({ modulId, zorlaAcik, onAcikDegisti, gizliButon }: ModulRehberSistemiProps) {
   const [acik, setAcik] = useState(false);
-  const rehber = modulRehberBul(modulId);
+  const { rehberModulId } = useAdminAksiyon();
+  const etkinModulId = rehberModulId ?? modulId;
+  const rehber = modulRehberBul(etkinModulId);
 
   const ac = useCallback(() => {
     setAcik(true);
@@ -31,7 +34,7 @@ export function ModulRehberSistemi({ modulId, zorlaAcik, onAcikDegisti, gizliBut
   useEffect(() => {
     setAcik(false);
     onAcikDegisti?.(false);
-  }, [modulId, onAcikDegisti]);
+  }, [modulId, rehberModulId, onAcikDegisti]);
 
   return (
     <>

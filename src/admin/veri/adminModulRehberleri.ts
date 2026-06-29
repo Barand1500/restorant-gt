@@ -1,4 +1,5 @@
 import type { RehberKart } from '@/admin/ortak/AdminRehberModal';
+import { masterSekmeRehberBul } from '@/admin/veri/adminMasterRehberleri';
 
 export interface ModulRehber {
   baslik: string;
@@ -10,26 +11,27 @@ export interface ModulRehber {
 
 export const ADMIN_MODUL_REHBERLERI: Record<string, ModulRehber> = {
   master: {
-    baslik: 'Master Rehberi',
+    baslik: 'Master — Genel Bakış',
     altBaslik: 'Organizasyon ve lisans yönetimi',
-    bolumBaslik: 'Master',
+    bolumBaslik: 'Master modülü',
     kartlar: [
       {
-        ikon: '🤝',
-        baslik: 'Bayi → Firma → Şube',
-        aciklama: 'Distribütör ağını, müşteri firmalarını ve lokasyonları tek hiyerarşide yönetin.',
+        ikon: '🗂️',
+        baslik: 'Sekmeler',
+        aciklama:
+          'Sol menüden Modüller, Bayiler, Firmalar, Şubeler, Kullanıcılar, Paketler ve Lisanslar sekmelerine geçin. Her sekmenin kendi rehberi vardır.',
         renk: 'mavi',
       },
       {
-        ikon: '🎫',
-        baslik: 'Paket ve Lisans',
-        aciklama: 'Satılabilir paketleri tanımlayın, firmalara lisans atayın ve süre takibi yapın.',
+        ikon: '🤝',
+        baslik: 'Hiyerarşi',
+        aciklama: 'Bayi → Firma → Şube zinciri organizasyonu tanımlar. Kullanıcılar ve lisanslar bu yapıya bağlanır.',
         renk: 'mor',
       },
       {
-        ikon: '🧩',
-        baslik: 'Modüller',
-        aciklama: 'Panele bağlı yazılım modülleri ve prefix tanımları burada yönetilir.',
+        ikon: '❓',
+        baslik: 'Bu rehber',
+        aciklama: 'Alt çubuktaki ? veya F1 ile açılan yardım, bulunduğunuz sekmeye göre değişir.',
         renk: 'turuncu',
       },
     ],
@@ -220,5 +222,12 @@ const VARSAYILAN_REHBER: ModulRehber = {
 };
 
 export function modulRehberBul(modulId: string): ModulRehber {
-  return ADMIN_MODUL_REHBERLERI[modulId] ?? VARSAYILAN_REHBER;
+  if (ADMIN_MODUL_REHBERLERI[modulId]) return ADMIN_MODUL_REHBERLERI[modulId];
+
+  if (modulId.startsWith('master-')) {
+    const sekmeRehber = masterSekmeRehberBul(modulId.slice('master-'.length));
+    if (sekmeRehber) return sekmeRehber;
+  }
+
+  return VARSAYILAN_REHBER;
 }
