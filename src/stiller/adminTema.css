@@ -8539,6 +8539,22 @@ html:has(.admin-panel[data-tema='acik']) body {
   border-radius: 0.875rem;
   border: 1px solid var(--ap-border);
   background: var(--ap-input-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, outline 0.15s;
+}
+
+.ap-master-paket-kart-secili {
+  border-color: color-mix(in srgb, var(--ap-accent, #3b82f6) 45%, var(--ap-border));
+  outline: 1px solid color-mix(in srgb, var(--ap-accent, #3b82f6) 35%, transparent);
+}
+
+.ap-master-paket-kart-degisti {
+  outline: 1px dashed color-mix(in srgb, var(--ap-accent, #3b82f6) 55%, transparent);
+}
+
+.ap-master-paket-toggle {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .ap-master-paket-one-cikan {
@@ -8807,6 +8823,74 @@ html:has(.admin-panel[data-tema='acik']) body {
 
 .ap-master-tablo-pasif {
   opacity: 0.55;
+}
+
+.ap-master-bayi-tablo tbody tr {
+  cursor: pointer;
+}
+
+.ap-master-tablo-secili {
+  background: color-mix(in srgb, var(--ap-accent, #3b82f6) 12%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--ap-accent, #3b82f6) 35%, transparent);
+}
+
+.ap-master-tablo-degisti {
+  outline: 1px dashed color-mix(in srgb, var(--ap-accent, #3b82f6) 55%, transparent);
+}
+
+.ap-master-tablo-hucre {
+  min-width: 4.5rem;
+}
+
+.ap-master-tablo-hucre-duzenlenebilir {
+  cursor: text;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  margin: -0.125rem -0.25rem;
+}
+
+.ap-master-tablo-hucre-duzenlenebilir:hover {
+  background: color-mix(in srgb, var(--ap-accent, #3b82f6) 8%, transparent);
+}
+
+.ap-master-tablo-input {
+  width: 100%;
+  min-width: 3.5rem;
+  padding: 0.25rem 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--ap-heading);
+  background: var(--ap-surface, #1e293b);
+  border: 1px solid var(--ap-accent, #3b82f6);
+  border-radius: 0.25rem;
+  outline: none;
+}
+
+.ap-master-tablo-bilgi-baslik {
+  cursor: help;
+}
+
+.ap-master-tablo-toggle-hucre {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ap-master-tablo-ikon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  color: var(--ap-accent);
+  background: color-mix(in srgb, var(--ap-accent, #3b82f6) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ap-accent, #3b82f6) 25%, transparent);
+  transition: background 0.15s, color 0.15s;
+}
+
+.ap-master-tablo-ikon-btn:hover {
+  background: color-mix(in srgb, var(--ap-accent, #3b82f6) 20%, transparent);
+  color: var(--ap-heading);
 }
 
 .ap-master-bayi-satir {

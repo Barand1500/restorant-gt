@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
 import { IlIlceArama, TelefonAlani } from '@/admin/baslat-menusu/master/bilesenler/MasterFormAlanlari';
-import type { BayiFormGirdi, MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
+import {
+  bayiTarihGoster,
+  type BayiFormGirdi,
+  type MasterBayi,
+} from '@/admin/baslat-menusu/master/bayiler/api';
 
 interface BayiKayitModalProps {
   acik: boolean;
@@ -12,7 +16,19 @@ interface BayiKayitModalProps {
   onKaydet: (girdi: BayiFormGirdi) => void;
 }
 
-const bosForm: BayiFormGirdi = { unvan: '', ustId: null, il: '', ilce: '', eposta: '', telefon: '', gsm: '' };
+const bosForm: BayiFormGirdi = {
+  unvan: '',
+  ustId: null,
+  il: '',
+  ilce: '',
+  adres: '',
+  eposta: '',
+  telefon: '',
+  gsm: '',
+  vergiDairesi: '',
+  vergiNo: '',
+  iskonto: null,
+};
 
 export function BayiKayitModal({
   acik,
@@ -33,9 +49,13 @@ export function BayiKayitModal({
         ustId: duzenlenen.ustId,
         il: duzenlenen.il ?? '',
         ilce: duzenlenen.ilce ?? '',
+        adres: duzenlenen.adres ?? '',
         eposta: duzenlenen.eposta ?? '',
         telefon: duzenlenen.telefon ?? '',
         gsm: duzenlenen.gsm ?? '',
+        vergiDairesi: duzenlenen.vergiDairesi ?? '',
+        vergiNo: duzenlenen.vergiNo ?? '',
+        iskonto: duzenlenen.iskonto,
       });
     } else {
       setForm(bosForm);
@@ -69,14 +89,29 @@ export function BayiKayitModal({
       setHata('Unvan en az 2 karakter olmalı');
       return;
     }
+
+    let iskonto: number | null = null;
+    if (form.iskonto != null && form.iskonto !== ('' as unknown as number)) {
+      const n = Number(form.iskonto);
+      if (Number.isNaN(n) || n < 0 || n > 100) {
+        setHata('İskonto 0–100 arasında olmalı');
+        return;
+      }
+      iskonto = n;
+    }
+
     onKaydet({
       ...form,
       unvan,
       il: form.il?.trim() || undefined,
       ilce: form.ilce?.trim() || undefined,
+      adres: form.adres?.trim() || undefined,
       eposta: form.eposta?.trim() || undefined,
       telefon: form.telefon?.trim() || undefined,
       gsm: form.gsm?.trim() || undefined,
+      vergiDairesi: form.vergiDairesi?.trim() || undefined,
+      vergiNo: form.vergiNo?.trim() || undefined,
+      iskonto,
       ustId: form.ustId ?? null,
     });
   }
@@ -97,6 +132,17 @@ export function BayiKayitModal({
             ✕
           </button>
         </div>
+
+        {duzenlenen && (
+          <div className="mt-3 flex flex-wrap gap-4 text-xs">
+            <span className="ap-muted">
+              Kayıt: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.kayitTarihi)}</strong>
+            </span>
+            <span className="ap-muted">
+              Güncelleme: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
+            </span>
+          </div>
+        )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -131,6 +177,48 @@ export function BayiKayitModal({
             ilce={form.ilce ?? ''}
             onDegistir={(g) => setForm((f) => ({ ...f, ...g }))}
           />
+          <div className="sm:col-span-2">
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Adres</label>
+            <input
+              className={formInputSinifi}
+              value={form.adres ?? ''}
+              onChange={(e) => setForm({ ...form, adres: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Vergi dairesi</label>
+            <input
+              className={formInputSinifi}
+              value={form.vergiDairesi ?? ''}
+              onChange={(e) => setForm({ ...form, vergiDairesi: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Vergi no</label>
+            <input
+              className={formInputSinifi}
+              value={form.vergiNo ?? ''}
+              onChange={(e) => setForm({ ...form, vergiNo: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">İskonto (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              className={formInputSinifi}
+              placeholder="0"
+              value={form.iskonto ?? ''}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  iskonto: e.target.value === '' ? null : Number(e.target.value),
+                })
+              }
+            />
+          </div>
           <div>
             <label className="ap-muted mb-1 block text-xs font-semibold uppercase">E-posta</label>
             <input

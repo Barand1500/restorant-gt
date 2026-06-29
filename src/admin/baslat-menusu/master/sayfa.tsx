@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AdminModulKabuk, AdminPanelKarti } from '@/admin/ortak/AdminBilesenleri';
-import { MasterBilgiPaneli } from '@/admin/baslat-menusu/master/bilesenler/MasterBilgiPaneli';
 import { MasterSekmeCubugu } from '@/admin/baslat-menusu/master/bilesenler/MasterSekmeCubugu';
 import { MasterSekmeIcerik } from '@/admin/baslat-menusu/master/bilesenler/MasterSekmeIcerik';
 import { masterSekmeBul, type MasterSekmeId } from '@/admin/baslat-menusu/master/tipler';
@@ -19,7 +18,6 @@ export function MasterSayfasi() {
         <div className="ap-sistem-layout">
           <aside className="ap-sistem-sol">
             <MasterSekmeCubugu aktif={sekme} onDegistir={setSekme} />
-            <MasterBilgiPaneli sekme={tanim} />
           </aside>
 
           <div className="ap-sistem-icerik">

@@ -35,6 +35,7 @@ export function DurumAnahtari({
   ikon,
   devreDisi = false,
   kompakt = false,
+  sadeceToggle = false,
 }: {
   etiket: string;
   aciklama?: string;
@@ -44,7 +45,24 @@ export function DurumAnahtari({
   ikon?: string;
   devreDisi?: boolean;
   kompakt?: boolean;
+  sadeceToggle?: boolean;
 }) {
+  if (sadeceToggle) {
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={acik}
+        aria-label={etiket}
+        disabled={devreDisi}
+        onClick={() => onChange(!acik)}
+        className={`ap-toggle ${acik ? 'ap-toggle-on' : ''} ${renk === 'turuncu' ? 'ap-toggle-turuncu' : ''} ${devreDisi ? 'cursor-not-allowed opacity-60' : ''}`}
+      >
+        <span className="ap-toggle-thumb" />
+      </button>
+    );
+  }
+
   return (
     <div
       className={`ap-sistem-toggle ap-sistem-toggle-${renk} ${kompakt ? 'ap-sistem-toggle-kompakt' : ''} ${acik ? 'ap-sistem-toggle-aktif' : ''} ${devreDisi ? 'opacity-60' : ''}`}

@@ -15,6 +15,9 @@ export interface MasterSube {
   telefon: string | null;
   gsm: string | null;
   eposta: string | null;
+  vergiDairesi: string | null;
+  vergiNo: string | null;
+  iskonto: number | null;
   aktif: boolean;
   kayitTarihi: string;
   guncellemeTarihi: string;
@@ -34,6 +37,9 @@ export interface SubeFormGirdi {
   eposta?: string;
   telefon?: string;
   gsm?: string;
+  vergiDairesi?: string;
+  vergiNo?: string;
+  iskonto?: number | null;
   aktif?: boolean;
 }
 
@@ -48,8 +54,14 @@ export function subeTipEtiketi(tip: SubeTipi): string {
   return SUBE_TIP_SECENEKLERI.find((s) => s.kod === tip)?.etiket ?? tip;
 }
 
+export function subeTarihGoster(iso: string | null): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('tr-TR');
+}
+
 export async function masterSubeleriGetir(): Promise<SubeListeYanit> {
-  return adminJsonFetch<SubeListeYanit>('/subeler', { headers: adminHeaders() });
+  const veri = await adminJsonFetch<SubeListeYanit>('/subeler', { headers: adminHeaders() });
+  return { subeler: veri.subeler ?? [] };
 }
 
 export async function masterSubeOlustur(girdi: SubeFormGirdi): Promise<{ sube: MasterSube }> {
@@ -68,5 +80,12 @@ export async function masterSubeGuncelle(
     method: 'PATCH',
     headers: adminHeaders(),
     body: JSON.stringify(girdi),
+  });
+}
+
+export async function masterSubeSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/subeler/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
   });
 }

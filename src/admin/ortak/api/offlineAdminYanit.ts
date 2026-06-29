@@ -70,6 +70,9 @@ interface OfflineSube {
   telefon: string | null;
   gsm: string | null;
   eposta: string | null;
+  vergiDairesi: string | null;
+  vergiNo: string | null;
+  iskonto: number | null;
   aktif: boolean;
   kayitTarihi: string;
   guncellemeTarihi: string;
@@ -368,9 +371,34 @@ function offlineBayiYaz(body: BodyInit | null | undefined, method: string, path:
   const liste = offlineBayiOku();
   const simdi = new Date().toISOString();
 
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    const bayi = liste.find((b) => b.id === id);
+    if (!bayi) return { mesaj: 'Bayi bulunamadi' };
+    if (bayi.firmaSayisi > 0) return { mesaj: 'Firmalari olan bayi silinemez' };
+    if (bayi.altBayiSayisi > 0) return { mesaj: 'Alt bayileri olan bayi silinemez' };
+    offlineBayiKaydet(liste.filter((b) => b.id !== id));
+    return { mesaj: 'Silindi' };
+  }
+
   if (method === 'POST' && typeof body === 'string') {
-    const girdi = JSON.parse(body) as { unvan?: string; ustId?: number | null; il?: string; ilce?: string; eposta?: string; telefon?: string; gsm?: string };
+    const girdi = JSON.parse(body) as {
+      unvan?: string;
+      ustId?: number | null;
+      il?: string;
+      ilce?: string;
+      adres?: string;
+      eposta?: string;
+      telefon?: string;
+      gsm?: string;
+      vergiDairesi?: string;
+      vergiNo?: string;
+      iskonto?: number | null;
+    };
     const ust = girdi.ustId ? liste.find((b) => b.id === girdi.ustId) : null;
+    const iskontoHam = girdi.iskonto;
+    const iskonto =
+      iskontoHam != null && !Number.isNaN(Number(iskontoHam)) ? Number(iskontoHam) : null;
     const bayi: OfflineBayi = {
       id: Math.max(0, ...liste.map((b) => b.id)) + 1,
       unvan: girdi.unvan?.trim() ?? 'Yeni Bayi',
@@ -378,13 +406,13 @@ function offlineBayiYaz(body: BodyInit | null | undefined, method: string, path:
       ustUnvan: ust?.unvan ?? null,
       il: girdi.il?.trim() ?? null,
       ilce: girdi.ilce?.trim() ?? null,
-      adres: null,
+      adres: girdi.adres?.trim() ?? null,
       telefon: girdi.telefon?.trim() ?? null,
       gsm: girdi.gsm?.trim() ?? null,
       eposta: girdi.eposta?.trim() ?? null,
-      vergiDairesi: null,
-      vergiNo: null,
-      iskonto: null,
+      vergiDairesi: girdi.vergiDairesi?.trim() ?? null,
+      vergiNo: girdi.vergiNo?.trim() ?? null,
+      iskonto,
       aktif: true,
       firmaSayisi: 0,
       altBayiSayisi: 0,
@@ -401,15 +429,25 @@ function offlineBayiYaz(body: BodyInit | null | undefined, method: string, path:
     const idx = liste.findIndex((b) => b.id === id);
     if (idx < 0) return { mesaj: 'Bayi bulunamadi' };
     const ust = girdi.ustId ? liste.find((b) => b.id === girdi.ustId) : liste[idx].ustId ? liste.find((b) => b.id === liste[idx].ustId) : null;
+    const iskontoGuncel =
+      girdi.iskonto !== undefined
+        ? girdi.iskonto == null || Number.isNaN(Number(girdi.iskonto))
+          ? null
+          : Number(girdi.iskonto)
+        : liste[idx].iskonto;
     const guncel: OfflineBayi = {
       ...liste[idx],
       ...(girdi.unvan ? { unvan: girdi.unvan.trim() } : {}),
       ...(girdi.ustId !== undefined ? { ustId: girdi.ustId, ustUnvan: ust?.unvan ?? null } : {}),
       ...(girdi.il !== undefined ? { il: girdi.il } : {}),
       ...(girdi.ilce !== undefined ? { ilce: girdi.ilce } : {}),
+      ...(girdi.adres !== undefined ? { adres: girdi.adres } : {}),
       ...(girdi.eposta !== undefined ? { eposta: girdi.eposta } : {}),
       ...(girdi.telefon !== undefined ? { telefon: girdi.telefon } : {}),
       ...(girdi.gsm !== undefined ? { gsm: girdi.gsm } : {}),
+      ...(girdi.vergiDairesi !== undefined ? { vergiDairesi: girdi.vergiDairesi } : {}),
+      ...(girdi.vergiNo !== undefined ? { vergiNo: girdi.vergiNo } : {}),
+      ...(girdi.iskonto !== undefined ? { iskonto: iskontoGuncel } : {}),
       ...('aktif' in girdi ? { aktif: Boolean(girdi.aktif) } : {}),
       guncellemeTarihi: simdi,
     };
@@ -549,6 +587,9 @@ function offlineSubeOku(): OfflineSube[] {
       telefon: null,
       gsm: null,
       eposta: null,
+      vergiDairesi: null,
+      vergiNo: null,
+      iskonto: null,
       aktif: true,
       kayitTarihi: simdi,
       guncellemeTarihi: simdi,
@@ -569,6 +610,13 @@ function offlineSubeYaz(body: BodyInit | null | undefined, method: string, path:
   const firmalar = offlineFirmaOku();
   const simdi = new Date().toISOString();
 
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    if (!liste.some((s) => s.id === id)) return { mesaj: 'Sube bulunamadi' };
+    offlineSubeKaydet(liste.filter((s) => s.id !== id));
+    return { mesaj: 'Silindi' };
+  }
+
   if (method === 'POST' && typeof body === 'string') {
     const girdi = JSON.parse(body) as {
       firmaId?: number;
@@ -580,8 +628,14 @@ function offlineSubeYaz(body: BodyInit | null | undefined, method: string, path:
       eposta?: string;
       telefon?: string;
       gsm?: string;
+      vergiDairesi?: string;
+      vergiNo?: string;
+      iskonto?: number | null;
     };
     const firma = firmalar.find((f) => f.id === girdi.firmaId);
+    const iskontoHam = girdi.iskonto;
+    const iskonto =
+      iskontoHam != null && !Number.isNaN(Number(iskontoHam)) ? Number(iskontoHam) : null;
     const sube: OfflineSube = {
       id: Math.max(0, ...liste.map((s) => s.id)) + 1,
       firmaId: girdi.firmaId ?? 1,
@@ -595,6 +649,9 @@ function offlineSubeYaz(body: BodyInit | null | undefined, method: string, path:
       telefon: girdi.telefon?.trim() ?? null,
       gsm: girdi.gsm?.trim() ?? null,
       eposta: girdi.eposta?.trim() ?? null,
+      vergiDairesi: girdi.vergiDairesi?.trim() ?? null,
+      vergiNo: girdi.vergiNo?.trim() ?? null,
+      iskonto,
       aktif: true,
       kayitTarihi: simdi,
       guncellemeTarihi: simdi,
@@ -609,6 +666,12 @@ function offlineSubeYaz(body: BodyInit | null | undefined, method: string, path:
     const idx = liste.findIndex((s) => s.id === id);
     if (idx < 0) return { mesaj: 'Sube bulunamadi' };
     const firma = girdi.firmaId ? firmalar.find((f) => f.id === girdi.firmaId) : null;
+    const iskontoGuncel =
+      girdi.iskonto !== undefined
+        ? girdi.iskonto == null || Number.isNaN(Number(girdi.iskonto))
+          ? null
+          : Number(girdi.iskonto)
+        : liste[idx].iskonto;
     const guncel: OfflineSube = {
       ...liste[idx],
       ...(girdi.subeAdi ? { subeAdi: girdi.subeAdi.trim() } : {}),
@@ -626,6 +689,9 @@ function offlineSubeYaz(body: BodyInit | null | undefined, method: string, path:
       ...(girdi.eposta !== undefined ? { eposta: girdi.eposta } : {}),
       ...(girdi.telefon !== undefined ? { telefon: girdi.telefon } : {}),
       ...(girdi.gsm !== undefined ? { gsm: girdi.gsm } : {}),
+      ...(girdi.vergiDairesi !== undefined ? { vergiDairesi: girdi.vergiDairesi } : {}),
+      ...(girdi.vergiNo !== undefined ? { vergiNo: girdi.vergiNo } : {}),
+      ...(girdi.iskonto !== undefined ? { iskonto: iskontoGuncel } : {}),
       ...('aktif' in girdi ? { aktif: Boolean(girdi.aktif) } : {}),
       guncellemeTarihi: simdi,
     };
@@ -673,6 +739,15 @@ function offlinePaketListe() {
 function offlinePaketYaz(body: BodyInit | null | undefined, method: string, path: string) {
   const liste = offlinePaketOku();
   const simdi = new Date().toISOString();
+
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    const paket = liste.find((p) => p.id === id);
+    if (!paket) return { mesaj: 'Paket bulunamadi' };
+    if (paket.aktifLisansSayisi > 0) return { mesaj: 'Lisansi olan paket silinemez' };
+    offlinePaketKaydet(liste.filter((p) => p.id !== id));
+    return { mesaj: 'Silindi' };
+  }
 
   if (method === 'POST' && typeof body === 'string') {
     const girdi = JSON.parse(body) as Partial<OfflinePaket>;

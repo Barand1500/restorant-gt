@@ -45,3 +45,10 @@ export async function masterPaketGuncelle(
     body: JSON.stringify(girdi),
   });
 }
+
+export async function masterPaketSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/paketler/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
+  });
+}

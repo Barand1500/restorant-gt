@@ -3,6 +3,7 @@ import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
 import { IlIlceArama, TelefonAlani } from '@/admin/baslat-menusu/master/bilesenler/MasterFormAlanlari';
 import {
   SUBE_TIP_SECENEKLERI,
+  subeTarihGoster,
   type MasterSube,
   type SubeFormGirdi,
 } from '@/admin/baslat-menusu/master/subeler/api';
@@ -27,6 +28,9 @@ const bosForm: SubeFormGirdi = {
   eposta: '',
   telefon: '',
   gsm: '',
+  vergiDairesi: '',
+  vergiNo: '',
+  iskonto: null,
 };
 
 export function SubeKayitModal({
@@ -56,6 +60,9 @@ export function SubeKayitModal({
         eposta: duzenlenen.eposta ?? '',
         telefon: duzenlenen.telefon ?? '',
         gsm: duzenlenen.gsm ?? '',
+        vergiDairesi: duzenlenen.vergiDairesi ?? '',
+        vergiNo: duzenlenen.vergiNo ?? '',
+        iskonto: duzenlenen.iskonto,
       });
     } else {
       setForm({
@@ -94,6 +101,17 @@ export function SubeKayitModal({
       setHata('Şube adı en az 2 karakter olmalı');
       return;
     }
+
+    let iskonto: number | null = null;
+    if (form.iskonto != null) {
+      const n = Number(form.iskonto);
+      if (Number.isNaN(n) || n < 0 || n > 100) {
+        setHata('İskonto 0–100 arasında olmalı');
+        return;
+      }
+      iskonto = n;
+    }
+
     onKaydet({
       ...form,
       subeAdi,
@@ -103,6 +121,9 @@ export function SubeKayitModal({
       eposta: form.eposta?.trim() || undefined,
       telefon: form.telefon?.trim() || undefined,
       gsm: form.gsm?.trim() || undefined,
+      vergiDairesi: form.vergiDairesi?.trim() || undefined,
+      vergiNo: form.vergiNo?.trim() || undefined,
+      iskonto,
     });
   }
 
@@ -120,6 +141,17 @@ export function SubeKayitModal({
             ✕
           </button>
         </div>
+
+        {duzenlenen && (
+          <div className="mt-3 flex flex-wrap gap-4 text-xs">
+            <span className="ap-muted">
+              Kayıt: <strong className="ap-heading">{subeTarihGoster(duzenlenen.kayitTarihi)}</strong>
+            </span>
+            <span className="ap-muted">
+              Güncelleme: <strong className="ap-heading">{subeTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
+            </span>
+          </div>
+        )}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
@@ -174,6 +206,39 @@ export function SubeKayitModal({
               className={formInputSinifi}
               value={form.adres ?? ''}
               onChange={(e) => setForm({ ...form, adres: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Vergi dairesi</label>
+            <input
+              className={formInputSinifi}
+              value={form.vergiDairesi ?? ''}
+              onChange={(e) => setForm({ ...form, vergiDairesi: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Vergi no</label>
+            <input
+              className={formInputSinifi}
+              value={form.vergiNo ?? ''}
+              onChange={(e) => setForm({ ...form, vergiNo: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">İskonto (%)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              step={0.01}
+              className={formInputSinifi}
+              value={form.iskonto ?? ''}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  iskonto: e.target.value === '' ? null : Number(e.target.value),
+                })
+              }
             />
           </div>
           <div>

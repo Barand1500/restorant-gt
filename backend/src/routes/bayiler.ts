@@ -151,4 +151,26 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   return res.json({ bayi: bayiYanitOlustur(guncel) });
 });
 
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return res.status(400).json({ mesaj: 'Gecersiz bayi id' });
+  }
+
+  const mevcut = await prisma.bayi.findUnique({
+    where: { id },
+    include: { _count: { select: { firmalar: true, altBayiler: true } } },
+  });
+  if (!mevcut) return res.status(404).json({ mesaj: 'Bayi bulunamadi' });
+  if (mevcut._count.firmalar > 0) {
+    return res.status(400).json({ mesaj: 'Firmalari olan bayi silinemez' });
+  }
+  if (mevcut._count.altBayiler > 0) {
+    return res.status(400).json({ mesaj: 'Alt bayileri olan bayi silinemez' });
+  }
+
+  await prisma.bayi.delete({ where: { id } });
+  return res.json({ mesaj: 'Silindi' });
+});
+
 export default router;

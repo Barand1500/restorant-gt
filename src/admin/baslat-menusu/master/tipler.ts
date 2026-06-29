@@ -63,7 +63,7 @@ export const MASTER_SEKMELER: MasterSekmeTanim[] = [
     ad: 'Paketler',
     ikon: '📦',
     baslik: 'Lisans Paketleri',
-    altBaslik: 'Satılabilir paket tanımları ve limitler',
+    altBaslik: 'Satılabilir paket tanımları ve kota bilgileri',
     baglam: 'Şube, personel ve masa kotası pakete göre belirlenir',
   },
   {

@@ -55,6 +55,12 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         telefon: metinAl(body.telefon, 20),
         gsm: metinAl(body.gsm, 20),
         eposta: metinAl(body.eposta, 191),
+        vergiDairesi: metinAl(body.vergiDairesi, 100),
+        vergiNo: metinAl(body.vergiNo, 50),
+        iskonto:
+          body.iskonto != null && body.iskonto !== ''
+            ? new Prisma.Decimal(Number(body.iskonto))
+            : null,
         durum: body.aktif === false ? false : true,
       },
       include: subeInclude,
@@ -107,6 +113,20 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   if (body.telefon !== undefined) data.telefon = metinAl(body.telefon, 20);
   if (body.gsm !== undefined) data.gsm = metinAl(body.gsm, 20);
   if (body.eposta !== undefined) data.eposta = metinAl(body.eposta, 191);
+  if (body.vergiDairesi !== undefined) data.vergiDairesi = metinAl(body.vergiDairesi, 100);
+  if (body.vergiNo !== undefined) data.vergiNo = metinAl(body.vergiNo, 50);
+
+  if (body.iskonto !== undefined) {
+    if (body.iskonto === null || body.iskonto === '') {
+      data.iskonto = null;
+    } else {
+      const iskonto = Number(body.iskonto);
+      if (Number.isNaN(iskonto) || iskonto < 0 || iskonto > 100) {
+        return res.status(400).json({ mesaj: 'Iskonto 0-100 arasi olmali' });
+      }
+      data.iskonto = new Prisma.Decimal(iskonto);
+    }
+  }
 
   if (Object.keys(data).length === 0) {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
@@ -119,6 +139,25 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   });
 
   return res.json({ sube: subeYanitOlustur(guncel) });
+});
+
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return res.status(400).json({ mesaj: 'Gecersiz sube id' });
+  }
+
+  const mevcut = await prisma.sube.findUnique({
+    where: { id },
+    include: { _count: { select: { kullanicilar: true } } },
+  });
+  if (!mevcut) return res.status(404).json({ mesaj: 'Sube bulunamadi' });
+  if (mevcut._count.kullanicilar > 0) {
+    return res.status(400).json({ mesaj: 'Kullanicilari olan sube silinemez' });
+  }
+
+  await prisma.sube.delete({ where: { id } });
+  return res.json({ mesaj: 'Silindi' });
 });
 
 export default router;

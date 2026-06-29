@@ -31,7 +31,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   const fiyat = Number(body.fiyat ?? 0);
 
   if ([subeSayisi, personelSayisi, masaSayisi].some((n) => !Number.isInteger(n) || n < 1)) {
-    return res.status(400).json({ mesaj: 'Limitler pozitif tam sayi olmali' });
+    return res.status(400).json({ mesaj: 'Sayilar pozitif tam sayi olmali' });
   }
   if (Number.isNaN(fiyat) || fiyat < 0) return res.status(400).json({ mesaj: 'Gecersiz fiyat' });
 
@@ -92,6 +92,23 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   return res.json({
     paket: { ...paketYanitOlustur(guncel), aktifLisansSayisi: lisansSayilari.get(id) ?? 0 },
   });
+});
+
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz paket id' });
+
+  const mevcut = await prisma.paket.findUnique({
+    where: { id },
+    include: { _count: { select: { lisanslar: true } } },
+  });
+  if (!mevcut) return res.status(404).json({ mesaj: 'Paket bulunamadi' });
+  if (mevcut._count.lisanslar > 0) {
+    return res.status(400).json({ mesaj: 'Lisansi olan paket silinemez' });
+  }
+
+  await prisma.paket.delete({ where: { id } });
+  return res.json({ mesaj: 'Silindi' });
 });
 
 export default router;

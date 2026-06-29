@@ -37,10 +37,19 @@ export interface BayiFormGirdi {
   ustId?: number | null;
   il?: string;
   ilce?: string;
+  adres?: string;
   eposta?: string;
   telefon?: string;
   gsm?: string;
+  vergiDairesi?: string;
+  vergiNo?: string;
+  iskonto?: number | null;
   aktif?: boolean;
+}
+
+export function bayiTarihGoster(iso: string | null): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('tr-TR');
 }
 
 export async function masterBayileriGetir(): Promise<BayiListeYanit> {
@@ -63,5 +72,12 @@ export async function masterBayiGuncelle(
     method: 'PATCH',
     headers: adminHeaders(),
     body: JSON.stringify(girdi),
+  });
+}
+
+export async function masterBayiSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/bayiler/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
   });
 }

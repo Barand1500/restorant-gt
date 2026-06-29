@@ -10,16 +10,59 @@ interface PaketKayitModalProps {
   onKaydet: (girdi: PaketFormGirdi) => void;
 }
 
-const bosForm: PaketFormGirdi = {
+interface PaketFormMetin {
+  paketAdi: string;
+  subeSayisi: string;
+  personelSayisi: string;
+  masaSayisi: string;
+  fiyat: string;
+}
+
+const bosFormMetin: PaketFormMetin = {
   paketAdi: '',
-  subeSayisi: 1,
-  personelSayisi: 10,
-  masaSayisi: 50,
-  fiyat: 0,
+  subeSayisi: '1',
+  personelSayisi: '10',
+  masaSayisi: '50',
+  fiyat: '0',
 };
 
+function tamSayiKabul(metin: string): boolean {
+  return metin === '' || /^\d+$/.test(metin);
+}
+
+function ondalikKabul(metin: string): boolean {
+  return metin === '' || /^\d*\.?\d*$/.test(metin);
+}
+
+function metindenGirdi(form: PaketFormMetin): { girdi?: PaketFormGirdi; hata?: string } {
+  const paketAdi = form.paketAdi.trim();
+  if (paketAdi.length < 2) return { hata: 'Paket adı en az 2 karakter olmalı' };
+
+  const subeSayisi = Number(form.subeSayisi);
+  const personelSayisi = Number(form.personelSayisi);
+  const masaSayisi = Number(form.masaSayisi);
+  const fiyat = Number(form.fiyat);
+
+  if (form.subeSayisi.trim() === '' || !Number.isInteger(subeSayisi) || subeSayisi < 1) {
+    return { hata: 'Şube sayısı en az 1 olmalı' };
+  }
+  if (form.personelSayisi.trim() === '' || !Number.isInteger(personelSayisi) || personelSayisi < 1) {
+    return { hata: 'Personel sayısı en az 1 olmalı' };
+  }
+  if (form.masaSayisi.trim() === '' || !Number.isInteger(masaSayisi) || masaSayisi < 1) {
+    return { hata: 'Masa sayısı en az 1 olmalı' };
+  }
+  if (form.fiyat.trim() === '' || Number.isNaN(fiyat) || fiyat < 0) {
+    return { hata: 'Geçerli bir fiyat girin' };
+  }
+
+  return {
+    girdi: { paketAdi, subeSayisi, personelSayisi, masaSayisi, fiyat },
+  };
+}
+
 export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKaydet }: PaketKayitModalProps) {
-  const [form, setForm] = useState<PaketFormGirdi>(bosForm);
+  const [form, setForm] = useState<PaketFormMetin>(bosFormMetin);
   const [hata, setHata] = useState('');
 
   useEffect(() => {
@@ -27,13 +70,13 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
     if (duzenlenen) {
       setForm({
         paketAdi: duzenlenen.paketAdi,
-        subeSayisi: duzenlenen.subeSayisi,
-        personelSayisi: duzenlenen.personelSayisi,
-        masaSayisi: duzenlenen.masaSayisi,
-        fiyat: duzenlenen.fiyat,
+        subeSayisi: String(duzenlenen.subeSayisi),
+        personelSayisi: String(duzenlenen.personelSayisi),
+        masaSayisi: String(duzenlenen.masaSayisi),
+        fiyat: String(duzenlenen.fiyat),
       });
     } else {
-      setForm(bosForm);
+      setForm(bosFormMetin);
     }
     setHata('');
   }, [acik, duzenlenen]);
@@ -57,12 +100,12 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
   if (!acik) return null;
 
   function kaydet() {
-    const paketAdi = form.paketAdi.trim();
-    if (paketAdi.length < 2) {
-      setHata('Paket adı en az 2 karakter olmalı');
+    const sonuc = metindenGirdi(form);
+    if (sonuc.hata || !sonuc.girdi) {
+      setHata(sonuc.hata ?? 'Geçersiz form');
       return;
     }
-    onKaydet({ ...form, paketAdi });
+    onKaydet(sonuc.girdi);
   }
 
   return (
@@ -88,44 +131,55 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
             />
           </div>
           <div>
-            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Şube limiti</label>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Şube sayısı</label>
             <input
-              type="number"
-              min={1}
+              type="text"
+              inputMode="numeric"
               className={formInputSinifi}
               value={form.subeSayisi}
-              onChange={(e) => setForm((f) => ({ ...f, subeSayisi: Number(e.target.value) }))}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (tamSayiKabul(v)) setForm((f) => ({ ...f, subeSayisi: v }));
+              }}
             />
           </div>
           <div>
-            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Personel limiti</label>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Personel sayısı</label>
             <input
-              type="number"
-              min={1}
+              type="text"
+              inputMode="numeric"
               className={formInputSinifi}
               value={form.personelSayisi}
-              onChange={(e) => setForm((f) => ({ ...f, personelSayisi: Number(e.target.value) }))}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (tamSayiKabul(v)) setForm((f) => ({ ...f, personelSayisi: v }));
+              }}
             />
           </div>
           <div>
-            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Masa limiti</label>
+            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Masa sayısı</label>
             <input
-              type="number"
-              min={1}
+              type="text"
+              inputMode="numeric"
               className={formInputSinifi}
               value={form.masaSayisi}
-              onChange={(e) => setForm((f) => ({ ...f, masaSayisi: Number(e.target.value) }))}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (tamSayiKabul(v)) setForm((f) => ({ ...f, masaSayisi: v }));
+              }}
             />
           </div>
           <div>
             <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Aylık fiyat (₺)</label>
             <input
-              type="number"
-              min={0}
-              step={0.01}
+              type="text"
+              inputMode="decimal"
               className={formInputSinifi}
               value={form.fiyat}
-              onChange={(e) => setForm((f) => ({ ...f, fiyat: Number(e.target.value) }))}
+              onChange={(e) => {
+                const v = e.target.value.replace(',', '.');
+                if (ondalikKabul(v)) setForm((f) => ({ ...f, fiyat: v }));
+              }}
             />
           </div>
         </div>
@@ -149,3 +203,5 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
     </div>
   );
 }
+
+export { metindenGirdi, tamSayiKabul, ondalikKabul };

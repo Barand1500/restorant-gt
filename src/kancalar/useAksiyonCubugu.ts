@@ -63,6 +63,13 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  master: [
+    A('kaydet', 'Kaydet', false),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
 };
 
 const varsayilanAksiyonlar: AksiyonButonu[] = [
