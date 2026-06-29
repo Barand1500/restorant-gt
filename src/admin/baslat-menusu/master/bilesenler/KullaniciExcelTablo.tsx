@@ -1,4 +1,5 @@
 import type { MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
+import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
 import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import { MasterDuzenlenebilirHucre } from '@/admin/baslat-menusu/master/bilesenler/MasterDuzenlenebilirHucre';
 import type { MasterFirma } from '@/admin/baslat-menusu/master/firmalar/api';
@@ -217,16 +218,15 @@ export function KullaniciExcelTablo({
                 onClick={() => onSatirSec(k.id)}
               >
                 {gorunurSutunlar.map((id) => sutunHucre(k, id))}
-                <td className="ap-master-excel-hucre ap-master-excel-th-aksiyon">
+                <td className="ap-master-excel-hucre ap-master-excel-th-aksiyon" onClick={(e) => e.stopPropagation()}>
                   <button
                     type="button"
-                    className="ap-master-link-btn !cursor-pointer !opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onModalDuzenle(k);
-                    }}
+                    className="ap-master-tablo-ikon-btn"
+                    onClick={() => onModalDuzenle(k)}
+                    aria-label="Kullanıcı düzenle"
+                    title="Tüm alanları düzenle"
                   >
-                    Düzenle
+                    <DuzenleIkonu />
                   </button>
                 </td>
               </tr>

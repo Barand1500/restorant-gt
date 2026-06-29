@@ -1,4 +1,5 @@
 import type { MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
+import { DuzenleIkonu } from '@/admin/baslat-menusu/master/bilesenler/DuzenleIkonu';
 import { MasterTabloSutunAyarlari } from '@/admin/baslat-menusu/master/bilesenler/MasterTabloSutunAyarlari';
 import { MasterDuzenlenebilirHucre } from '@/admin/baslat-menusu/master/bilesenler/MasterDuzenlenebilirHucre';
 import {
@@ -216,16 +217,15 @@ export function FirmaExcelTablo({
                 onClick={() => onSatirSec(f.id)}
               >
                 {gorunurSutunlar.map((id) => sutunHucre(f, id))}
-                <td className="ap-master-excel-hucre ap-master-excel-th-aksiyon">
+                <td className="ap-master-excel-hucre ap-master-excel-th-aksiyon" onClick={(e) => e.stopPropagation()}>
                   <button
                     type="button"
-                    className="ap-master-link-btn !cursor-pointer !opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onModalDuzenle(f);
-                    }}
+                    className="ap-master-tablo-ikon-btn"
+                    onClick={() => onModalDuzenle(f)}
+                    aria-label="Firma düzenle"
+                    title="Tüm alanları düzenle"
                   >
-                    Düzenle
+                    <DuzenleIkonu />
                   </button>
                 </td>
               </tr>
