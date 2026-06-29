@@ -50,6 +50,9 @@ interface OfflineFirma {
   telefon: string | null;
   gsm: string | null;
   eposta: string | null;
+  vergiDairesi: string | null;
+  vergiNo: string | null;
+  iskonto: number | null;
   aktif: boolean;
   subeSayisi: number;
   lisansDurum: 'aktif' | 'pasif' | 'yakinda' | 'yok';
@@ -314,6 +317,14 @@ function offlineModulYaz(body: BodyInit | null | undefined, method: string, path
     return { modul: guncel };
   }
 
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    const yeni = liste.filter((m) => m.id !== id);
+    if (yeni.length === liste.length) return { mesaj: 'Modul bulunamadi' };
+    offlineModulKaydet(yeni);
+    return { mesaj: 'Modul silindi' };
+  }
+
   return { mesaj: 'Kayıt (offline mod)' };
 }
 
@@ -480,6 +491,9 @@ function offlineFirmaOku(): OfflineFirma[] {
       telefon: null,
       gsm: null,
       eposta: 'demo@restoran.local',
+      vergiDairesi: 'Kadıköy',
+      vergiNo: '1234567890',
+      iskonto: 5,
       aktif: true,
       subeSayisi: 1,
       lisansDurum: 'aktif',
@@ -512,6 +526,10 @@ function offlineFirmaYaz(body: BodyInit | null | undefined, method: string, path
       eposta?: string;
       telefon?: string;
       gsm?: string;
+      vergiDairesi?: string;
+      vergiNo?: string;
+      iskonto?: number | null;
+      aktif?: boolean;
     };
     const bayi = bayiler.find((b) => b.id === girdi.bayiId);
     const firma: OfflineFirma = {
@@ -525,7 +543,10 @@ function offlineFirmaYaz(body: BodyInit | null | undefined, method: string, path
       telefon: girdi.telefon?.trim() ?? null,
       gsm: girdi.gsm?.trim() ?? null,
       eposta: girdi.eposta?.trim() ?? null,
-      aktif: true,
+      vergiDairesi: girdi.vergiDairesi?.trim() ?? null,
+      vergiNo: girdi.vergiNo?.trim() ?? null,
+      iskonto: girdi.iskonto ?? null,
+      aktif: girdi.aktif !== false,
       subeSayisi: 0,
       lisansDurum: 'yok',
       kayitTarihi: simdi,
@@ -537,7 +558,13 @@ function offlineFirmaYaz(body: BodyInit | null | undefined, method: string, path
 
   if (method === 'PATCH' && typeof body === 'string') {
     const id = Number(path.split('/').pop());
-    const girdi = JSON.parse(body) as Partial<OfflineFirma> & { bayiId?: number; aktif?: boolean };
+    const girdi = JSON.parse(body) as Partial<OfflineFirma> & {
+      bayiId?: number;
+      aktif?: boolean;
+      vergiDairesi?: string;
+      vergiNo?: string;
+      iskonto?: number | null;
+    };
     const idx = liste.findIndex((f) => f.id === id);
     if (idx < 0) return { mesaj: 'Firma bulunamadi' };
     const bayi = girdi.bayiId ? bayiler.find((b) => b.id === girdi.bayiId) : null;
@@ -553,6 +580,9 @@ function offlineFirmaYaz(body: BodyInit | null | undefined, method: string, path
       ...(girdi.eposta !== undefined ? { eposta: girdi.eposta } : {}),
       ...(girdi.telefon !== undefined ? { telefon: girdi.telefon } : {}),
       ...(girdi.gsm !== undefined ? { gsm: girdi.gsm } : {}),
+      ...(girdi.vergiDairesi !== undefined ? { vergiDairesi: girdi.vergiDairesi?.trim() ?? null } : {}),
+      ...(girdi.vergiNo !== undefined ? { vergiNo: girdi.vergiNo?.trim() ?? null } : {}),
+      ...(girdi.iskonto !== undefined ? { iskonto: girdi.iskonto } : {}),
       ...('aktif' in girdi ? { aktif: Boolean(girdi.aktif) } : {}),
       guncellemeTarihi: simdi,
     };
@@ -560,6 +590,14 @@ function offlineFirmaYaz(body: BodyInit | null | undefined, method: string, path
     yeni[idx] = guncel;
     offlineFirmaKaydet(yeni);
     return { firma: guncel };
+  }
+
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    const yeni = liste.filter((f) => f.id !== id);
+    if (yeni.length === liste.length) return { mesaj: 'Firma bulunamadi' };
+    offlineFirmaKaydet(yeni);
+    return { mesaj: 'Firma silindi' };
   }
 
   return { mesaj: 'Kayıt (offline mod)' };
@@ -882,6 +920,14 @@ function offlineLisansYaz(body: BodyInit | null | undefined, method: string, pat
     return { lisans: guncel };
   }
 
+  if (method === 'DELETE') {
+    const id = Number(path.split('/').pop());
+    const yeni = liste.filter((l) => l.id !== id);
+    if (yeni.length === liste.length) return { mesaj: 'Lisans bulunamadi' };
+    offlineLisansKaydet(yeni);
+    return { mesaj: 'Lisans silindi' };
+  }
+
   return { mesaj: 'Kayıt (offline mod)' };
 }
 
@@ -903,8 +949,9 @@ function offlineMasterKullaniciListe() {
         firmaTabela: 'Demo Restoran',
         subeId: 1,
         subeAdi: 'Merkez Sube',
+        iskonto: 10,
         aktif: true,
-        sonGirisTarihi: null,
+        sonGirisTarihi: simdi,
         kayitTarihi: simdi,
         guncellemeTarihi: simdi,
       },

@@ -13,6 +13,9 @@ export interface MasterFirma {
   telefon: string | null;
   gsm: string | null;
   eposta: string | null;
+  vergiDairesi: string | null;
+  vergiNo: string | null;
+  iskonto: number | null;
   aktif: boolean;
   subeSayisi: number;
   lisansDurum: FirmaLisansDurum;
@@ -33,6 +36,9 @@ export interface FirmaFormGirdi {
   eposta?: string;
   telefon?: string;
   gsm?: string;
+  vergiDairesi?: string;
+  vergiNo?: string;
+  iskonto?: number | null;
   aktif?: boolean;
 }
 
@@ -69,5 +75,12 @@ export async function masterFirmaGuncelle(
     method: 'PATCH',
     headers: adminHeaders(),
     body: JSON.stringify(girdi),
+  });
+}
+
+export async function masterFirmaSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/firmalar/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
   });
 }

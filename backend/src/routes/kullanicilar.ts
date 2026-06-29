@@ -55,6 +55,14 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   const subeId = body.subeId != null && body.subeId !== '' ? Number(body.subeId) : null;
   const gsm = body.gsm != null && String(body.gsm).trim() ? String(body.gsm).trim().slice(0, 20) : null;
 
+  let iskonto: number | null = null;
+  if (body.iskonto != null && body.iskonto !== '') {
+    iskonto = Number(body.iskonto);
+    if (Number.isNaN(iskonto) || iskonto < 0 || iskonto > 100) {
+      return res.status(400).json({ mesaj: 'Iskonto 0-100 arasinda olmali' });
+    }
+  }
+
   const kullanici = await prisma.kullanici.create({
     data: {
       email: email.toLowerCase(),
@@ -66,6 +74,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       firmaId,
       subeId,
       gsm,
+      iskonto: iskonto != null ? new Prisma.Decimal(iskonto) : null,
       aktif: body.aktif !== false,
     },
     include: kullaniciInclude,
@@ -106,6 +115,17 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   }
   if (body.sifre && String(body.sifre).trim()) {
     data.sifreHash = sifreHashle(String(body.sifre));
+  }
+  if (body.iskonto !== undefined) {
+    if (body.iskonto === null || body.iskonto === '') {
+      data.iskonto = null;
+    } else {
+      const iskonto = Number(body.iskonto);
+      if (Number.isNaN(iskonto) || iskonto < 0 || iskonto > 100) {
+        return res.status(400).json({ mesaj: 'Iskonto 0-100 arasinda olmali' });
+      }
+      data.iskonto = new Prisma.Decimal(iskonto);
+    }
   }
 
   if (Object.keys(data).length === 0) return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });

@@ -84,10 +84,29 @@ export function modulYolundanBul(pathname: string): AdminModul | undefined {
     });
 }
 
-export function modulAra(terim: string): AdminModul[] {
+/** Panel modül id → veritabanı prefix (ör. sekme-yonetimi → sekme_yonetimi) */
+export function modulIdDenPrefix(modulId: string): string {
+  return modulId.replace(/-/g, '_');
+}
+
+export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> | null | undefined): boolean {
+  if (modulId === 'master') return true;
+  if (!aktifPrefixler) return true;
+  return aktifPrefixler.has(modulIdDenPrefix(modulId));
+}
+
+export function modulleriMenuyeGoreFiltrele(
+  moduller: AdminModul[],
+  aktifPrefixler: Set<string> | null | undefined
+): AdminModul[] {
+  return moduller.filter((m) => modulMenuGorunurMu(m.id, aktifPrefixler));
+}
+
+export function modulAra(terim: string, aktifPrefixler?: Set<string> | null): AdminModul[] {
   const q = terim.toLowerCase().trim();
-  if (!q) return adminModulleri;
-  return adminModulleri.filter(
+  const kaynak = modulleriMenuyeGoreFiltrele(adminModulleri, aktifPrefixler);
+  if (!q) return kaynak;
+  return kaynak.filter(
     (m) =>
       m.baslik.toLowerCase().includes(q) ||
       m.kategori.toLowerCase().includes(q) ||

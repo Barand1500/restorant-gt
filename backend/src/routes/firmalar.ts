@@ -17,6 +17,20 @@ function metinAl(deger: unknown, max: number): string | null | undefined {
   return s.slice(0, max);
 }
 
+function iskontoAl(deger: unknown): number | null | undefined {
+  if (deger === undefined) return undefined;
+  if (deger === null || deger === '') return null;
+  const n = Number(deger);
+  if (Number.isNaN(n) || n < 0 || n > 100) return undefined;
+  return n;
+}
+
+function iskontoGecersizMi(deger: unknown): boolean {
+  if (deger === undefined || deger === null || deger === '') return false;
+  const n = Number(deger);
+  return Number.isNaN(n) || n < 0 || n > 100;
+}
+
 router.get('/', async (_req: AuthRequest, res: Response) => {
   const firmalar = await firmaListesiGetir();
   return res.json({ firmalar });
@@ -38,6 +52,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   if (!bayi) return res.status(400).json({ mesaj: 'Bayi bulunamadi' });
   if (!bayi.durum) return res.status(400).json({ mesaj: 'Pasif bayiye firma atanamaz' });
 
+  const iskonto = iskontoAl(body.iskonto);
+  if (iskontoGecersizMi(body.iskonto)) {
+    return res.status(400).json({ mesaj: 'Iskonto 0-100 arasinda olmali' });
+  }
+
   try {
     const kayit = await prisma.firma.create({
       data: {
@@ -49,6 +68,9 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         telefon: metinAl(body.telefon, 20),
         gsm: metinAl(body.gsm, 20),
         eposta: metinAl(body.eposta, 191),
+        vergiDairesi: metinAl(body.vergiDairesi, 100),
+        vergiNo: metinAl(body.vergiNo, 50),
+        iskonto: iskonto != null ? new Prisma.Decimal(iskonto) : null,
         durum: body.aktif === false ? false : true,
       },
       include: firmaInclude,
@@ -97,6 +119,16 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   if (body.telefon !== undefined) data.telefon = metinAl(body.telefon, 20);
   if (body.gsm !== undefined) data.gsm = metinAl(body.gsm, 20);
   if (body.eposta !== undefined) data.eposta = metinAl(body.eposta, 191);
+  if (body.vergiDairesi !== undefined) data.vergiDairesi = metinAl(body.vergiDairesi, 100);
+  if (body.vergiNo !== undefined) data.vergiNo = metinAl(body.vergiNo, 50);
+
+  if (body.iskonto !== undefined) {
+    if (iskontoGecersizMi(body.iskonto)) {
+      return res.status(400).json({ mesaj: 'Iskonto 0-100 arasinda olmali' });
+    }
+    const iskonto = iskontoAl(body.iskonto);
+    data.iskonto = iskonto != null ? new Prisma.Decimal(iskonto) : null;
+  }
 
   if (Object.keys(data).length === 0) {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
@@ -109,6 +141,19 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   });
 
   return res.json({ firma: firmaYanitOlustur(guncel) });
+});
+
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return res.status(400).json({ mesaj: 'Gecersiz firma id' });
+  }
+
+  const mevcut = await prisma.firma.findUnique({ where: { id } });
+  if (!mevcut) return res.status(404).json({ mesaj: 'Firma bulunamadi' });
+
+  await prisma.firma.delete({ where: { id } });
+  return res.json({ mesaj: 'Firma silindi' });
 });
 
 export default router;

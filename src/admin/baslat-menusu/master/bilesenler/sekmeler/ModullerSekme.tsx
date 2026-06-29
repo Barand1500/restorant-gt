@@ -5,10 +5,13 @@ import { ModulEkleModal } from '@/admin/baslat-menusu/master/bilesenler/ModulEkl
 import {
   masterModulGuncelle,
   masterModulOlustur,
+  masterModulSil,
   masterModulleriGetir,
   type MasterModul,
 } from '@/admin/baslat-menusu/master/moduller/api';
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
+import { modulKatalogYenile } from '@/baglamlar/ModulKatalogContext';
+import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 
 export function ModullerSekme() {
@@ -21,6 +24,7 @@ export function ModullerSekme() {
   const [modalAcik, setModalAcik] = useState(false);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [islemId, setIslemId] = useState<number | null>(null);
+  const [seciliId, setSeciliId] = useState<number | null>(null);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -28,6 +32,10 @@ export function ModullerSekme() {
     try {
       const veri = await masterModulleriGetir();
       setModuller(veri.moduller);
+      setSeciliId((onceki) => {
+        if (onceki !== null && !veri.moduller.some((m) => m.id === onceki)) return null;
+        return onceki;
+      });
     } catch (err) {
       setHata(err instanceof Error ? err.message : 'Modüller alınamadı');
     } finally {
@@ -49,11 +57,17 @@ export function ModullerSekme() {
     });
   }, [moduller, arama, filtre]);
 
+  const seciliModul = useMemo(
+    () => (seciliId !== null ? moduller.find((m) => m.id === seciliId) ?? null : null),
+    [moduller, seciliId]
+  );
+
   async function durumDegistir(modul: MasterModul, aktif: boolean) {
     setIslemId(modul.id);
     try {
       await masterModulGuncelle(modul.id, { aktif });
       await yukle();
+      modulKatalogYenile();
       basariBildir(`${modul.ad} ${aktif ? 'aktif' : 'pasif'} yapıldı.`);
     } catch (err) {
       hataBildir(err instanceof Error ? err.message : 'Durum güncellenemedi');
@@ -68,6 +82,8 @@ export function ModullerSekme() {
       const { modul } = await masterModulOlustur(girdi);
       setModalAcik(false);
       await yukle();
+      modulKatalogYenile();
+      setSeciliId(modul.id);
       basariBildir(`${modul.ad} eklendi — ${modul.rolSayisi} rol otomatik oluşturuldu.`);
     } catch (err) {
       hataBildir(err instanceof Error ? err.message : 'Modül eklenemedi');
@@ -75,6 +91,38 @@ export function ModullerSekme() {
       setKaydediliyor(false);
     }
   }
+
+  const ekleAc = useCallback(() => setModalAcik(true), []);
+
+  const modulSil = useCallback(async () => {
+    if (!seciliModul) return;
+    if (!confirm(`"${seciliModul.ad}" modülünü silmek istediğinize emin misiniz? İlişkili roller de kaldırılır.`)) {
+      return;
+    }
+    setIslemId(seciliModul.id);
+    try {
+      await masterModulSil(seciliModul.id);
+      setSeciliId(null);
+      await yukle();
+      modulKatalogYenile();
+      basariBildir(`${seciliModul.ad} silindi.`);
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Modül silinemedi');
+    } finally {
+      setIslemId(null);
+    }
+  }, [seciliModul, yukle, basariBildir, hataBildir]);
+
+  const islemde = kaydediliyor || islemId !== null;
+
+  useModulAksiyonlari(
+    { ekle: ekleAc, sil: modulSil },
+    {
+      kaydet: false,
+      ekle: !islemde,
+      sil: !!seciliModul && !islemde,
+    }
+  );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Modüller yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
@@ -102,13 +150,9 @@ export function ModullerSekme() {
 
       <div className="ap-master-ust">
         <MasterArama placeholder="Modül adı veya prefix ara…" value={arama} onChange={setArama} />
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
-          onClick={() => setModalAcik(true)}
-        >
-          + Modül Ekle
-        </button>
+        <p className="ap-muted text-xs">
+          Modül seçmek için karta tıklayın. Ekleme ve silme alt aksiyon çubuğundan yapılır.
+        </p>
       </div>
 
       {liste.length === 0 ? (
@@ -122,7 +166,18 @@ export function ModullerSekme() {
           {liste.map((m) => (
             <article
               key={m.id}
-              className={`ap-master-kart ap-master-modul-kart ${!m.aktif ? 'ap-master-modul-kart-pasif' : ''}`}
+              role="button"
+              tabIndex={0}
+              className={`ap-master-kart ap-master-modul-kart ap-master-kart-tiklanabilir ${
+                seciliId === m.id ? 'ap-master-kart-secili' : ''
+              } ${!m.aktif ? 'ap-master-modul-kart-pasif' : ''}`}
+              onClick={() => setSeciliId(m.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setSeciliId(m.id);
+                }
+              }}
             >
               <div className="ap-master-kart-ust">
                 <span className="ap-master-kart-ikon">🧩</span>
@@ -134,10 +189,10 @@ export function ModullerSekme() {
               <p className="ap-muted mt-1 font-mono text-xs">{m.prefix}</p>
               <p className="ap-muted mt-2 text-xs">{m.rolSayisi} rol tanımı</p>
 
-              <div className="ap-master-modul-toggle">
+              <div className="ap-master-modul-toggle" onClick={(e) => e.stopPropagation()}>
                 <DurumAnahtari
                   etiket="Modül durumu"
-                  aciklama={m.aktif ? 'Panelde kullanılabilir' : 'Pasif modüller rol matrisinde gizlenir'}
+                  aciklama={m.aktif ? 'Başlat menüsünde görünür' : 'Başlat menüsünden gizlenir'}
                   acik={m.aktif}
                   devreDisi={islemId === m.id}
                   onChange={(v) => void durumDegistir(m, v)}

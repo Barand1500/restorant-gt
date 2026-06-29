@@ -31,6 +31,7 @@ export async function masterKullaniciYanitOlustur(k: MasterKullaniciKayit) {
     firmaTabela: k.firma?.tabelaAdi ?? null,
     subeId: k.subeId,
     subeAdi: k.sube?.subeAdi ?? null,
+    iskonto: k.iskonto != null ? Number(k.iskonto) : null,
     aktif: k.aktif,
     sonGirisTarihi: k.sonGirisTarihi?.toISOString() ?? null,
     kayitTarihi: tarihIso(k.olusturma),

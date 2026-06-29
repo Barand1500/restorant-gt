@@ -8,6 +8,7 @@ import {
   type SubeFormGirdi,
 } from '@/admin/baslat-menusu/master/subeler/api';
 import type { MasterFirma } from '@/admin/baslat-menusu/master/firmalar/api';
+import { SistemModal } from '@/admin/ortak/SistemModal';
 
 interface SubeKayitModalProps {
   acik: boolean;
@@ -73,24 +74,6 @@ export function SubeKayitModal({
     setHata('');
   }, [acik, duzenlenen, firmaSecenekleri]);
 
-  useEffect(() => {
-    if (!acik) return;
-    function tusHandler(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onKapat();
-      }
-    }
-    document.addEventListener('keydown', tusHandler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', tusHandler);
-      document.body.style.overflow = '';
-    };
-  }, [acik, onKapat]);
-
-  if (!acik) return null;
-
   function kaydet() {
     const subeAdi = form.subeAdi.trim();
     if (!form.firmaId || form.firmaId < 1) {
@@ -128,32 +111,42 @@ export function SubeKayitModal({
   }
 
   return (
-    <div className="ap-sistem-modal-arka" role="dialog" aria-modal="true" aria-labelledby="sube-kayit-baslik">
-      <div
-        className="ap-sistem-modal ap-master-modal ap-master-modul-modal ap-master-firma-modal"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="ap-sistem-modal-baslik">
-          <h2 id="sube-kayit-baslik" className="ap-heading text-base font-bold">
-            {duzenlenen ? 'Şube Düzenle' : 'Yeni Şube Ekle'}
-          </h2>
-          <button type="button" className="ap-sistem-modal-kapat" onClick={onKapat} aria-label="Kapat">
-            ✕
+    <SistemModal
+      acik={acik}
+      onKapat={onKapat}
+      baslik={duzenlenen ? 'Şube Düzenle' : 'Yeni Şube Ekle'}
+      ikon="🍽️"
+      genislik="firma"
+      baslikId="sube-kayit-baslik"
+      kapatmaDevreDisi={kaydediliyor}
+      footer={
+        <>
+          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
+            İptal
           </button>
+          <button
+            type="button"
+            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
+            onClick={kaydet}
+            disabled={kaydediliyor || aktifFirmalar.length === 0}
+          >
+            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Şube Oluştur'}
+          </button>
+        </>
+      }
+    >
+      {duzenlenen && (
+        <div className="mb-3 flex flex-wrap gap-4 text-xs">
+          <span className="ap-muted">
+            Kayıt: <strong className="ap-heading">{subeTarihGoster(duzenlenen.kayitTarihi)}</strong>
+          </span>
+          <span className="ap-muted">
+            Güncelleme: <strong className="ap-heading">{subeTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
+          </span>
         </div>
+      )}
 
-        {duzenlenen && (
-          <div className="mt-3 flex flex-wrap gap-4 text-xs">
-            <span className="ap-muted">
-              Kayıt: <strong className="ap-heading">{subeTarihGoster(duzenlenen.kayitTarihi)}</strong>
-            </span>
-            <span className="ap-muted">
-              Güncelleme: <strong className="ap-heading">{subeTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
-            </span>
-          </div>
-        )}
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Firma *</label>
             <select
@@ -265,22 +258,7 @@ export function SubeKayitModal({
           </div>
         </div>
 
-        {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
-
-        <div className="ap-sistem-modal-aksiyonlar ap-master-modal-aksiyonlar">
-          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
-            İptal
-          </button>
-          <button
-            type="button"
-            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
-            onClick={kaydet}
-            disabled={kaydediliyor || aktifFirmalar.length === 0}
-          >
-            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Şube Oluştur'}
-          </button>
-        </div>
-      </div>
-    </div>
+      {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
+    </SistemModal>
   );
 }

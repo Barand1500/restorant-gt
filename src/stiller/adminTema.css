@@ -5513,6 +5513,101 @@ html:has(.admin-panel[data-tema='acik']) body {
   padding: 1rem;
 }
 
+.ap-sistem-modal-arka-sabit {
+  pointer-events: auto;
+}
+
+.ap-sistem-modal-v2 {
+  padding: 0;
+  overflow: hidden;
+  animation: ap-modal-giris 0.2s ease-out;
+}
+
+@keyframes ap-modal-giris {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.ap-sistem-modal-v2-ust-cizgi {
+  height: 3px;
+  background: linear-gradient(90deg, var(--ap-accent), #8b5cf6, var(--ap-accent));
+}
+
+.ap-sistem-modal-baslik-v2 {
+  padding: 1.15rem 1.25rem 0.75rem;
+  margin-bottom: 0;
+  align-items: center;
+}
+
+.ap-sistem-modal-ikon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--ap-accent) 14%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.ap-sistem-modal-kapat-v2 {
+  align-self: flex-start;
+}
+
+.ap-sistem-modal-govde-v2 {
+  padding: 0 1.25rem 1.25rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 9rem);
+}
+
+.ap-sistem-modal-alt-v2 {
+  margin-top: 0;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-hover) 60%, transparent);
+  justify-content: flex-end;
+}
+
+.ap-sistem-modal-bilgi-kutu {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.625rem;
+  border: 1px solid color-mix(in srgb, var(--ap-accent) 25%, var(--ap-border));
+  background: color-mix(in srgb, var(--ap-accent) 8%, var(--ap-surface));
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ap-text);
+}
+
+.ap-sistem-modal-bilgi-ikon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ap-master-kart-tiklanabilir {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.ap-master-kart-tiklanabilir:hover {
+  border-color: color-mix(in srgb, var(--ap-accent) 40%, var(--ap-border));
+}
+
+.ap-master-kart-secili {
+  border-color: var(--ap-accent) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ap-accent) 35%, transparent);
+}
+
 .ap-sistem-modal {
   width: min(720px, 100%);
   max-height: 90vh;
@@ -8798,7 +8893,231 @@ html:has(.admin-panel[data-tema='acik']) body {
 }
 
 .ap-master-firma-modal {
-  width: min(100%, 520px);
+  width: min(100%, 560px);
+}
+
+.ap-master-excel-wrap {
+  border-radius: 0.75rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+  overflow: visible;
+}
+
+.ap-master-excel-ust {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 70%, transparent);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.ap-master-excel-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.ap-master-excel-tablo {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.ap-master-excel-tablo thead {
+  background: color-mix(in srgb, var(--ap-input-bg) 90%, var(--ap-accent) 4%);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ap-master-excel-tablo th {
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ap-muted);
+  border-bottom: 1px solid var(--ap-border);
+  white-space: nowrap;
+}
+
+.ap-master-excel-hucre {
+  padding: 0.45rem 0.65rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--ap-border);
+  max-width: 180px;
+}
+
+.ap-master-excel-tablo tbody tr:last-child .ap-master-excel-hucre {
+  border-bottom: none;
+}
+
+.ap-master-excel-hucre-tiklanabilir {
+  cursor: cell;
+  transition: background 0.12s ease;
+}
+
+.ap-master-excel-hucre-tiklanabilir:hover {
+  background: color-mix(in srgb, var(--ap-accent) 6%, transparent);
+}
+
+.ap-master-excel-hucre-duzenle {
+  padding: 0.3rem 0.4rem;
+  background: color-mix(in srgb, var(--ap-accent) 8%, var(--ap-surface));
+  box-shadow: inset 0 0 0 1px var(--ap-accent);
+}
+
+.ap-master-excel-input {
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.ap-master-excel-satir-secili .ap-master-excel-hucre {
+  background: color-mix(in srgb, var(--ap-accent) 10%, var(--ap-surface));
+}
+
+.ap-master-excel-satir-secili .ap-master-excel-hucre-duzenle {
+  background: color-mix(in srgb, var(--ap-accent) 14%, var(--ap-surface));
+}
+
+.ap-master-excel-satir-uyari .ap-master-excel-hucre {
+  background: color-mix(in srgb, #f59e0b 6%, var(--ap-surface));
+}
+
+.ap-master-excel-hucre-sayi {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ap-master-excel-hucre-tarih {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ap-master-modal-bolum-baslik {
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--ap-border);
+}
+
+.ap-master-excel-th-aksiyon {
+  width: 5.5rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ap-master-excel-tablo tbody tr {
+  cursor: pointer;
+}
+
+.ap-master-sutun-ayar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ap-master-sutun-ayar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+  color: var(--ap-muted);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.ap-master-sutun-ayar-btn:hover {
+  color: var(--ap-heading);
+  border-color: color-mix(in srgb, var(--ap-accent) 40%, var(--ap-border));
+  background: var(--ap-hover);
+}
+
+.ap-master-sutun-ayar-panel {
+  width: min(100vw - 2rem, 300px);
+  max-height: min(70vh, 420px);
+  overflow-y: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  padding: 0.85rem;
+}
+
+.ap-master-sutun-ayar-panel-portal {
+  position: fixed;
+}
+
+.ap-master-sutun-ayar-baslik {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.ap-master-sutun-ayar-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ap-master-sutun-ayar-oge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ap-border) 60%, transparent);
+}
+
+.ap-master-sutun-ayar-liste-gizli .ap-master-sutun-ayar-oge {
+  opacity: 0.75;
+}
+
+.ap-master-sutun-ayar-etiket {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.ap-master-sutun-ayar-tasima {
+  display: flex;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.ap-master-sutun-ayar-tas-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--ap-border);
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--ap-muted);
+}
+
+.ap-master-sutun-ayar-tas-btn:hover:not(:disabled) {
+  background: var(--ap-hover);
+  color: var(--ap-heading);
+}
+
+.ap-master-sutun-ayar-tas-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .ap-master-modal .ap-sistem-modal-aksiyonlar,

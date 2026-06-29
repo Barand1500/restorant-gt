@@ -16,6 +16,7 @@ export interface MasterKullanici {
   firmaTabela: string | null;
   subeId: number | null;
   subeAdi: string | null;
+  iskonto: number | null;
   aktif: boolean;
   sonGirisTarihi: string | null;
   kayitTarihi: string;
@@ -32,7 +33,28 @@ export interface KullaniciFormGirdi {
   firmaId?: number | null;
   subeId?: number | null;
   gsm?: string;
+  iskonto?: number | null;
   aktif?: boolean;
+}
+
+export function kullaniciTipiHesapla(
+  bayiId?: number | null,
+  firmaId?: number | null,
+  subeId?: number | null
+): KullaniciTipi {
+  if (subeId) return 'sube';
+  if (firmaId) return 'firma';
+  if (bayiId) return 'bayi';
+  return 'merkez';
+}
+
+export function sonGirisGoster(iso: string | null): string {
+  if (!iso) return '—';
+  try {
+    return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso));
+  } catch {
+    return '—';
+  }
 }
 
 export const KULLANICI_TIP_ETIKET: Record<KullaniciTipi, string> = {
@@ -62,5 +84,12 @@ export async function masterKullaniciGuncelle(
     method: 'PATCH',
     headers: adminHeaders(),
     body: JSON.stringify(girdi),
+  });
+}
+
+export async function masterKullaniciSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/kullanicilar/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
   });
 }

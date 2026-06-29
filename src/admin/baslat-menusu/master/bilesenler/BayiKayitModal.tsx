@@ -6,6 +6,7 @@ import {
   type BayiFormGirdi,
   type MasterBayi,
 } from '@/admin/baslat-menusu/master/bayiler/api';
+import { SistemModal } from '@/admin/ortak/SistemModal';
 
 interface BayiKayitModalProps {
   acik: boolean;
@@ -63,24 +64,6 @@ export function BayiKayitModal({
     setHata('');
   }, [acik, duzenlenen]);
 
-  useEffect(() => {
-    if (!acik) return;
-    function tusHandler(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onKapat();
-      }
-    }
-    document.addEventListener('keydown', tusHandler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', tusHandler);
-      document.body.style.overflow = '';
-    };
-  }, [acik, onKapat]);
-
-  if (!acik) return null;
-
   const ustSecenekler = ustBayiSecenekleri.filter((b) => b.id !== duzenlenen?.id && b.aktif);
 
   function kaydet() {
@@ -117,34 +100,42 @@ export function BayiKayitModal({
   }
 
   return (
-    <div
-      className="ap-sistem-modal-arka"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="bayi-kayit-baslik"
-    >
-      <div className="ap-sistem-modal ap-master-modal ap-master-modul-modal ap-master-bayi-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ap-sistem-modal-baslik">
-          <h2 id="bayi-kayit-baslik" className="ap-heading text-base font-bold">
-            {duzenlenen ? 'Bayi Düzenle' : 'Yeni Bayi Ekle'}
-          </h2>
-          <button type="button" className="ap-sistem-modal-kapat" onClick={onKapat} aria-label="Kapat">
-            ✕
+    <SistemModal
+      acik={acik}
+      onKapat={onKapat}
+      baslik={duzenlenen ? 'Bayi Düzenle' : 'Yeni Bayi Ekle'}
+      ikon="🏢"
+      genislik="bayi"
+      baslikId="bayi-kayit-baslik"
+      kapatmaDevreDisi={kaydediliyor}
+      footer={
+        <>
+          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
+            İptal
           </button>
+          <button
+            type="button"
+            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
+            onClick={kaydet}
+            disabled={kaydediliyor}
+          >
+            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Bayi Oluştur'}
+          </button>
+        </>
+      }
+    >
+      {duzenlenen && (
+        <div className="mb-3 flex flex-wrap gap-4 text-xs">
+          <span className="ap-muted">
+            Kayıt: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.kayitTarihi)}</strong>
+          </span>
+          <span className="ap-muted">
+            Güncelleme: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
+          </span>
         </div>
+      )}
 
-        {duzenlenen && (
-          <div className="mt-3 flex flex-wrap gap-4 text-xs">
-            <span className="ap-muted">
-              Kayıt: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.kayitTarihi)}</strong>
-            </span>
-            <span className="ap-muted">
-              Güncelleme: <strong className="ap-heading">{bayiTarihGoster(duzenlenen.guncellemeTarihi)}</strong>
-            </span>
-          </div>
-        )}
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Unvan *</label>
             <input
@@ -243,22 +234,7 @@ export function BayiKayitModal({
           </div>
         </div>
 
-        {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
-
-        <div className="ap-sistem-modal-aksiyonlar ap-master-modal-aksiyonlar">
-          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
-            İptal
-          </button>
-          <button
-            type="button"
-            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
-            onClick={kaydet}
-            disabled={kaydediliyor}
-          >
-            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Bayi Oluştur'}
-          </button>
-        </div>
-      </div>
-    </div>
+      {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
+    </SistemModal>
   );
 }

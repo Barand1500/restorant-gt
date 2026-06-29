@@ -64,3 +64,10 @@ export async function masterLisansGuncelle(
     body: JSON.stringify(girdi),
   });
 }
+
+export async function masterLisansSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/lisanslar/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
+  });
+}

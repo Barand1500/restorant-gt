@@ -66,3 +66,10 @@ export async function masterModulGuncelle(
     body: JSON.stringify(body),
   });
 }
+
+export async function masterModulSil(id: number): Promise<{ mesaj: string }> {
+  return adminJsonFetch(`/moduller/${id}`, {
+    method: 'DELETE',
+    headers: adminHeaders(),
+  });
+}

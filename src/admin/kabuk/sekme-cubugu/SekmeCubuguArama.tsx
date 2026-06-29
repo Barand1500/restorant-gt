@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { modulAra } from '@/admin/veri/adminMenuYapisi';
+import { useModulKatalog } from '@/baglamlar/ModulKatalogContext';
 import { usePanelDil } from '@/baglamlar/PanelDilContext';
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import type { SekmeAramaGorunum } from '@/admin/baslat-menusu/sistem/sekme-yonetimi/yardimci';
@@ -17,7 +18,8 @@ export function SekmeCubuguArama({ gorunum, onModulSec }: SekmeCubuguAramaProps)
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [odak, setOdak] = useState(false);
-  const sonuclar = modulAra(arama).slice(0, 8);
+  const { aktifPrefixler } = useModulKatalog();
+  const sonuclar = modulAra(arama, aktifPrefixler).slice(0, 8);
   const panelAcik =
     gorunum === 'input' ? odak || arama.trim().length > 0 : acik;
 

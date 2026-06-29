@@ -93,4 +93,15 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   return res.json({ lisans: lisansYanitOlustur(guncel) });
 });
 
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz lisans id' });
+
+  const mevcut = await prisma.lisans.findUnique({ where: { id } });
+  if (!mevcut) return res.status(404).json({ mesaj: 'Lisans bulunamadi' });
+
+  await prisma.lisans.delete({ where: { id } });
+  return res.json({ mesaj: 'Lisans silindi' });
+});
+
 export default router;

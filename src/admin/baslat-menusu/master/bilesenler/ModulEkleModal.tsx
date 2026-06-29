@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { prefixNormalize, prefixUret } from '@/admin/baslat-menusu/master/moduller/api';
+import { SistemModal } from '@/admin/ortak/SistemModal';
 
 export interface ModulFormDegeri {
   modulAdi: string;
@@ -37,24 +38,6 @@ export function ModulEkleModal({ acik, mevcutPrefixler, kaydediliyor, onKapat, o
     }));
   }, [acik, form.modulAdi, mevcutPrefixler, prefixElle]);
 
-  useEffect(() => {
-    if (!acik) return;
-    function tusHandler(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onKapat();
-      }
-    }
-    document.addEventListener('keydown', tusHandler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', tusHandler);
-      document.body.style.overflow = '';
-    };
-  }, [acik, onKapat]);
-
-  if (!acik) return null;
-
   function kaydet() {
     const ad = form.modulAdi.trim();
     const prefix = prefixNormalize(form.prefix);
@@ -74,57 +57,17 @@ export function ModulEkleModal({ acik, mevcutPrefixler, kaydediliyor, onKapat, o
   }
 
   return (
-    <div
-      className="ap-sistem-modal-arka"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modul-ekle-baslik"
-    >
-      <div className="ap-sistem-modal ap-master-modal ap-master-modul-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ap-sistem-modal-baslik">
-          <h2 id="modul-ekle-baslik" className="ap-heading text-base font-bold">
-            Yeni Modül Ekle
-          </h2>
-          <button type="button" className="ap-sistem-modal-kapat" onClick={onKapat} aria-label="Kapat">
-            ✕
-          </button>
-        </div>
-        <p className="ap-muted mt-2 text-sm">
-          Modül kaydedildiğinde varsayılan sistem rolleri otomatik oluşturulur ve listede görünür.
-        </p>
-        <div className="mt-4 space-y-3">
-          <div>
-            <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Modül adı</label>
-            <input
-              className={formInputSinifi}
-              placeholder="ör. Stok Yönetimi"
-              value={form.modulAdi}
-              onChange={(e) => setForm({ ...form, modulAdi: e.target.value })}
-              autoFocus
-            />
-          </div>
-          <div>
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <label className="ap-muted text-xs font-semibold uppercase">Prefix (benzersiz kod)</label>
-              <button
-                type="button"
-                className="ap-master-link-btn !cursor-pointer !opacity-100"
-                onClick={() => setPrefixElle((v) => !v)}
-              >
-                {prefixElle ? 'Otomatik üret' : 'Elle düzenle'}
-              </button>
-            </div>
-            <input
-              className={`${formInputSinifi} font-mono text-sm`}
-              placeholder="stok_yonetimi"
-              value={form.prefix}
-              readOnly={!prefixElle}
-              onChange={(e) => setForm({ ...form, prefix: prefixNormalize(e.target.value) })}
-            />
-          </div>
-          {hata && <p className="text-sm text-red-400">{hata}</p>}
-        </div>
-        <div className="ap-sistem-modal-aksiyonlar ap-master-modal-aksiyonlar">
+    <SistemModal
+      acik={acik}
+      onKapat={onKapat}
+      baslik="Yeni Modül Ekle"
+      altBaslik="Kataloga yeni bir panel modülü tanımlayın"
+      ikon="🧩"
+      genislik="sm"
+      baslikId="modul-ekle-baslik"
+      kapatmaDevreDisi={kaydediliyor}
+      footer={
+        <>
           <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
             İptal
           </button>
@@ -136,8 +79,49 @@ export function ModulEkleModal({ acik, mevcutPrefixler, kaydediliyor, onKapat, o
           >
             {kaydediliyor ? 'Kaydediliyor…' : 'Modül Oluştur'}
           </button>
-        </div>
+        </>
+      }
+    >
+      <div className="ap-sistem-modal-bilgi-kutu">
+        <span className="ap-sistem-modal-bilgi-ikon" aria-hidden>
+          ℹ️
+        </span>
+        <p>Modül kaydedildiğinde varsayılan sistem rolleri otomatik oluşturulur ve katalogda listelenir.</p>
       </div>
-    </div>
+
+      <div className="mt-4 space-y-4">
+        <div>
+          <label className="ap-muted mb-1.5 block text-xs font-semibold uppercase tracking-wide">Modül adı</label>
+          <input
+            className={formInputSinifi}
+            placeholder="ör. Stok Yönetimi"
+            value={form.modulAdi}
+            onChange={(e) => setForm({ ...form, modulAdi: e.target.value })}
+            autoFocus
+          />
+        </div>
+        <div>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label className="ap-muted text-xs font-semibold uppercase tracking-wide">Prefix (benzersiz kod)</label>
+            <button
+              type="button"
+              className="ap-master-link-btn !cursor-pointer !opacity-100"
+              onClick={() => setPrefixElle((v) => !v)}
+            >
+              {prefixElle ? 'Otomatik üret' : 'Elle düzenle'}
+            </button>
+          </div>
+          <input
+            className={`${formInputSinifi} font-mono text-sm`}
+            placeholder="stok_yonetimi"
+            value={form.prefix}
+            readOnly={!prefixElle}
+            onChange={(e) => setForm({ ...form, prefix: prefixNormalize(e.target.value) })}
+          />
+          <p className="ap-muted mt-1.5 text-xs">Küçük harf, rakam ve alt çizgi. Harf ile başlamalı.</p>
+        </div>
+        {hata && <p className="text-sm text-red-400">{hata}</p>}
+      </div>
+    </SistemModal>
   );
 }

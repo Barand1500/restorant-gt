@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import type { MasterPaket, PaketFormGirdi } from '@/admin/baslat-menusu/master/paketler/api';
+import { SistemModal } from '@/admin/ortak/SistemModal';
 
 interface PaketKayitModalProps {
   acik: boolean;
@@ -81,24 +82,6 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
     setHata('');
   }, [acik, duzenlenen]);
 
-  useEffect(() => {
-    if (!acik) return;
-    function tusHandler(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onKapat();
-      }
-    }
-    document.addEventListener('keydown', tusHandler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', tusHandler);
-      document.body.style.overflow = '';
-    };
-  }, [acik, onKapat]);
-
-  if (!acik) return null;
-
   function kaydet() {
     const sonuc = metindenGirdi(form);
     if (sonuc.hata || !sonuc.girdi) {
@@ -109,18 +92,31 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
   }
 
   return (
-    <div className="ap-sistem-modal-arka" role="dialog" aria-modal="true" aria-labelledby="paket-kayit-baslik">
-      <div className="ap-sistem-modal ap-master-modal ap-master-modul-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="ap-sistem-modal-baslik">
-          <h2 id="paket-kayit-baslik" className="ap-heading text-base font-bold">
-            {duzenlenen ? 'Paket Düzenle' : 'Yeni Paket'}
-          </h2>
-          <button type="button" className="ap-sistem-modal-kapat" onClick={onKapat} aria-label="Kapat">
-            ✕
+    <SistemModal
+      acik={acik}
+      onKapat={onKapat}
+      baslik={duzenlenen ? 'Paket Düzenle' : 'Yeni Paket'}
+      ikon="📦"
+      genislik="sm"
+      baslikId="paket-kayit-baslik"
+      kapatmaDevreDisi={kaydediliyor}
+      footer={
+        <>
+          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
+            İptal
           </button>
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
+            onClick={kaydet}
+            disabled={kaydediliyor}
+          >
+            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Paket Oluştur'}
+          </button>
+        </>
+      }
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="ap-muted mb-1 block text-xs font-semibold uppercase">Paket adı *</label>
             <input
@@ -184,23 +180,8 @@ export function PaketKayitModal({ acik, duzenlenen, kaydediliyor, onKapat, onKay
           </div>
         </div>
 
-        {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
-
-        <div className="ap-sistem-modal-aksiyonlar ap-master-modal-aksiyonlar">
-          <button type="button" className="ap-sistem-modal-btn" onClick={onKapat} disabled={kaydediliyor}>
-            İptal
-          </button>
-          <button
-            type="button"
-            className="ap-sistem-modal-btn ap-sistem-modal-btn-birincil"
-            onClick={kaydet}
-            disabled={kaydediliyor}
-          >
-            {kaydediliyor ? 'Kaydediliyor…' : duzenlenen ? 'Güncelle' : 'Paket Oluştur'}
-          </button>
-        </div>
-      </div>
-    </div>
+      {hata && <p className="mt-3 text-sm text-red-400">{hata}</p>}
+    </SistemModal>
   );
 }
 

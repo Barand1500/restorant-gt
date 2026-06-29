@@ -14,6 +14,13 @@ const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: b
 });
 
 const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
+  master: [
+    A('kaydet', 'Kaydet', false),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
   ayarlar: [
     A('kaydet', 'Kaydet', true, true),
     A('ekle', 'Yeni Ekle', false),
@@ -57,13 +64,6 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('yayinla', 'Yayınla', false),
   ],
   'veri-yedekleme': [
-    A('kaydet', 'Kaydet', false),
-    A('ekle', 'Yeni Ekle', false),
-    A('sil', 'Sil', false),
-    A('onizle', 'Önizle', false),
-    A('yayinla', 'Yayınla', false),
-  ],
-  master: [
     A('kaydet', 'Kaydet', false),
     A('ekle', 'Yeni Ekle', false),
     A('sil', 'Sil', false),

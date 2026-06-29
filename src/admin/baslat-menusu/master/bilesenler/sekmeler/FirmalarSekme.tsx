@@ -2,17 +2,42 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formSelectSinifi } from '@/formlar/FormAlani';
 import { masterBayileriGetir, type MasterBayi } from '@/admin/baslat-menusu/master/bayiler/api';
 import { FirmaKayitModal } from '@/admin/baslat-menusu/master/bilesenler/FirmaKayitModal';
+import {
+  FirmaExcelTablo,
+  type AktifHucre,
+  type FirmaDuzenlenebilirAlan,
+} from '@/admin/baslat-menusu/master/bilesenler/FirmaExcelTablo';
 import { MasterArama } from '@/admin/baslat-menusu/master/bilesenler/MasterArama';
 import {
-  lisansDurumEtiketi,
+  firmaTabloSutunlariKaydet,
+  firmaTabloSutunlariOku,
+} from '@/admin/baslat-menusu/master/firmalar/firmaTabloSutunlari';
+import {
   masterFirmaGuncelle,
   masterFirmaOlustur,
+  masterFirmaSil,
   masterFirmalariGetir,
   type FirmaFormGirdi,
   type MasterFirma,
 } from '@/admin/baslat-menusu/master/firmalar/api';
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
+import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
+
+function hucreMevcutDeger(firma: MasterFirma, alan: FirmaDuzenlenebilirAlan): string {
+  switch (alan) {
+    case 'bayiId':
+      return String(firma.bayiId);
+    case 'aktif':
+      return firma.aktif ? 'true' : 'false';
+    case 'tabelaAdi':
+      return firma.tabelaAdi ?? '';
+    case 'iskonto':
+      return firma.iskonto != null ? String(firma.iskonto) : '';
+    default:
+      return (firma[alan] as string | undefined) ?? '';
+  }
+}
 
 export function FirmalarSekme() {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
@@ -26,6 +51,11 @@ export function FirmalarSekme() {
   const [modalAcik, setModalAcik] = useState(false);
   const [duzenlenen, setDuzenlenen] = useState<MasterFirma | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [seciliId, setSeciliId] = useState<number | null>(null);
+  const [aktifHucre, setAktifHucre] = useState<AktifHucre | null>(null);
+  const [hucreTaslak, setHucreTaslak] = useState('');
+  const [hucreKaydediliyor, setHucreKaydediliyor] = useState(false);
+  const [gorunurSutunlar, setGorunurSutunlar] = useState(firmaTabloSutunlariOku);
 
   const yukle = useCallback(async () => {
     setYukleniyor(true);
@@ -34,6 +64,10 @@ export function FirmalarSekme() {
       const [firmaVeri, bayiVeri] = await Promise.all([masterFirmalariGetir(), masterBayileriGetir()]);
       setFirmalar(firmaVeri.firmalar);
       setBayiler(bayiVeri.bayiler);
+      setSeciliId((onceki) => {
+        if (onceki !== null && !firmaVeri.firmalar.some((f) => f.id === onceki)) return null;
+        return onceki;
+      });
     } catch (err) {
       setHata(err instanceof Error ? err.message : 'Firmalar alınamadı');
     } finally {
@@ -55,10 +89,96 @@ export function FirmalarSekme() {
       return (
         f.unvan.toLowerCase().includes(q) ||
         (f.tabelaAdi?.toLowerCase().includes(q) ?? false) ||
-        f.bayiUnvan.toLowerCase().includes(q)
+        f.bayiUnvan.toLowerCase().includes(q) ||
+        (f.il?.toLowerCase().includes(q) ?? false) ||
+        (f.eposta?.toLowerCase().includes(q) ?? false) ||
+        (f.vergiNo?.toLowerCase().includes(q) ?? false) ||
+        (f.vergiDairesi?.toLowerCase().includes(q) ?? false)
       );
     });
   }, [firmalar, arama, filtre, bayiFiltre]);
+
+  const seciliFirma = useMemo(
+    () => (seciliId !== null ? firmalar.find((f) => f.id === seciliId) ?? null : null),
+    [firmalar, seciliId]
+  );
+
+  const aktifBayiler = useMemo(() => bayiler.filter((b) => b.aktif), [bayiler]);
+
+  function hucreIptal() {
+    setAktifHucre(null);
+    setHucreTaslak('');
+  }
+
+  const hucreBaslat = useCallback((firma: MasterFirma, alan: FirmaDuzenlenebilirAlan) => {
+    setAktifHucre({ firmaId: firma.id, alan });
+    setHucreTaslak(hucreMevcutDeger(firma, alan));
+  }, []);
+
+  const hucreKaydet = useCallback(
+    async (anlikDeger?: string) => {
+      if (!aktifHucre || hucreKaydediliyor) return;
+      const firma = firmalar.find((f) => f.id === aktifHucre.firmaId);
+      if (!firma) {
+        hucreIptal();
+        return;
+      }
+
+      const ham = (anlikDeger ?? hucreTaslak).trim();
+      const mevcut = hucreMevcutDeger(firma, aktifHucre.alan);
+      if (ham === mevcut.trim() || (aktifHucre.alan !== 'unvan' && ham === mevcut)) {
+        hucreIptal();
+        return;
+      }
+
+      const girdi: Partial<FirmaFormGirdi> = {};
+      const { alan } = aktifHucre;
+
+      if (alan === 'unvan') {
+        if (ham.length < 2) {
+          hataBildir('Unvan en az 2 karakter olmalı');
+          return;
+        }
+        girdi.unvan = ham;
+      } else if (alan === 'bayiId') {
+        const bayiId = Number(ham);
+        if (!Number.isInteger(bayiId) || bayiId < 1) {
+          hataBildir('Geçerli bir bayi seçin');
+          return;
+        }
+        girdi.bayiId = bayiId;
+      } else if (alan === 'aktif') {
+        girdi.aktif = ham === 'true';
+      } else if (alan === 'tabelaAdi') {
+        girdi.tabelaAdi = ham || undefined;
+      } else if (alan === 'iskonto') {
+        if (!ham) {
+          girdi.iskonto = null;
+        } else {
+          const n = Number(ham);
+          if (Number.isNaN(n) || n < 0 || n > 100) {
+            hataBildir('İskonto 0-100 arasında olmalı');
+            return;
+          }
+          girdi.iskonto = n;
+        }
+      } else {
+        girdi[alan] = ham || undefined;
+      }
+
+      setHucreKaydediliyor(true);
+      try {
+        const { firma: guncel } = await masterFirmaGuncelle(firma.id, girdi);
+        setFirmalar((onceki) => onceki.map((f) => (f.id === guncel.id ? guncel : f)));
+        hucreIptal();
+      } catch (err) {
+        hataBildir(err instanceof Error ? err.message : 'Hücre kaydedilemedi');
+      } finally {
+        setHucreKaydediliyor(false);
+      }
+    },
+    [aktifHucre, hucreTaslak, hucreKaydediliyor, firmalar, hataBildir]
+  );
 
   async function kaydet(girdi: FirmaFormGirdi) {
     setKaydediliyor(true);
@@ -67,7 +187,8 @@ export function FirmalarSekme() {
         await masterFirmaGuncelle(duzenlenen.id, girdi);
         basariBildir(`${girdi.unvan} güncellendi.`);
       } else {
-        await masterFirmaOlustur(girdi);
+        const { firma } = await masterFirmaOlustur(girdi);
+        setSeciliId(firma.id);
         basariBildir(`${girdi.unvan} eklendi.`);
       }
       setModalAcik(false);
@@ -80,20 +201,51 @@ export function FirmalarSekme() {
     }
   }
 
-  function yeniFirma() {
+  const yeniFirma = useCallback(() => {
     setDuzenlenen(null);
     setModalAcik(true);
-  }
+  }, []);
 
-  function firmaDuzenle(firma: MasterFirma) {
-    setDuzenlenen(firma);
-    setModalAcik(true);
-  }
+  const firmaSil = useCallback(async () => {
+    if (!seciliFirma) return;
+    if (
+      !confirm(
+        `"${seciliFirma.tabelaAdi ?? seciliFirma.unvan}" firmasını silmek istediğinize emin misiniz? Bağlı şubeler de kaldırılır.`
+      )
+    ) {
+      return;
+    }
+    setKaydediliyor(true);
+    try {
+      await masterFirmaSil(seciliFirma.id);
+      setSeciliId(null);
+      await yukle();
+      basariBildir('Firma silindi.');
+    } catch (err) {
+      hataBildir(err instanceof Error ? err.message : 'Firma silinemedi');
+    } finally {
+      setKaydediliyor(false);
+    }
+  }, [seciliFirma, yukle, basariBildir, hataBildir]);
+
+  const sutunlarDegistir = useCallback((sira: string[]) => {
+    setGorunurSutunlar(sira);
+    firmaTabloSutunlariKaydet(sira);
+  }, []);
+
+  const islemde = kaydediliyor || hucreKaydediliyor;
+
+  useModulAksiyonlari(
+    { ekle: yeniFirma, sil: firmaSil },
+    {
+      kaydet: false,
+      ekle: !islemde && aktifBayiler.length > 0 && !aktifHucre,
+      sil: !!seciliFirma && !islemde && !aktifHucre,
+    }
+  );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Firmalar yükleniyor…" />;
   if (hata) return <HataDurumu mesaj={hata} />;
-
-  const aktifBayiler = bayiler.filter((b) => b.aktif);
 
   return (
     <div className="ap-master-sekme">
@@ -117,7 +269,7 @@ export function FirmalarSekme() {
       </div>
 
       <div className="ap-master-ust ap-master-ust-filtre">
-        <MasterArama placeholder="Tabela, unvan veya bayi ara…" value={arama} onChange={setArama} />
+        <MasterArama placeholder="Tabela, unvan, bayi, il veya e-posta ara…" value={arama} onChange={setArama} />
         <select
           className={formSelectSinifi}
           value={bayiFiltre}
@@ -131,15 +283,9 @@ export function FirmalarSekme() {
             </option>
           ))}
         </select>
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil shrink-0"
-          onClick={yeniFirma}
-          disabled={aktifBayiler.length === 0}
-          title={aktifBayiler.length === 0 ? 'Önce aktif bir bayi ekleyin' : undefined}
-        >
-          + Firma Ekle
-        </button>
+        <p className="ap-muted text-xs sm:col-span-2">
+          Satır seçmek için tıklayın; hücreyi çift tıklayarak düzenleyin. Sütunları ⚙️ ile özelleştirin.
+        </p>
       </div>
 
       {liste.length === 0 ? (
@@ -147,60 +293,31 @@ export function FirmalarSekme() {
           <p className="ap-muted text-sm">
             {arama || filtre !== 'tumu' || bayiFiltre !== ''
               ? 'Filtreye uygun firma bulunamadı.'
-              : 'Henüz firma kaydı yok.'}
+              : aktifBayiler.length === 0
+                ? 'Önce aktif bir bayi ekleyin.'
+                : 'Henüz firma kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
       ) : (
-        <div className="ap-seo-tablo-scroll">
-          <table className="ap-seo-tablo">
-            <thead>
-              <tr>
-                <th>Tabela</th>
-                <th>Unvan</th>
-                <th>Bayi</th>
-                <th>Şube</th>
-                <th>Lisans</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {liste.map((f) => (
-                <tr key={f.id} className={!f.aktif ? 'ap-master-tablo-pasif' : undefined}>
-                  <td>
-                    <span className="ap-heading font-medium">{f.tabelaAdi ?? '—'}</span>
-                  </td>
-                  <td className="ap-muted text-sm">{f.unvan}</td>
-                  <td>
-                    <span className="ap-master-etiket">{f.bayiUnvan}</span>
-                  </td>
-                  <td>{f.subeSayisi}</td>
-                  <td>
-                    <span
-                      className={`ap-master-lisans-badge ${
-                        f.lisansDurum === 'aktif'
-                          ? 'ap-master-lisans-aktif'
-                          : f.lisansDurum === 'yakinda'
-                            ? 'ap-master-lisans-uyari'
-                            : ''
-                      }`}
-                    >
-                      {lisansDurumEtiketi(f.lisansDurum)}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="ap-master-link-btn !cursor-pointer !opacity-100"
-                      onClick={() => firmaDuzenle(f)}
-                    >
-                      Düzenle
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <FirmaExcelTablo
+          firmalar={liste}
+          bayiler={bayiler}
+          seciliId={seciliId}
+          aktifHucre={aktifHucre}
+          hucreTaslak={hucreTaslak}
+          hucreKaydediliyor={hucreKaydediliyor}
+          gorunurSutunlar={gorunurSutunlar}
+          onSutunlarDegistir={sutunlarDegistir}
+          onSatirSec={setSeciliId}
+          onHucreBaslat={hucreBaslat}
+          onHucreTaslak={setHucreTaslak}
+          onHucreKaydet={hucreKaydet}
+          onHucreIptal={hucreIptal}
+          onModalDuzenle={(f) => {
+            setDuzenlenen(f);
+            setModalAcik(true);
+          }}
+        />
       )}
 
       <FirmaKayitModal

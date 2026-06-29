@@ -6,6 +6,7 @@ import { useAksiyonCubugu } from '@/kancalar/useAksiyonCubugu';
 import { AdminAksiyonProvider, useAdminAksiyon } from '@/baglamlar/AdminAksiyonContext';
 import { AdminUyariBildirimProvider } from '@/baglamlar/AdminUyariBildirimContext';
 import { AdminTemaProvider, useAdminTema } from '@/baglamlar/AdminTemaContext';
+import { ModulKatalogProvider } from '@/baglamlar/ModulKatalogContext';
 import { AdminHeader } from './AdminHeader';
 import { AltAksiyonCubugu } from './aksiyon-cubugu/AltAksiyonCubugu';
 import { modulBul, modulYolundanBul } from '@/admin/veri/adminMenuYapisi';
@@ -393,11 +394,13 @@ export function AdminLayout() {
   return (
     <AdminTemaProvider>
       <AdminAksiyonProvider>
-        <AdminUyariBildirimProvider>
-          <PanelDilKabuk>
-            <AdminLayoutIcerik />
-          </PanelDilKabuk>
-        </AdminUyariBildirimProvider>
+        <ModulKatalogProvider>
+          <AdminUyariBildirimProvider>
+            <PanelDilKabuk>
+              <AdminLayoutIcerik />
+            </PanelDilKabuk>
+          </AdminUyariBildirimProvider>
+        </ModulKatalogProvider>
       </AdminAksiyonProvider>
     </AdminTemaProvider>
   );

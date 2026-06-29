@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { modulAra, adminKategoriler, adminModulleri } from '@/admin/veri/adminMenuYapisi';
+import { modulAra, adminKategoriler, adminModulleri, modulleriMenuyeGoreFiltrele } from '@/admin/veri/adminMenuYapisi';
+import { useModulKatalog } from '@/baglamlar/ModulKatalogContext';
 import { usePanelDil } from '@/baglamlar/PanelDilContext';
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import { BaslatMenuArama } from './BaslatMenuArama';
@@ -39,7 +40,9 @@ function BaslatMenuIcerik({
 }) {
   const [arama, setArama] = useState('');
   const { t } = usePanelDil();
-  const sonuclar = modulAra(arama);
+  const { aktifPrefixler } = useModulKatalog();
+  const sonuclar = modulAra(arama, aktifPrefixler);
+  const gorunurModuller = modulleriMenuyeGoreFiltrele(adminModulleri, aktifPrefixler);
 
   return (
     <div className="ap-baslat-menu-dock fixed left-0 top-12 z-50 flex max-h-[calc(100vh-3rem)] w-[min(440px,92vw)] flex-col overflow-hidden border border-[var(--ap-border)] border-l-0 bg-[var(--ap-surface)] shadow-2xl">
@@ -67,7 +70,7 @@ function BaslatMenuIcerik({
               key={kategori}
               baslik={t(`kategori.${kategori}`, kategori)}
               kategori={kategori}
-              moduller={adminModulleri.filter((m) => m.kategori === kategori)}
+              moduller={gorunurModuller.filter((m) => m.kategori === kategori)}
               onSec={(m) => {
                 onModulSec(m);
                 onKapat();

@@ -116,4 +116,19 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   return res.json({ modul: modulYanitOlustur(guncel) });
 });
 
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) {
+    return res.status(400).json({ mesaj: 'Gecersiz modul id' });
+  }
+
+  const mevcut = await prisma.modul.findUnique({ where: { id } });
+  if (!mevcut) {
+    return res.status(404).json({ mesaj: 'Modul bulunamadi' });
+  }
+
+  await prisma.modul.delete({ where: { id } });
+  return res.json({ mesaj: 'Modul silindi' });
+});
+
 export default router;
