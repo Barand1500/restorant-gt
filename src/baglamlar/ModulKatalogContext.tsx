@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { adminHeaders, adminJsonFetch } from '@/admin/ortak/api/adminFetch';
 import { masterModulleriGetir } from '@/admin/baslat-menusu/master/moduller/api';
 import { modulMenuGorunurMu as panelModulMenuGorunurMu } from '@/admin/veri/adminMenuYapisi';
 
@@ -27,7 +28,14 @@ export function ModulKatalogProvider({ children }: { children: ReactNode }) {
       const { moduller } = await masterModulleriGetir();
       setAktifPrefixler(new Set(moduller.filter((m) => m.aktif).map((m) => m.prefix)));
     } catch {
-      setAktifPrefixler(null);
+      try {
+        const { moduller } = await adminJsonFetch<{ moduller: { prefix: string }[] }>('/roller', {
+          headers: adminHeaders(),
+        });
+        setAktifPrefixler(new Set(moduller.map((m) => m.prefix)));
+      } catch {
+        setAktifPrefixler(null);
+      }
     } finally {
       setYukleniyor(false);
     }

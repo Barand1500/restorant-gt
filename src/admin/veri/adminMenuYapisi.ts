@@ -103,6 +103,8 @@ export function modulIdDenPrefix(modulId: string): string {
 const PANEL_ALTYAPI_MODUL_IDLERI = new Set(['ayarlar', 'sekme-yonetimi', 'kisayol-ayarlari']);
 
 export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> | null | undefined): boolean {
+  const modul = modulBul(modulId);
+  if (modul?.kategori === 'Tanımlar') return true;
   if (modulId === 'master') return MASTER_MENU_GORUNUR;
   if (PANEL_ALTYAPI_MODUL_IDLERI.has(modulId)) return true;
   if (!aktifPrefixler) return true;

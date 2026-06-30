@@ -59,6 +59,18 @@ cd "$SITE/repo"
 npm ci
 VITE_API_URL=/api npm run build
 rsync -a --delete "$SITE/repo/frontend/" "$SITE/frontend/"
+FRONTEND_JS="$(grep -oE 'index-[^"]+\.js' "$SITE/frontend/index.html" | head -1 || true)"
+echo "  Frontend: $SITE/frontend/ (${FRONTEND_JS:-index bulunamadi})"
+if [ -f "$SITE/index.html" ]; then
+  KOK_JS="$(grep -oE 'index-[^"]+\.js' "$SITE/index.html" | head -1 || true)"
+  if [ -n "$KOK_JS" ] && [ "$KOK_JS" != "$FRONTEND_JS" ]; then
+    echo ""
+    echo "  UYARI: Site kokunde ESKI index.html var ($KOK_JS)"
+    echo "  CloudPanel Document Root su olmali: $SITE/frontend"
+    echo "  Degilse nginx eski dosyalari gosterir."
+    echo ""
+  fi
+fi
 
 echo "[3/6] Backend build..."
 cd "$SITE/repo/backend"

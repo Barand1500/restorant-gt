@@ -4,17 +4,20 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 SCHEMA="$(bash scripts/prisma-sema.sh .env)"
-PRISMA="npx prisma --schema $SCHEMA"
 LOG="$(mktemp)"
 
 cleanup() { rm -f "$LOG"; }
 trap cleanup EXIT
 
+prisma_cmd() {
+  npx prisma "$@" --schema "$SCHEMA"
+}
+
 echo "  Prisma sema: $SCHEMA"
 
 if [ "${DB_RESET:-0}" = "1" ]; then
   echo "  DB_RESET=1 — tablolar sifirlanip yeniden olusturuluyor..."
-  $PRISMA db push --force-reset
+  prisma_cmd db push --force-reset --accept-data-loss
   if [ "$SCHEMA" = "prisma/schema.prisma" ]; then
     npm run db:seed
   else
@@ -24,7 +27,7 @@ if [ "${DB_RESET:-0}" = "1" ]; then
 fi
 
 set +e
-$PRISMA db push >"$LOG" 2>&1
+prisma_cmd db push >"$LOG" 2>&1
 PUSH_EXIT=$?
 set -e
 cat "$LOG"
