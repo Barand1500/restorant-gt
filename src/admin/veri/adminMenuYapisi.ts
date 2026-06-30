@@ -1,9 +1,11 @@
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
+import { tanimlarAdminModulleri } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 
 /** Master modülü menüde geçici gizli — tekrar açmak için true yapın */
 export const MASTER_MENU_GORUNUR = false;
 
 export const adminModulleri: AdminModul[] = [
+  ...tanimlarAdminModulleri(),
   {
     id: 'master',
     baslik: 'Master',
@@ -69,6 +71,7 @@ export const adminGizliModuller: AdminModul[] = [
 ];
 
 export const adminKategoriler = [
+  'Tanımlar',
   ...(MASTER_MENU_GORUNUR ? (['Master'] as const) : []),
   'Müşteri / Ajans',
   'Sistem',

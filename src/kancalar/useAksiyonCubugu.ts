@@ -5,6 +5,7 @@ import type { AksiyonButonu } from '@/admin/ortak/tipler/admin';
 import type { AksiyonId } from '@/baglamlar/AdminAksiyonContext';
 import { useYetkiler } from '@/kancalar/useYetkiler';
 import type { YetkiKodu } from '@/admin/baslat-menusu/musteri-ajans/roller/api';
+import { TANIMLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 
 const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: boolean): AksiyonButonu => ({
   id,
@@ -70,6 +71,18 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  ...Object.fromEntries(
+    TANIMLAR_MODUL_TANIMLARI.map((t) => [
+      t.id,
+      [
+        A('kaydet', 'Kaydet', false),
+        A('ekle', 'Yeni Ekle', false),
+        A('sil', 'Sil', false),
+        A('onizle', 'Önizle', false),
+        A('yayinla', 'Yayınla', false),
+      ],
+    ])
+  ),
 };
 
 const varsayilanAksiyonlar: AksiyonButonu[] = [

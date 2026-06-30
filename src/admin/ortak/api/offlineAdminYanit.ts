@@ -1,4 +1,5 @@
 import type { SistemAyarlariForm } from '@/admin/baslat-menusu/sistem/ayarlar/tipler';
+import { tanimlarSeedKayitlari } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 
 const OFFLINE_SISTEM_ANAHTAR = 'restorant-offline-sistem-ayarlari';
 const OFFLINE_MODUL_ANAHTAR = 'restorant-offline-moduller';
@@ -136,6 +137,15 @@ const VARSAYILAN_OFFLINE_MODULLER: OfflineModul[] = [
   { id: 1, ad: 'Master', prefix: 'master', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
   { id: 2, ad: 'Kullanicilar', prefix: 'kullanicilar', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
   { id: 3, ad: 'Roller', prefix: 'roller', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
+  ...tanimlarSeedKayitlari().map((t, i) => ({
+    id: 100 + i,
+    ad: t.modulAdi,
+    prefix: t.prefix,
+    aktif: true,
+    rolSayisi: 6,
+    kayitTarihi: '',
+    guncellemeTarihi: '',
+  })),
   { id: 4, ad: 'Ayarlar', prefix: 'ayarlar', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
 ];
 

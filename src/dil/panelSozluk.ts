@@ -158,6 +158,7 @@ export const PANEL_SOZLUK_EN: Record<string, string> = {
   'kategori.Site Yönetimi': 'Site Management',
   'kategori.İçerik Yönetimi': 'Content Management',
   'kategori.Müşteri / Ajans': 'Customer / Agency',
+  'kategori.Tanımlar': 'Definitions',
   'kategori.Sistem': 'System',
 };
 

@@ -11,6 +11,7 @@ const KATEGORI_IKON: Record<string, string> = {
   'Site Yönetimi': '🏠',
   'İçerik Yönetimi': '📝',
   'Müşteri / Ajans': '👥',
+  Tanımlar: '📋',
   Sistem: '⚙️',
 };
 

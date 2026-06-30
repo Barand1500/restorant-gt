@@ -6,6 +6,8 @@ import { KullanicilarSayfasi } from '@/admin/baslat-menusu/musteri-ajans/kullani
 import { RollerSayfasi } from '@/admin/baslat-menusu/musteri-ajans/roller/sayfa';
 import { SekmeYonetimiSayfasi } from '@/admin/baslat-menusu/sistem/sekme-yonetimi/sayfa';
 import { KisayolAyarlariSayfasi } from '@/admin/baslat-menusu/sistem/kisayol-ayarlari/sayfa';
+import { TanimlarBosSayfa } from '@/admin/baslat-menusu/tanimlar/TanimlarBosSayfa';
+import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
 interface AdminModulIcerikProps {
@@ -22,6 +24,11 @@ export function AdminModulIcerik({ modulId, onModulAc }: AdminModulIcerikProps) 
 }
 
 function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
+  const tanimModul = tanimlarModulBul(modulId);
+  if (tanimModul) {
+    return <TanimlarBosSayfa baslik={tanimModul.baslik} aciklama={tanimModul.aciklama} />;
+  }
+
   switch (modulId) {
     case 'loglar':
       return <LoglarSayfasi />;
