@@ -70,15 +70,21 @@ rsync -a \
 echo "[4/6] Backend bagimliliklari (sunucu)..."
 cd "$SITE/backend"
 npm ci
+chmod +x scripts/db-push-safe.sh 2>/dev/null || true
 
 echo "[5/6] Veritabani..."
 npx prisma generate
-if [ "$DB_RESET" = "1" ]; then
-  echo "  DB_RESET=1 — force-reset + seed"
-  npx prisma db push --force-reset
-  npm run db:seed
+DB_OK=1
+export DB_RESET
+if bash scripts/db-push-safe.sh; then
+  echo "  Veritabani guncellendi."
 else
-  npx prisma db push
+  DB_OK=0
+  echo ""
+  echo "  UYARI: Veritabani adimi basarisiz — deploy DEVAM EDIYOR (PM2 yenilenecek)."
+  echo "  Manuel: cd $SITE/backend && bash scripts/db-push-safe.sh"
+  echo "  Sifir kurulum (TUM VERI SILINIR): DB_RESET=1 ./deploy.sh"
+  echo ""
 fi
 
 echo "[6/6] PM2 ($PM2_NAME, port $API_PORT)..."
@@ -90,6 +96,12 @@ fi
 pm2 save
 
 echo ""
-echo "=== DEPLOY TAMAMLANDI ==="
+if [ "$DB_OK" = "1" ]; then
+  echo "=== DEPLOY TAMAMLANDI ==="
+else
+  echo "=== DEPLOY TAMAMLANDI (veritabani uyarisi var) ==="
+fi
 curl -sf "http://127.0.0.1:${API_PORT}/api/health" && echo "" || echo "UYARI: health check basarisiz"
+echo ""
+echo "Frontend guncellendi. Tarayicida Ctrl+Shift+R ile sert yenileme yapin."
 echo ""
