@@ -99,8 +99,12 @@ export function modulIdDenPrefix(modulId: string): string {
   return modulId.replace(/-/g, '_');
 }
 
+/** Panel altyapısı — Master modül kataloğundan bağımsız menüde her zaman görünür */
+const PANEL_ALTYAPI_MODUL_IDLERI = new Set(['ayarlar', 'sekme-yonetimi', 'kisayol-ayarlari']);
+
 export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> | null | undefined): boolean {
   if (modulId === 'master') return MASTER_MENU_GORUNUR;
+  if (PANEL_ALTYAPI_MODUL_IDLERI.has(modulId)) return true;
   if (!aktifPrefixler) return true;
   return aktifPrefixler.has(modulIdDenPrefix(modulId));
 }

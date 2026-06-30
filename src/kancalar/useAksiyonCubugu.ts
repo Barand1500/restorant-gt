@@ -71,8 +71,15 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  tanimlar: [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
   ...Object.fromEntries(
-    TANIMLAR_MODUL_TANIMLARI.map((t) => [
+    TANIMLAR_MODUL_TANIMLARI.filter((t) => t.id !== 'tanimlar').map((t) => [
       t.id,
       [
         A('kaydet', 'Kaydet', false),

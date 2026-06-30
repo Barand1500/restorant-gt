@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { masterModulleriGetir } from '@/admin/baslat-menusu/master/moduller/api';
-import { MASTER_MENU_GORUNUR, modulIdDenPrefix } from '@/admin/veri/adminMenuYapisi';
+import { modulMenuGorunurMu as panelModulMenuGorunurMu } from '@/admin/veri/adminMenuYapisi';
 
 export const MODUL_KATALOG_YENILE_OLAY = 'ap-modul-katalog-yenile';
 
@@ -41,11 +41,7 @@ export function ModulKatalogProvider({ children }: { children: ReactNode }) {
   }, [yenile]);
 
   const modulMenuGorunurMu = useCallback(
-    (modulId: string) => {
-      if (modulId === 'master') return MASTER_MENU_GORUNUR;
-      if (!aktifPrefixler) return true;
-      return aktifPrefixler.has(modulIdDenPrefix(modulId));
-    },
+    (modulId: string) => panelModulMenuGorunurMu(modulId, aktifPrefixler),
     [aktifPrefixler]
   );
 

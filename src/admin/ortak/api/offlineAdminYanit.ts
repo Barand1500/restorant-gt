@@ -147,6 +147,8 @@ const VARSAYILAN_OFFLINE_MODULLER: OfflineModul[] = [
     guncellemeTarihi: '',
   })),
   { id: 4, ad: 'Ayarlar', prefix: 'ayarlar', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
+  { id: 5, ad: 'Sekme Yonetimi', prefix: 'sekme_yonetimi', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
+  { id: 6, ad: 'Kisayol Ayarlari', prefix: 'kisayol_ayarlari', aktif: true, rolSayisi: 6, kayitTarihi: '', guncellemeTarihi: '' },
 ];
 
 const OFFLINE_YETKILER = [
@@ -273,18 +275,34 @@ function offlineSistemAyarlari(form?: Partial<SistemAyarlariForm>) {
   };
 }
 
+function offlineModulVarsayilan(): OfflineModul[] {
+  const simdi = new Date().toISOString();
+  return VARSAYILAN_OFFLINE_MODULLER.map((m) => ({
+    ...m,
+    kayitTarihi: simdi,
+    guncellemeTarihi: simdi,
+  }));
+}
+
 function offlineModulOku(): OfflineModul[] {
+  const varsayilan = offlineModulVarsayilan();
   try {
     const ham = localStorage.getItem(OFFLINE_MODUL_ANAHTAR);
-    if (ham) return JSON.parse(ham) as OfflineModul[];
+    if (ham) {
+      const kayitli = JSON.parse(ham) as OfflineModul[];
+      const prefixler = new Set(kayitli.map((m) => m.prefix));
+      const eksik = varsayilan.filter((m) => !prefixler.has(m.prefix));
+      if (eksik.length > 0) {
+        const birlesik = [...kayitli, ...eksik];
+        offlineModulKaydet(birlesik);
+        return birlesik;
+      }
+      return kayitli;
+    }
   } catch {
     /* bozuk kayıt */
   }
-  return VARSAYILAN_OFFLINE_MODULLER.map((m) => ({
-    ...m,
-    kayitTarihi: new Date().toISOString(),
-    guncellemeTarihi: new Date().toISOString(),
-  }));
+  return varsayilan;
 }
 
 function offlineModulKaydet(liste: OfflineModul[]) {

@@ -1,13 +1,40 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AdminModulKabuk, AdminPanelKarti } from '@/admin/ortak/AdminBilesenleri';
-import { TanimlarBilgiPaneli } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarBilgiPaneli';
+import { TanimlarGenelSekme } from '@/admin/baslat-menusu/tanimlar/bilesenler/genel/TanimlarGenelSekme';
 import { TanimlarSekmeIcerik } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarSekmeIcerik';
 import { TanimlarSekmeCubugu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarSekmeCubugu';
+import { TanimlarGeciciUyari } from '@/admin/baslat-menusu/tanimlar/bilesenler/genel/TanimlarGeciciUyari';
+import { UYARI_KAYDEDILMEDI } from '@/admin/baslat-menusu/tanimlar/genel/veri';
 import { tanimlarSekmeBul, type TanimlarSekmeId } from '@/admin/baslat-menusu/tanimlar/tipler';
+
+const KIRLI_TAKIP_SEKMELER: TanimlarSekmeId[] = ['genel', 'diger', 'sms-ayarlari'];
 
 export function TanimlarSayfasi() {
   const [sekme, setSekme] = useState<TanimlarSekmeId>('genel');
+  const [kirliSekmeler, setKirliSekmeler] = useState<Partial<Record<TanimlarSekmeId, boolean>>>({});
+  const [sekmeUyari, setSekmeUyari] = useState<string | null>(null);
   const aktifSekme = tanimlarSekmeBul(sekme);
+
+  const sekmeKirliMi = useCallback(
+    (id: TanimlarSekmeId) => Boolean(kirliSekmeler[id]),
+    [kirliSekmeler]
+  );
+
+  const onSekmeKirliDegisti = useCallback((id: TanimlarSekmeId, kirli: boolean) => {
+    setKirliSekmeler((onceki) => ({ ...onceki, [id]: kirli }));
+  }, []);
+
+  const sekmeDegistir = useCallback(
+    (yeni: TanimlarSekmeId) => {
+      if (yeni !== sekme && KIRLI_TAKIP_SEKMELER.includes(sekme) && sekmeKirliMi(sekme)) {
+        setSekmeUyari(UYARI_KAYDEDILMEDI);
+        return;
+      }
+      setSekmeUyari(null);
+      setSekme(yeni);
+    },
+    [sekme, sekmeKirliMi]
+  );
 
   return (
     <AdminModulKabuk
@@ -18,15 +45,25 @@ export function TanimlarSayfasi() {
       <div className="ap-sistem-yonetimi">
         <div className="ap-sistem-layout">
           <aside className="ap-sistem-sol">
-            <TanimlarSekmeCubugu aktif={sekme} onDegistir={setSekme} />
-            <div className="mt-4">
-              <TanimlarBilgiPaneli />
-            </div>
+            <TanimlarSekmeCubugu aktif={sekme} onDegistir={sekmeDegistir} />
           </aside>
 
           <div className="ap-sistem-icerik">
             <AdminPanelKarti baslik={aktifSekme.ad} altBaslik={aktifSekme.altBaslik}>
-              <TanimlarSekmeIcerik sekme={sekme} />
+              <TanimlarGeciciUyari mesaj={sekmeUyari} onTemizle={() => setSekmeUyari(null)} />
+
+              {sekme === 'genel' ? (
+                <TanimlarGenelSekme onKirliDegisti={(kirli) => onSekmeKirliDegisti('genel', kirli)} />
+              ) : (
+                <TanimlarSekmeIcerik
+                  sekme={sekme}
+                  onKirliDegisti={
+                    sekme === 'diger' || sekme === 'sms-ayarlari'
+                      ? (kirli) => onSekmeKirliDegisti(sekme, kirli)
+                      : undefined
+                  }
+                />
+              )}
             </AdminPanelKarti>
           </div>
         </div>

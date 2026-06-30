@@ -6,31 +6,22 @@ interface TanimlarKullaniciSubeDepartmanPanelProps {
   kullanici: TanimlarKullanici;
   kayit: TanimlarSubeDepartmanKaydi;
   onKayitDegistir: (kayit: TanimlarSubeDepartmanKaydi) => void;
-  onGeri: () => void;
   onAta: () => void;
-  onVazgec: () => void;
 }
 
 export function TanimlarKullaniciSubeDepartmanPanel({
   kullanici,
   kayit,
   onKayitDegistir,
-  onGeri,
   onAta,
-  onVazgec,
 }: TanimlarKullaniciSubeDepartmanPanelProps) {
   const kilitli = kayit.atanmis;
 
   return (
     <div className="ap-tanimlar-sube-dep-panel">
-      <header className="ap-tanimlar-yetki-ust">
-        <button type="button" className="ap-tanimlar-yetki-geri" onClick={onGeri}>
-          <span aria-hidden>←</span> Geri
-        </button>
-        <div className="ap-tanimlar-yetki-baslik-alan">
-          <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Şube / Departman</h3>
-          <p className="ap-tanimlar-yetki-alt">Personel şube ve departman ataması</p>
-        </div>
+      <header className="ap-tanimlar-panel-baslik">
+        <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Şube / Departman</h3>
+        <p className="ap-tanimlar-yetki-alt">Personel şube ve departman ataması</p>
       </header>
 
       <div className="ap-tanimlar-sube-dep-uyari" role="note">
@@ -78,9 +69,6 @@ export function TanimlarKullaniciSubeDepartmanPanel({
             Departman Ata
           </button>
         )}
-        <button type="button" className="ap-tanimlar-tablo-btn" onClick={onVazgec}>
-          Vazgeç
-        </button>
       </footer>
     </div>
   );

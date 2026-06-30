@@ -194,16 +194,50 @@ export function TanimlarKullanicilarSekme() {
   }, [seciliId, kullanicilar, hucreIptal, basariBildir]);
 
   const kaydet = useCallback(() => {
+    if (gorunum === 'yetkiler' && yetkiKullaniciId != null && taslakYetki) {
+      setYetkiHaritasi((onceki) => ({
+        ...onceki,
+        [yetkiKullaniciId]: yetkiKaydiKopyala(taslakYetki),
+      }));
+    }
+    if (gorunum === 'sube-departman' && subeKullaniciId != null && taslakSubeDepartman) {
+      setSubeDepartmanHaritasi((onceki) => ({
+        ...onceki,
+        [subeKullaniciId]: subeDepartmanKopyala(taslakSubeDepartman),
+      }));
+    }
+    if (gorunum === 'urun-yetki' && urunKullaniciId != null && taslakUrunYetki) {
+      setUrunYetkiHaritasi((onceki) => ({
+        ...onceki,
+        [urunKullaniciId]: urunYetkiKopyala(taslakUrunYetki),
+      }));
+    }
+
     const bosAd = kullanicilar.find((k) => !k.kullaniciAdi.trim());
     if (bosAd) {
       hataBildir('Tüm kullanıcıların adı dolu olmalı');
       return;
     }
     basariBildir('Kullanıcılar kaydedildi.');
-  }, [kullanicilar, basariBildir, hataBildir]);
+  }, [
+    gorunum,
+    yetkiKullaniciId,
+    taslakYetki,
+    subeKullaniciId,
+    taslakSubeDepartman,
+    urunKullaniciId,
+    taslakUrunYetki,
+    kullanicilar,
+    basariBildir,
+    hataBildir,
+  ]);
 
   const yetkilerAc = useCallback(
     (k: TanimlarKullanici) => {
+      if (gorunum === 'yetkiler' && yetkiKullaniciId === k.id) {
+        listeGorunumuneDon();
+        return;
+      }
       if (adminKullanicisiMi(k)) {
         setUyariMesaji('Admin kullanıcısının yetkileri kısıtlanamaz.');
         return;
@@ -214,54 +248,38 @@ export function TanimlarKullanicilarSekme() {
       setGorunum('yetkiler');
       hucreIptal();
     },
-    [yetkiHaritasi, hucreIptal]
+    [gorunum, yetkiKullaniciId, yetkiHaritasi, listeGorunumuneDon, hucreIptal]
   );
 
   const subeDepartmanAc = useCallback(
     (k: TanimlarKullanici) => {
+      if (gorunum === 'sube-departman' && subeKullaniciId === k.id) {
+        listeGorunumuneDon();
+        return;
+      }
       const mevcut = subeDepartmanHaritasi[k.id] ?? subeDepartmanKaydiBul(k.id);
       setSubeKullaniciId(k.id);
       setTaslakSubeDepartman(subeDepartmanKopyala(mevcut));
       setGorunum('sube-departman');
       hucreIptal();
     },
-    [subeDepartmanHaritasi, hucreIptal]
+    [gorunum, subeKullaniciId, subeDepartmanHaritasi, listeGorunumuneDon, hucreIptal]
   );
 
   const urunYetkiAc = useCallback(
     (k: TanimlarKullanici) => {
+      if (gorunum === 'urun-yetki' && urunKullaniciId === k.id) {
+        listeGorunumuneDon();
+        return;
+      }
       const mevcut = urunYetkiHaritasi[k.id] ?? urunYetkiKaydiBul(k.id);
       setUrunKullaniciId(k.id);
       setTaslakUrunYetki(urunYetkiKopyala(mevcut));
       setGorunum('urun-yetki');
       hucreIptal();
     },
-    [urunYetkiHaritasi, hucreIptal]
+    [gorunum, urunKullaniciId, urunYetkiHaritasi, listeGorunumuneDon, hucreIptal]
   );
-
-  const yetkilerKaydetVeGeri = useCallback(() => {
-    if (yetkiKullaniciId == null || !taslakYetki) return;
-    setYetkiHaritasi((onceki) => ({
-      ...onceki,
-      [yetkiKullaniciId]: yetkiKaydiKopyala(taslakYetki),
-    }));
-    listeGorunumuneDon();
-    basariBildir('Yetkiler kaydedildi.');
-  }, [yetkiKullaniciId, taslakYetki, listeGorunumuneDon, basariBildir]);
-
-  const subeDepartmanKaydetVeGeri = useCallback(() => {
-    if (subeKullaniciId == null || !taslakSubeDepartman) return;
-    setSubeDepartmanHaritasi((onceki) => ({
-      ...onceki,
-      [subeKullaniciId]: subeDepartmanKopyala(taslakSubeDepartman),
-    }));
-    listeGorunumuneDon();
-    basariBildir('Şube / departman kaydedildi.');
-  }, [subeKullaniciId, taslakSubeDepartman, listeGorunumuneDon, basariBildir]);
-
-  const subeDepartmanVazgec = useCallback(() => {
-    listeGorunumuneDon();
-  }, [listeGorunumuneDon]);
 
   const subeDepartmanAta = useCallback(() => {
     if (!taslakSubeDepartman || subeKullaniciId == null) return;
@@ -284,16 +302,6 @@ export function TanimlarKullanicilarSekme() {
     }));
     basariBildir('Departman ataması tamamlandı.');
   }, [taslakSubeDepartman, subeKullaniciId, hataBildir, basariBildir]);
-
-  const urunYetkiKaydetVeGeri = useCallback(() => {
-    if (urunKullaniciId == null || !taslakUrunYetki) return;
-    setUrunYetkiHaritasi((onceki) => ({
-      ...onceki,
-      [urunKullaniciId]: urunYetkiKopyala(taslakUrunYetki),
-    }));
-    listeGorunumuneDon();
-    basariBildir('Ürün yetkileri kaydedildi.');
-  }, [urunKullaniciId, taslakUrunYetki, listeGorunumuneDon, basariBildir]);
 
   const personeldenYetkiKopyala = useCallback(
     (kaynakId: number) => {
@@ -328,22 +336,16 @@ export function TanimlarKullanicilarSekme() {
   }, [taslakUrunYetki, urunPano, basariBildir]);
 
   useModulAksiyonlari(
-    gorunum === 'liste' ? { kaydet, ekle: yeniKullanici, sil: kullaniciSil } : {},
     gorunum === 'liste'
-      ? {
-          kaydet: true,
-          ekle: true,
-          sil: seciliId != null,
-          onizle: false,
-          yayinla: false,
-        }
-      : {
-          kaydet: false,
-          ekle: false,
-          sil: false,
-          onizle: false,
-          yayinla: false,
-        }
+      ? { kaydet, ekle: yeniKullanici, sil: kullaniciSil }
+      : { kaydet },
+    {
+      kaydet: true,
+      ekle: gorunum === 'liste',
+      sil: gorunum === 'liste' && seciliId != null,
+      onizle: false,
+      yayinla: false,
+    }
   );
 
   return (
@@ -381,7 +383,6 @@ export function TanimlarKullanicilarSekme() {
                 kayit={taslakYetki}
                 panoDolu={yetkiPano != null}
                 onKayitDegistir={setTaslakYetki}
-                onGeri={yetkilerKaydetVeGeri}
                 onPersoneldenKopyala={personeldenYetkiKopyala}
                 onYetkiYapistir={yetkiYapistir}
               />
@@ -392,9 +393,7 @@ export function TanimlarKullanicilarSekme() {
                 kullanici={subeKullanici}
                 kayit={taslakSubeDepartman}
                 onKayitDegistir={setTaslakSubeDepartman}
-                onGeri={subeDepartmanKaydetVeGeri}
                 onAta={subeDepartmanAta}
-                onVazgec={subeDepartmanVazgec}
               />
             )}
 
@@ -405,7 +404,6 @@ export function TanimlarKullanicilarSekme() {
                 kayit={taslakUrunYetki}
                 panoDolu={urunPano != null}
                 onKayitDegistir={setTaslakUrunYetki}
-                onGeri={urunYetkiKaydetVeGeri}
                 onPersoneldenKopyala={personeldenUrunKopyala}
                 onYapistir={urunYapistir}
               />

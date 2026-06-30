@@ -1,5 +1,6 @@
 import type { TanimlarSekmeId } from '@/admin/baslat-menusu/tanimlar/tipler';
 import { tanimlarSekmeBul } from '@/admin/baslat-menusu/tanimlar/tipler';
+import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 
 interface TanimlarBosSekmeProps {
   sekme: TanimlarSekmeId;
@@ -7,6 +8,17 @@ interface TanimlarBosSekmeProps {
 
 export function TanimlarBosSekme({ sekme }: TanimlarBosSekmeProps) {
   const tanim = tanimlarSekmeBul(sekme);
+
+  useModulAksiyonlari(
+    {},
+    {
+      kaydet: false,
+      ekle: false,
+      sil: false,
+      onizle: false,
+      yayinla: false,
+    }
+  );
 
   return (
     <div className="ap-master-bos-durum py-10">

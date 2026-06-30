@@ -14,7 +14,6 @@ interface TanimlarKullaniciUrunYetkiPanelProps {
   kayit: TanimlarUrunYetkiKaydi;
   panoDolu: boolean;
   onKayitDegistir: (kayit: TanimlarUrunYetkiKaydi) => void;
-  onGeri: () => void;
   onPersoneldenKopyala: (kaynakKullaniciId: number) => void;
   onYapistir: () => void;
 }
@@ -42,7 +41,6 @@ export function TanimlarKullaniciUrunYetkiPanel({
   kayit,
   panoDolu,
   onKayitDegistir,
-  onGeri,
   onPersoneldenKopyala,
   onYapistir,
 }: TanimlarKullaniciUrunYetkiPanelProps) {
@@ -169,17 +167,12 @@ export function TanimlarKullaniciUrunYetkiPanel({
 
   return (
     <div className="ap-tanimlar-urun-yetki-panel">
-      <header className="ap-tanimlar-yetki-ust">
-        <button type="button" className="ap-tanimlar-yetki-geri" onClick={onGeri}>
-          <span aria-hidden>←</span> Geri
-        </button>
-        <div className="ap-tanimlar-yetki-baslik-alan">
-          <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Ürün Yetkilendir</h3>
-          <p className="ap-tanimlar-yetki-alt">
-            &quot;{kullanici.kullaniciAdi}&quot; kullanıcısı için yetkilendirilmiş ürünler sağ listede
-            görünür. ({sagListe.length} ürün)
-          </p>
-        </div>
+      <header className="ap-tanimlar-panel-baslik">
+        <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Ürün Yetkilendir</h3>
+        <p className="ap-tanimlar-yetki-alt">
+          &quot;{kullanici.kullaniciAdi}&quot; kullanıcısı için yetkilendirilmiş ürünler sağ listede
+          görünür. ({sagListe.length} ürün)
+        </p>
       </header>
 
       <div className="ap-tanimlar-urun-filtre-satir">

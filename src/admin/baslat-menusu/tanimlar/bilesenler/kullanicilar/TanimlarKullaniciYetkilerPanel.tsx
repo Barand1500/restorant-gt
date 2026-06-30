@@ -12,7 +12,6 @@ interface TanimlarKullaniciYetkilerPanelProps {
   kayit: TanimlarKullaniciYetkiKaydi;
   panoDolu: boolean;
   onKayitDegistir: (kayit: TanimlarKullaniciYetkiKaydi) => void;
-  onGeri: () => void;
   onPersoneldenKopyala: (kaynakKullaniciId: number) => void;
   onYetkiYapistir: () => void;
 }
@@ -31,7 +30,6 @@ export function TanimlarKullaniciYetkilerPanel({
   kayit,
   panoDolu,
   onKayitDegistir,
-  onGeri,
   onPersoneldenKopyala,
   onYetkiYapistir,
 }: TanimlarKullaniciYetkilerPanelProps) {
@@ -69,16 +67,11 @@ export function TanimlarKullaniciYetkilerPanel({
 
   return (
     <div className="ap-tanimlar-yetki-panel">
-      <header className="ap-tanimlar-yetki-ust">
-        <button type="button" className="ap-tanimlar-yetki-geri" onClick={onGeri}>
-          <span aria-hidden>←</span> Geri
-        </button>
-        <div className="ap-tanimlar-yetki-baslik-alan">
-          <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Yetkiler</h3>
-          <p className="ap-tanimlar-yetki-alt">
-            {acikYetkiSayisi} / {TANIMLAR_YETKI_TANIMLARI.length} yetki aktif
-          </p>
-        </div>
+      <header className="ap-tanimlar-panel-baslik">
+        <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Yetkiler</h3>
+        <p className="ap-tanimlar-yetki-alt">
+          {acikYetkiSayisi} / {TANIMLAR_YETKI_TANIMLARI.length} yetki aktif
+        </p>
       </header>
 
       <section className="ap-tanimlar-yetki-bolum ap-tanimlar-yetki-bolum-genis">
