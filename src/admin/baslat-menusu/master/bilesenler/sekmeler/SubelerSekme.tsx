@@ -39,6 +39,8 @@ import {
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
+import { SubeAgacGorunumu } from '@/admin/baslat-menusu/master/bilesenler/agac/SubeAgacGorunumu';
+import type { MasterGorunum } from '@/admin/baslat-menusu/master/bilesenler/MasterGorunumSegici';
 
 type SubeInlineAlan =
   | 'subeAdi'
@@ -224,7 +226,7 @@ function SubeTipiHucre({ subeTipi, duzenlemeAktif, onBasla, onSec, onBitir }: Su
   );
 }
 
-export function SubelerSekme() {
+export function SubelerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [subeler, setSubeler] = useState<MasterSube[]>([]);
   const [firmalar, setFirmalar] = useState<MasterFirma[]>([]);
@@ -744,6 +746,14 @@ export function SubelerSekme() {
                 : 'Henüz şube kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
+      ) : gorunum === 'agac' ? (
+        <SubeAgacGorunumu
+          subeler={liste}
+          firmalar={firmalar}
+          arama={arama}
+          filtre={filtre}
+          firmaFiltre={firmaFiltre}
+        />
       ) : (
         <>
           <div className="ap-master-excel-wrap">

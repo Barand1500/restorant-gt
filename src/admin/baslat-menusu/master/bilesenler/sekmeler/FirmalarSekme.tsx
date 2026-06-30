@@ -37,6 +37,10 @@ import {
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
+import { FirmaAgacGorunumu } from '@/admin/baslat-menusu/master/bilesenler/agac/FirmaAgacGorunumu';
+import type { MasterGorunum } from '@/admin/baslat-menusu/master/bilesenler/MasterGorunumSegici';
+import { masterLisanslariGetir, type MasterLisans } from '@/admin/baslat-menusu/master/lisanslar/api';
+import { masterSubeleriGetir, type MasterSube } from '@/admin/baslat-menusu/master/subeler/api';
 
 function hucreMevcutDeger(firma: MasterFirma, alan: FirmaDuzenlenebilirAlan): string {
   switch (alan) {
@@ -51,10 +55,12 @@ function hucreMevcutDeger(firma: MasterFirma, alan: FirmaDuzenlenebilirAlan): st
   }
 }
 
-export function FirmalarSekme() {
+export function FirmalarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [firmalar, setFirmalar] = useState<MasterFirma[]>([]);
   const [bayiler, setBayiler] = useState<MasterBayi[]>([]);
+  const [subeler, setSubeler] = useState<MasterSube[]>([]);
+  const [lisanslar, setLisanslar] = useState<MasterLisans[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
   const [arama, setArama] = useState('');
@@ -81,19 +87,36 @@ export function FirmalarSekme() {
     setYukleniyor(true);
     setHata('');
     try {
-      const [firmaVeri, bayiVeri] = await Promise.all([masterFirmalariGetir(), masterBayileriGetir()]);
-      setFirmalar(firmaVeri.firmalar);
-      setBayiler(bayiVeri.bayiler ?? []);
-      setSeciliId((onceki) => {
-        if (onceki !== null && !firmaVeri.firmalar.some((f) => f.id === onceki)) return null;
-        return onceki;
-      });
+      if (gorunum === 'agac') {
+        const [firmaVeri, bayiVeri, subeVeri, lisansVeri] = await Promise.all([
+          masterFirmalariGetir(),
+          masterBayileriGetir(),
+          masterSubeleriGetir(),
+          masterLisanslariGetir(),
+        ]);
+        setFirmalar(firmaVeri.firmalar);
+        setBayiler(bayiVeri.bayiler ?? []);
+        setSubeler(subeVeri.subeler ?? []);
+        setLisanslar(lisansVeri.lisanslar ?? []);
+        setSeciliId((onceki) => {
+          if (onceki !== null && !firmaVeri.firmalar.some((f) => f.id === onceki)) return null;
+          return onceki;
+        });
+      } else {
+        const [firmaVeri, bayiVeri] = await Promise.all([masterFirmalariGetir(), masterBayileriGetir()]);
+        setFirmalar(firmaVeri.firmalar);
+        setBayiler(bayiVeri.bayiler ?? []);
+        setSeciliId((onceki) => {
+          if (onceki !== null && !firmaVeri.firmalar.some((f) => f.id === onceki)) return null;
+          return onceki;
+        });
+      }
     } catch (err) {
       setHata(err instanceof Error ? err.message : 'Firmalar alınamadı');
     } finally {
       setYukleniyor(false);
     }
-  }, []);
+  }, [gorunum]);
 
   useEffect(() => {
     void yukle();
@@ -375,6 +398,16 @@ export function FirmalarSekme() {
                 : 'Henüz firma kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
+      ) : gorunum === 'agac' ? (
+        <FirmaAgacGorunumu
+          firmalar={liste}
+          bayiler={bayiler}
+          subeler={subeler}
+          lisanslar={lisanslar}
+          arama={arama}
+          filtre={filtre}
+          bayiFiltre={bayiFiltre}
+        />
       ) : (
         <>
           <FirmaExcelTablo

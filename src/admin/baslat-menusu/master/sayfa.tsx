@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { AdminModulKabuk, AdminPanelKarti } from '@/admin/ortak/AdminBilesenleri';
+import { MasterGorunumSegici, type MasterGorunum } from '@/admin/baslat-menusu/master/bilesenler/MasterGorunumSegici';
 import { MasterSekmeCubugu } from '@/admin/baslat-menusu/master/bilesenler/MasterSekmeCubugu';
 import { MasterKartUstAksiyonProvider } from '@/admin/baslat-menusu/master/bilesenler/MasterKartUstAksiyon';
 import { MasterSekmeIcerik } from '@/admin/baslat-menusu/master/bilesenler/MasterSekmeIcerik';
@@ -7,8 +8,11 @@ import { masterSekmeBul, type MasterSekmeId } from '@/admin/baslat-menusu/master
 import { masterRehberModulId } from '@/admin/veri/adminMasterRehberleri';
 import { useAdminAksiyon } from '@/baglamlar/AdminAksiyonContext';
 
+const AGAC_SEKMELER = new Set<MasterSekmeId>(['bayiler', 'firmalar', 'subeler']);
+
 export function MasterSayfasi() {
   const [sekme, setSekme] = useState<MasterSekmeId>('bayiler');
+  const [gorunum, setGorunum] = useState<MasterGorunum>('tablo');
   const [kartUstAksiyon, setKartUstAksiyon] = useState<ReactNode>(null);
   const { setRehberModulId } = useAdminAksiyon();
   const tanim = masterSekmeBul(sekme);
@@ -23,6 +27,18 @@ export function MasterSayfasi() {
     return () => setRehberModulId(null);
   }, [sekme, setRehberModulId]);
 
+  useEffect(() => {
+    setGorunum('tablo');
+  }, [sekme]);
+
+  const ustAksiyon =
+    AGAC_SEKMELER.has(sekme) || kartUstAksiyon ? (
+      <div className="ap-panel-kart-ust-aksiyon">
+        {AGAC_SEKMELER.has(sekme) && <MasterGorunumSegici gorunum={gorunum} onDegistir={setGorunum} />}
+        {kartUstAksiyon}
+      </div>
+    ) : undefined;
+
   return (
     <AdminModulKabuk
       baslik="Master"
@@ -36,9 +52,9 @@ export function MasterSayfasi() {
           </aside>
 
           <div className="ap-sistem-icerik">
-            <AdminPanelKarti baslik={tanim.baslik} altBaslik={tanim.altBaslik} ustAksiyon={kartUstAksiyon}>
+            <AdminPanelKarti baslik={tanim.baslik} altBaslik={tanim.altBaslik} ustAksiyon={ustAksiyon}>
               <MasterKartUstAksiyonProvider onUstAksiyon={kartUstAksiyonAyarla}>
-                <MasterSekmeIcerik sekme={sekme} />
+                <MasterSekmeIcerik sekme={sekme} gorunum={gorunum} />
               </MasterKartUstAksiyonProvider>
             </AdminPanelKarti>
           </div>

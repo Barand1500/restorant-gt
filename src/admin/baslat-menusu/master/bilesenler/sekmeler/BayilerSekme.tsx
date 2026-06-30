@@ -35,6 +35,8 @@ import {
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
+import { BayiAgacGorunumu } from '@/admin/baslat-menusu/master/bilesenler/agac/BayiAgacGorunumu';
+import type { MasterGorunum } from '@/admin/baslat-menusu/master/bilesenler/MasterGorunumSegici';
 
 type BayiInlineAlan = 'unvan' | 'eposta' | 'konum' | 'ustBayi' | 'vergiDairesi' | 'vergiNo' | 'iskonto';
 
@@ -175,7 +177,7 @@ function UstBayiHucre({
   );
 }
 
-export function BayilerSekme() {
+export function BayilerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [bayiler, setBayiler] = useState<MasterBayi[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
@@ -658,6 +660,8 @@ export function BayilerSekme() {
               : 'Henüz bayi kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
+      ) : gorunum === 'agac' ? (
+        <BayiAgacGorunumu bayiler={liste} arama={arama} filtre={filtre} />
       ) : (
         <>
           <div className="ap-master-excel-wrap">

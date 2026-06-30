@@ -1,4 +1,4 @@
-/* Admin panel gece/gunduz tema degiskenleri */
+﻿/* Admin panel gece/gunduz tema degiskenleri */
 
 .admin-panel[data-tema='koyu'] {
   --ap-bg: #0f172a;
@@ -9644,7 +9644,6 @@ html:has(.admin-panel[data-tema='acik']) body {
     max-width: 220px;
   }
 }
-
 .ap-master-bayi-ust {
   grid-template-columns: minmax(0, 220px) minmax(120px, 150px) auto;
   justify-content: space-between;
@@ -9930,3 +9929,304 @@ html:has(.admin-panel[data-tema='acik']) body {
   justify-content: flex-end;
 }
 
+
+/* Master görünüm segici (tablo / ağaç) */
+.ap-panel-kart-ust-aksiyon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ap-master-gorunum-segici {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 80%, var(--ap-surface));
+}
+
+.ap-master-gorunum-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.45rem;
+  border: 2px solid transparent;
+  color: var(--ap-muted);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ap-master-gorunum-btn:hover {
+  color: var(--ap-heading);
+  background: var(--ap-hover);
+}
+
+.ap-master-gorunum-btn-aktif {
+  color: var(--ap-heading);
+  background: var(--ap-surface);
+  border-color: color-mix(in srgb, var(--ap-accent) 55%, var(--ap-border));
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 3px color-mix(in srgb, var(--ap-accent) 12%, transparent);
+  animation: ap-master-gorunum-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ap-master-gorunum-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 0 0 3px color-mix(in srgb, var(--ap-accent) 12%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.12),
+      0 0 0 4px color-mix(in srgb, var(--ap-accent) 22%, transparent);
+  }
+}
+
+/* Master ağaç görünümü */
+.ap-master-agac-wrap {
+  border-radius: 0.75rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+  overflow: hidden;
+}
+
+.ap-master-agac-ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 70%, var(--ap-surface));
+}
+
+.ap-master-agac-sekme-etiket {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--ap-accent) 80%, var(--ap-heading));
+}
+
+.ap-master-agac-tumunu-kapat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ap-muted);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+}
+
+.ap-master-agac-tumunu-kapat:hover {
+  color: var(--ap-heading);
+  background: var(--ap-hover);
+}
+
+.ap-master-agac-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+}
+
+.ap-master-agac-kart {
+  border-radius: 0.65rem;
+  border: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-accent) 4%, var(--ap-surface));
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ap-master-agac-kart-acik {
+  border-color: color-mix(in srgb, var(--ap-accent) 35%, var(--ap-border));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.ap-master-agac-kart-vurgulu {
+  background: color-mix(in srgb, var(--ap-accent) 6%, var(--ap-surface));
+}
+
+.ap-master-agac-kart-baslik {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.ap-master-agac-kart-baslik:disabled {
+  cursor: default;
+}
+
+.ap-master-agac-kart-ikon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+  font-size: 1rem;
+}
+
+.ap-master-agac-kart-metin {
+  flex: 1;
+  min-width: 0;
+}
+
+.ap-master-agac-kart-rozetler {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.ap-master-agac-sayac {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ap-accent) 14%, var(--ap-surface));
+  color: color-mix(in srgb, var(--ap-accent) 85%, var(--ap-heading));
+  white-space: nowrap;
+}
+
+.ap-master-agac-ok {
+  font-size: 1rem;
+  color: var(--ap-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ap-master-agac-ok-acik {
+  transform: rotate(180deg);
+}
+
+.ap-master-agac-kart-icerik {
+  padding: 0 0.85rem 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--ap-border) 70%, transparent);
+  background: color-mix(in srgb, var(--ap-input-bg) 40%, var(--ap-surface));
+}
+
+.ap-master-agac-alt-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-top: 0.65rem;
+}
+
+.ap-master-agac-firma-blok .ap-master-agac-kart {
+  margin-left: 0.35rem;
+}
+
+.ap-master-agac-dugum {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  background: var(--ap-surface);
+  border: 1px solid color-mix(in srgb, var(--ap-border) 80%, transparent);
+  position: relative;
+}
+
+.ap-master-agac-dugum-girinti {
+  margin-left: 1.25rem;
+}
+
+.ap-master-agac-dugum-cizgi {
+  position: absolute;
+  left: -0.85rem;
+  top: 50%;
+  width: 0.65rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--ap-accent) 40%, var(--ap-border));
+}
+
+.ap-master-agac-dugum-ikon {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--ap-accent) 10%, var(--ap-surface));
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.ap-master-agac-dugum-metin {
+  flex: 1;
+  min-width: 0;
+}
+
+.ap-master-agac-bos {
+  margin: 0;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--ap-muted);
+  font-style: italic;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ap-input-bg) 60%, transparent);
+}
+
+.ap-master-agac-paket-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0 0.35rem;
+}
+
+.ap-master-agac-paket-satir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ap-master-agac-paket {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, #8b5cf6 14%, var(--ap-surface));
+  color: color-mix(in srgb, #7c3aed 90%, var(--ap-heading));
+  border: 1px solid color-mix(in srgb, #8b5cf6 25%, var(--ap-border));
+}
+
+.ap-master-agac-paket-aktif {
+  background: color-mix(in srgb, #22c55e 14%, var(--ap-surface));
+  color: #15803d;
+  border-color: color-mix(in srgb, #22c55e 30%, var(--ap-border));
+}
+
+.ap-master-agac-paket-uyari {
+  background: color-mix(in srgb, #f59e0b 14%, var(--ap-surface));
+  color: #b45309;
+  border-color: color-mix(in srgb, #f59e0b 30%, var(--ap-border));
+}
