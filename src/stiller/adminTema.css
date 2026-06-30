@@ -10958,3 +10958,665 @@ html:has(.admin-panel[data-tema='acik']) body {
   font-size: 0.68rem;
   padding: 0.35rem 0.55rem;
 }
+
+/* Barkod desenleri */
+.ap-tanimlar-barkod-sekme {
+  min-width: 0;
+}
+
+.ap-tanimlar-barkod-duzen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .ap-tanimlar-barkod-duzen {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ap-tanimlar-barkod-liste-wrap {
+  border: 1px solid var(--ap-border);
+  border-radius: 0.75rem;
+  background: var(--ap-surface);
+  overflow: hidden;
+}
+
+.ap-tanimlar-barkod-liste-baslik {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 45%, var(--ap-surface));
+}
+
+.ap-tanimlar-barkod-liste-baslik h4 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-barkod-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  max-height: min(52vh, 24rem);
+  overflow-y: auto;
+}
+
+.ap-tanimlar-barkod-satir {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.55rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.ap-tanimlar-barkod-satir:hover {
+  background: color-mix(in srgb, var(--ap-accent) 6%, transparent);
+}
+
+.ap-tanimlar-barkod-satir-secili {
+  background: color-mix(in srgb, var(--ap-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ap-accent) 25%, var(--ap-border));
+}
+
+.ap-tanimlar-barkod-satir-no {
+  flex-shrink: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ap-muted);
+  background: color-mix(in srgb, var(--ap-input-bg) 80%, var(--ap-surface));
+}
+
+.ap-tanimlar-barkod-satir-icerik {
+  flex: 1;
+  min-width: 0;
+}
+
+.ap-tanimlar-barkod-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+}
+
+.ap-tanimlar-barkod-onizleme {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-top: 0.45rem;
+}
+
+.ap-tanimlar-barkod-onizleme-parca,
+.ap-tanimlar-barkod-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ap-tanimlar-barkod-chip-B {
+  background: color-mix(in srgb, #3b82f6 16%, var(--ap-surface));
+  color: #1d4ed8;
+}
+
+.ap-tanimlar-barkod-chip-G {
+  background: color-mix(in srgb, #22c55e 16%, var(--ap-surface));
+  color: #15803d;
+}
+
+.ap-tanimlar-barkod-chip-A {
+  background: color-mix(in srgb, #f59e0b 18%, var(--ap-surface));
+  color: #b45309;
+}
+
+.ap-tanimlar-barkod-chip-C {
+  background: color-mix(in srgb, #8b5cf6 16%, var(--ap-surface));
+  color: #6d28d9;
+}
+
+.ap-tanimlar-barkod-chip-sabit {
+  background: color-mix(in srgb, var(--ap-heading) 10%, var(--ap-surface));
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-barkod-chip-diger {
+  background: color-mix(in srgb, #ef4444 14%, var(--ap-surface));
+  color: #b91c1c;
+}
+
+.ap-tanimlar-barkod-bos {
+  padding: 1.25rem 0.75rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-barkod-yardim {
+  border: 1px solid var(--ap-border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.05rem;
+  background: color-mix(in srgb, var(--ap-input-bg) 30%, var(--ap-surface));
+}
+
+.ap-tanimlar-barkod-yardim-baslik {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-barkod-yardim-baslik-ust {
+  margin-top: 1rem;
+}
+
+.ap-tanimlar-barkod-yardim-giris {
+  margin: 0.55rem 0 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-barkod-kod {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--ap-heading) 8%, transparent);
+}
+
+.ap-tanimlar-barkod-sembol-liste,
+.ap-tanimlar-barkod-ornek-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ap-tanimlar-barkod-sembol-kart {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  background: var(--ap-surface);
+  border: 1px solid var(--ap-border);
+}
+
+.ap-tanimlar-barkod-sembol-kart strong {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-barkod-sembol-kart p {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-barkod-ornek-tus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ap-border);
+  background: var(--ap-surface);
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.ap-tanimlar-barkod-ornek-tus:hover {
+  border-color: color-mix(in srgb, var(--ap-accent) 35%, var(--ap-border));
+  background: color-mix(in srgb, var(--ap-accent) 6%, var(--ap-surface));
+}
+
+.ap-tanimlar-barkod-ornek-tus code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-barkod-ornek-tus span {
+  font-size: 0.72rem;
+  color: var(--ap-muted);
+}
+
+/* Paket servisi ücretleri */
+.ap-tanimlar-paket-sekme {
+  min-width: 0;
+}
+
+.ap-tanimlar-paket-tablo.ap-master-excel-wrap {
+  border: 1px solid color-mix(in srgb, var(--ap-border) 75%, transparent);
+  background: color-mix(in srgb, var(--ap-input-bg) 18%, var(--ap-surface));
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-tablo thead {
+  background: color-mix(in srgb, var(--ap-input-bg) 50%, transparent);
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-tablo th {
+  border-bottom: 1px solid color-mix(in srgb, var(--ap-border) 70%, transparent);
+  color: color-mix(in srgb, var(--ap-muted) 92%, var(--ap-heading));
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-hucre {
+  max-width: none;
+  min-width: 10rem;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--ap-border) 55%, transparent);
+  background: transparent;
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-tablo td.ap-master-excel-hucre:has(.ap-master-excel-input),
+.ap-tanimlar-paket-tablo .ap-master-excel-tablo td.ap-master-excel-hucre:has(.ap-master-tablo-input) {
+  padding: 0.45rem 0.65rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-satir-secili .ap-master-excel-hucre {
+  background: color-mix(in srgb, var(--ap-heading) 3.5%, var(--ap-surface));
+  box-shadow: none;
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-input {
+  border: 1px solid color-mix(in srgb, var(--ap-border) 88%, transparent) !important;
+  background: color-mix(in srgb, var(--ap-surface) 92%, var(--ap-input-bg)) !important;
+  box-shadow: none !important;
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-input:focus {
+  border-color: color-mix(in srgb, var(--ap-heading) 18%, var(--ap-border)) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ap-heading) 5%, transparent) !important;
+  outline: none;
+}
+
+.ap-tanimlar-paket-tablo tbody tr:hover .ap-master-excel-hucre {
+  background: color-mix(in srgb, var(--ap-heading) 2%, transparent);
+}
+
+.ap-tanimlar-paket-tablo .ap-master-excel-satir-secili:hover .ap-master-excel-hucre {
+  background: color-mix(in srgb, var(--ap-heading) 4%, var(--ap-surface));
+}
+
+.ap-tanimlar-paket-hucre-input {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ap-tanimlar-paket-birim {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-paket-ucret-hucre {
+  position: relative;
+}
+
+.ap-tanimlar-paket-tip-secici {
+  display: inline-flex;
+  margin-bottom: 0.45rem;
+  padding: 0.15rem;
+  border-radius: 0.45rem;
+  border: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 60%, var(--ap-surface));
+}
+
+.ap-tanimlar-paket-tip-tus {
+  border: none;
+  background: transparent;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ap-muted);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.ap-tanimlar-paket-tip-tus-aktif {
+  background: var(--ap-surface);
+  color: var(--ap-heading);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--ap-heading) 8%, transparent);
+}
+
+.ap-tanimlar-paket-tip-tus-aktif:first-child {
+  color: #15803d;
+}
+
+.ap-tanimlar-paket-tip-tus-aktif:last-child {
+  color: #6d28d9;
+}
+
+.ap-tanimlar-paket-yuzde-on {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #6d28d9;
+}
+
+.ap-tanimlar-paket-ucret-onizleme {
+  margin: 0.35rem 0 0;
+  font-size: 0.68rem;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-paket-ipucu {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ap-muted);
+  border-top: 1px solid color-mix(in srgb, var(--ap-border) 65%, transparent);
+  background: color-mix(in srgb, var(--ap-input-bg) 30%, transparent);
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.ap-tanimlar-paket-ipucu strong {
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-paket-ipucu ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.ap-tanimlar-paket-ipucu li {
+  margin-top: 0.2rem;
+}
+
+.ap-tanimlar-paket-ipucu code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--ap-heading) 8%, transparent);
+}
+
+/* Restoran durumu */
+.ap-tanimlar-restoran-sekme {
+  min-width: 0;
+  max-width: 36rem;
+}
+
+.ap-tanimlar-restoran-kart {
+  border: 1px solid var(--ap-border);
+  border-radius: 0.75rem;
+  padding: 1.1rem 1.15rem;
+  background: var(--ap-surface);
+  margin-bottom: 1rem;
+}
+
+.ap-tanimlar-restoran-kart-dar {
+  max-width: 22rem;
+}
+
+.ap-tanimlar-restoran-kart-baslik {
+  margin: 0 0 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-restoran-vardiya-izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.85rem;
+}
+
+.ap-tanimlar-restoran-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ap-tanimlar-restoran-alan-baslik {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-restoran-saat {
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.ap-tanimlar-restoran-dakika-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 10rem;
+}
+
+.ap-tanimlar-restoran-dakika {
+  font-size: 0.9375rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.ap-tanimlar-restoran-alan-ipucu {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ap-muted);
+  line-height: 1.4;
+}
+
+/* Vardiya saat seçici — analog kadran */
+.ap-tanimlar-vardiya-saat-wrap {
+  position: relative;
+}
+
+.ap-tanimlar-vardiya-saat-satir {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.ap-tanimlar-vardiya-saat-girdi {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  padding: 0.5rem 0.65rem;
+}
+
+.ap-tanimlar-vardiya-saat-ikon-tus {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  padding: 0;
+  border-radius: 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--ap-border) 88%, transparent);
+  background: color-mix(in srgb, var(--ap-surface) 92%, var(--ap-input-bg));
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.ap-tanimlar-vardiya-saat-ikon-tus:hover {
+  border-color: color-mix(in srgb, var(--ap-heading) 20%, var(--ap-border));
+  background: color-mix(in srgb, var(--ap-heading) 5%, var(--ap-surface));
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--ap-heading) 6%, transparent);
+}
+
+.ap-tanimlar-vardiya-saat-ikon-tus[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--ap-heading) 22%, var(--ap-border));
+  background: color-mix(in srgb, var(--ap-heading) 8%, var(--ap-surface));
+}
+
+.ap-tanimlar-vardiya-saat-panel {
+  padding: 0.85rem 0.9rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--ap-border) 80%, transparent);
+  background: var(--ap-surface);
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--ap-heading) 14%, transparent);
+}
+
+.ap-tanimlar-vardiya-saat-panel-portal {
+  box-sizing: border-box;
+}
+
+.ap-tanimlar-vardiya-saat-panel-baslik {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+}
+
+.ap-tanimlar-vardiya-saat-panel-baslik span:first-child {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.ap-tanimlar-vardiya-saat-panel-baslik strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-vardiya-saat-panel-baslik span:last-child {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-vardiya-saat-dijital {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  font-size: 1.65rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--ap-heading);
+}
+
+.ap-tanimlar-vardiya-saat-mod {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+}
+
+.ap-tanimlar-vardiya-saat-mod button {
+  flex: 1;
+  padding: 0.32rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  border: 1px solid var(--ap-border);
+  background: color-mix(in srgb, var(--ap-input-bg) 50%, transparent);
+  color: var(--ap-muted);
+  cursor: pointer;
+}
+
+.ap-tanimlar-vardiya-saat-mod-aktif {
+  background: color-mix(in srgb, var(--ap-heading) 8%, var(--ap-surface)) !important;
+  color: var(--ap-heading) !important;
+  border-color: color-mix(in srgb, var(--ap-heading) 18%, var(--ap-border)) !important;
+}
+
+.ap-tanimlar-vardiya-saat-kadran {
+  display: block;
+  width: 100%;
+  max-width: 13.5rem;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  cursor: pointer;
+  user-select: none;
+  overflow: visible;
+}
+
+.ap-tanimlar-vardiya-saat-cerceve {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ap-border) 70%, transparent);
+  stroke-width: 2;
+}
+
+.ap-tanimlar-vardiya-saat-yuz {
+  fill: color-mix(in srgb, var(--ap-input-bg) 35%, var(--ap-surface));
+}
+
+.ap-tanimlar-vardiya-saat-tik {
+  stroke: color-mix(in srgb, var(--ap-muted) 55%, transparent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.ap-tanimlar-vardiya-saat-rakam {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--ap-muted);
+  pointer-events: none;
+}
+
+.ap-tanimlar-vardiya-saat-akrep {
+  stroke: var(--ap-heading);
+  stroke-width: 4;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.ap-tanimlar-vardiya-saat-yelkovan {
+  stroke: color-mix(in srgb, var(--ap-accent) 75%, #3b82f6);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.ap-tanimlar-vardiya-saat-merkez {
+  fill: var(--ap-heading);
+  pointer-events: none;
+}
+
+.ap-tanimlar-vardiya-saat-ipucu {
+  margin: 0.5rem 0 0.65rem;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ap-muted);
+}
+
+.ap-tanimlar-vardiya-saat-tamam {
+  width: 100%;
+  justify-content: center;
+}
