@@ -110,6 +110,27 @@ export const ADMIN_MODUL_REHBERLERI: Record<string, ModulRehber> = {
     ],
   },
 
+  tanimlar: {
+    baslik: 'Tanımlar Rehberi',
+    altBaslik: 'Restoran operasyon ayarları',
+    bolumBaslik: 'Tanımlar',
+    kartlar: [
+      {
+        ikon: '📋',
+        baslik: 'Sekmeler',
+        aciklama:
+          'Sol menüden Tanımlar, Kullanıcılar, Masa Grupları, Barkod, Diğer, Paket Servisi Ücretleri, SMS Ayarları ve Restoran Durumu sekmelerine geçin.',
+        renk: 'mavi',
+      },
+      {
+        ikon: '🍽️',
+        baslik: 'Restoran kapsamı',
+        aciklama: 'Bu bölüm şube/restoran operasyon tanımlarını içerir; panel kullanıcı yönetiminden ayrıdır.',
+        renk: 'mor',
+      },
+    ],
+  },
+
   loglar: {
     baslik: 'Log Rehberi',
     altBaslik: 'İşlem geçmişi',

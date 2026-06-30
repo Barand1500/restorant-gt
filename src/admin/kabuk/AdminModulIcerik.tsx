@@ -7,6 +7,7 @@ import { RollerSayfasi } from '@/admin/baslat-menusu/musteri-ajans/roller/sayfa'
 import { SekmeYonetimiSayfasi } from '@/admin/baslat-menusu/sistem/sekme-yonetimi/sayfa';
 import { KisayolAyarlariSayfasi } from '@/admin/baslat-menusu/sistem/kisayol-ayarlari/sayfa';
 import { TanimlarBosSayfa } from '@/admin/baslat-menusu/tanimlar/TanimlarBosSayfa';
+import { TanimlarSayfasi } from '@/admin/baslat-menusu/tanimlar/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
@@ -26,6 +27,9 @@ export function AdminModulIcerik({ modulId, onModulAc }: AdminModulIcerikProps) 
 function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
   const tanimModul = tanimlarModulBul(modulId);
   if (tanimModul) {
+    if (modulId === 'tanimlar') {
+      return <TanimlarSayfasi />;
+    }
     return <TanimlarBosSayfa baslik={tanimModul.baslik} aciklama={tanimModul.aciklama} />;
   }
 
