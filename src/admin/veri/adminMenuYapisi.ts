@@ -1,5 +1,8 @@
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
 
+/** Master modülü menüde geçici gizli — tekrar açmak için true yapın */
+export const MASTER_MENU_GORUNUR = false;
+
 export const adminModulleri: AdminModul[] = [
   {
     id: 'master',
@@ -65,7 +68,11 @@ export const adminGizliModuller: AdminModul[] = [
   },
 ];
 
-export const adminKategoriler = ['Master', 'Müşteri / Ajans', 'Sistem'];
+export const adminKategoriler = [
+  ...(MASTER_MENU_GORUNUR ? (['Master'] as const) : []),
+  'Müşteri / Ajans',
+  'Sistem',
+] as const;
 
 export function modulBul(id: string): AdminModul | undefined {
   return adminModulleri.find((m) => m.id === id) ?? adminGizliModuller.find((m) => m.id === id);
@@ -90,7 +97,7 @@ export function modulIdDenPrefix(modulId: string): string {
 }
 
 export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> | null | undefined): boolean {
-  if (modulId === 'master') return true;
+  if (modulId === 'master') return MASTER_MENU_GORUNUR;
   if (!aktifPrefixler) return true;
   return aktifPrefixler.has(modulIdDenPrefix(modulId));
 }
