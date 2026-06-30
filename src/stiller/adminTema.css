@@ -731,6 +731,49 @@ html:has(.admin-panel[data-tema='acik']) body {
   color: var(--ap-text-muted);
 }
 
+.ap-menu-kategori-baslik-tus {
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s ease;
+}
+
+.ap-menu-kategori-baslik-tus:hover {
+  background: color-mix(in srgb, var(--ap-hover) 85%, transparent);
+}
+
+.ap-menu-kategori-baslik-ikon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.ap-menu-kategori-baslik-metin {
+  flex: 1;
+  min-width: 0;
+}
+
+.ap-menu-kategori-ok {
+  flex-shrink: 0;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--ap-muted);
+  transition: transform 0.18s ease;
+}
+
+.ap-menu-kategori-kapali .ap-menu-kategori-ok {
+  transform: rotate(-90deg);
+}
+
+.ap-menu-kategori-liste {
+  margin-top: 0.15rem;
+  padding-left: 0.15rem;
+}
+
 .ap-menu-oge {
   display: flex;
   width: 100%;
