@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { paketListesiGetir, paketLisansSayilariGetir, paketYanitOlustur } from '../lib/paketYardimci.js';
 import { paraBirimiDogrula } from '../lib/paraBirimiYardimci.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -39,7 +40,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   const paraBirimi = paraBirimiDogrula(body.paraBirimi);
   if (!paraBirimi) return res.status(400).json({ mesaj: 'Gecersiz para birimi' });
 
-  const kayit = await prisma.paket.create({
+  const kayit = await prismaMaster.paket.create({
     data: {
       paketAdi,
       subeSayisi,
@@ -57,11 +58,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz paket id' });
 
-  const mevcut = await prisma.paket.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.paket.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Paket bulunamadi' });
 
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.PaketUpdateInput = {};
+  const data: Record<string, unknown> = {};
 
   if (body.paketAdi !== undefined) {
     const ad = String(body.paketAdi).trim();
@@ -97,7 +98,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
 
   if (Object.keys(data).length === 0) return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
 
-  const guncel = await prisma.paket.update({ where: { id }, data });
+  const guncel = await prismaMaster.paket.update({ where: { id }, data });
   const lisansSayilari = await paketLisansSayilariGetir();
   return res.json({
     paket: { ...paketYanitOlustur(guncel), aktifLisansSayisi: lisansSayilari.get(id) ?? 0 },
@@ -108,7 +109,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz paket id' });
 
-  const mevcut = await prisma.paket.findUnique({
+  const mevcut = await prismaMaster.paket.findUnique({
     where: { id },
     include: { _count: { select: { lisanslar: true } } },
   });
@@ -117,7 +118,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Lisansi olan paket silinemez' });
   }
 
-  await prisma.paket.delete({ where: { id } });
+  await prismaMaster.paket.delete({ where: { id } });
   return res.json({ mesaj: 'Silindi' });
 });
 

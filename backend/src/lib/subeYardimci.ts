@@ -1,5 +1,5 @@
-import type { Sube } from '@prisma/client';
-import { prisma } from './prisma.js';
+import type { Sube } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 
 export type SubeSayim = Sube & {
   firma: { id: number; unvan: string; tabelaAdi: string | null; durum: boolean };
@@ -35,7 +35,7 @@ export const subeInclude = {
 } as const;
 
 export async function subeListesiGetir() {
-  const kayitlar = await prisma.sube.findMany({
+  const kayitlar = await prismaMaster.sube.findMany({
     orderBy: [{ id: 'asc' }],
     include: subeInclude,
   });

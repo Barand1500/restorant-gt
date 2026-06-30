@@ -9,6 +9,7 @@ import {
   ustBayiGecerliMi,
 } from '../lib/bayiYardimci.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -49,7 +50,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz ust bayi' });
   }
   if (ustId != null) {
-    const ustVar = await prisma.bayi.findUnique({ where: { id: ustId } });
+    const ustVar = await prismaMaster.bayi.findUnique({ where: { id: ustId } });
     if (!ustVar) return res.status(400).json({ mesaj: 'Ust bayi bulunamadi' });
   }
 
@@ -63,7 +64,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const kayit = await prisma.bayi.create({
+    const kayit = await prismaMaster.bayi.create({
       data: {
         unvan,
         ustId,
@@ -93,11 +94,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz bayi id' });
   }
 
-  const mevcut = await prisma.bayi.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.bayi.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Bayi bulunamadi' });
 
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.BayiUpdateInput = {};
+  const data: Record<string, unknown> = {};
 
   if (body.unvan !== undefined) {
     const unvan = metinAl(body.unvan, 191);
@@ -142,7 +143,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
   }
 
-  const guncel = await prisma.bayi.update({
+  const guncel = await prismaMaster.bayi.update({
     where: { id },
     data,
     include: bayiInclude,
@@ -157,7 +158,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz bayi id' });
   }
 
-  const mevcut = await prisma.bayi.findUnique({
+  const mevcut = await prismaMaster.bayi.findUnique({
     where: { id },
     include: { _count: { select: { firmalar: true, altBayiler: true } } },
   });
@@ -169,7 +170,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Alt bayileri olan bayi silinemez' });
   }
 
-  await prisma.bayi.delete({ where: { id } });
+  await prismaMaster.bayi.delete({ where: { id } });
   return res.json({ mesaj: 'Silindi' });
 });
 

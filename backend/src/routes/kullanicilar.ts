@@ -77,7 +77,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       iskonto: iskonto != null ? new Prisma.Decimal(iskonto) : null,
       aktif: body.aktif !== false,
     },
-    include: kullaniciInclude,
+    include: kullaniciInclude(),
   });
 
   await prisma.kullaniciKisayol.create({
@@ -94,24 +94,24 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 router.patch('/:id', async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.KullaniciUpdateInput = {};
+  const data: Prisma.KullaniciUncheckedUpdateInput = {};
 
   if (body.aktif !== undefined) data.aktif = Boolean(body.aktif);
   if (body.ad !== undefined) data.ad = String(body.ad).trim();
   if (body.email !== undefined) data.email = String(body.email).trim().toLowerCase();
   if (body.gsm !== undefined) data.gsm = body.gsm ? String(body.gsm).trim().slice(0, 20) : null;
-  if (body.rol !== undefined) data.rol = { connect: { id: await rolIdCoz(String(body.rol)) } };
+  if (body.rol !== undefined) data.rolId = await rolIdCoz(String(body.rol));
   if (body.kullaniciTipi !== undefined && GECERLI_TIPLER.includes(body.kullaniciTipi as (typeof GECERLI_TIPLER)[number])) {
     data.kullaniciTipi = body.kullaniciTipi as (typeof GECERLI_TIPLER)[number];
   }
   if (body.bayiId !== undefined) {
-    data.bayi = body.bayiId ? { connect: { id: Number(body.bayiId) } } : { disconnect: true };
+    data.bayiId = body.bayiId ? Number(body.bayiId) : null;
   }
   if (body.firmaId !== undefined) {
-    data.firma = body.firmaId ? { connect: { id: Number(body.firmaId) } } : { disconnect: true };
+    data.firmaId = body.firmaId ? Number(body.firmaId) : null;
   }
   if (body.subeId !== undefined) {
-    data.sube = body.subeId ? { connect: { id: Number(body.subeId) } } : { disconnect: true };
+    data.subeId = body.subeId ? Number(body.subeId) : null;
   }
   if (body.sifre && String(body.sifre).trim()) {
     data.sifreHash = sifreHashle(String(body.sifre));
@@ -133,7 +133,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   const kullanici = await prisma.kullanici.update({
     where: { id },
     data,
-    include: kullaniciInclude,
+    include: kullaniciInclude(),
   });
 
   return res.json({ kullanici: await masterKullaniciYanitOlustur(kullanici) });

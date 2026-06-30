@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { modulIcinVarsayilanRolleriOlustur, modulListesiGetir, modulYanitOlustur } from '../lib/modulYardimci.js';
 import { prefixGecerliMi, prefixNormalize, prefixUret } from '../lib/modulSabitleri.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -36,7 +37,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Modul adi en fazla 100 karakter olabilir' });
   }
 
-  const mevcutPrefixler = (await prisma.modul.findMany({ select: { prefix: true } })).map((m) => m.prefix);
+  const mevcutPrefixler = ((await prismaMaster.modul.findMany({ select: { prefix: true } })) as { prefix: string }[]).map((m) => m.prefix);
   const prefix = hamPrefix?.trim() ? prefixNormalize(hamPrefix) : prefixUret(ad, mevcutPrefixler);
 
   if (!prefixGecerliMi(prefix)) {
@@ -45,19 +46,19 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     });
   }
 
-  const varMi = await prisma.modul.findUnique({ where: { prefix } });
+  const varMi = await prismaMaster.modul.findUnique({ where: { prefix } });
   if (varMi) {
     return res.status(409).json({ mesaj: 'Bu prefix zaten kullaniliyor' });
   }
 
-  const kayit = await prisma.modul.create({
+  const kayit = await prismaMaster.modul.create({
     data: { modulAdi: ad, prefix, durum: aktif !== false },
     include: { _count: { select: { roller: true } } },
   });
 
   await modulIcinVarsayilanRolleriOlustur(kayit.id);
 
-  const guncel = await prisma.modul.findUniqueOrThrow({
+  const guncel = await prismaMaster.modul.findUniqueOrThrow({
     where: { id: kayit.id },
     include: { _count: { select: { roller: true } } },
   });
@@ -71,7 +72,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz modul id' });
   }
 
-  const mevcut = await prisma.modul.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.modul.findUnique({ where: { id } });
   if (!mevcut) {
     return res.status(404).json({ mesaj: 'Modul bulunamadi' });
   }
@@ -97,7 +98,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ mesaj: 'Gecersiz prefix formati' });
     }
     if (prefix !== mevcut.prefix) {
-      const baska = await prisma.modul.findUnique({ where: { prefix } });
+      const baska = await prismaMaster.modul.findUnique({ where: { prefix } });
       if (baska) return res.status(409).json({ mesaj: 'Bu prefix zaten kullaniliyor' });
       data.prefix = prefix;
     }
@@ -111,7 +112,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
   }
 
-  const guncel = await prisma.modul.update({
+  const guncel = await prismaMaster.modul.update({
     where: { id },
     data,
     include: { _count: { select: { roller: true } } },
@@ -126,12 +127,12 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz modul id' });
   }
 
-  const mevcut = await prisma.modul.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.modul.findUnique({ where: { id } });
   if (!mevcut) {
     return res.status(404).json({ mesaj: 'Modul bulunamadi' });
   }
 
-  await prisma.modul.delete({ where: { id } });
+  await prismaMaster.modul.delete({ where: { id } });
   return res.json({ mesaj: 'Modul silindi' });
 });
 

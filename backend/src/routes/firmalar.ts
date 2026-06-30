@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { Prisma } from '@prisma/client';
 import { firmaInclude, firmaListesiGetir, firmaYanitOlustur } from '../lib/firmaYardimci.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -48,7 +49,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecerli bir bayi secin' });
   }
 
-  const bayi = await prisma.bayi.findUnique({ where: { id: bayiId } });
+  const bayi = await prismaMaster.bayi.findUnique({ where: { id: bayiId } });
   if (!bayi) return res.status(400).json({ mesaj: 'Bayi bulunamadi' });
   if (!bayi.durum) return res.status(400).json({ mesaj: 'Pasif bayiye firma atanamaz' });
 
@@ -58,7 +59,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const kayit = await prisma.firma.create({
+    const kayit = await prismaMaster.firma.create({
       data: {
         bayiId,
         unvan,
@@ -88,11 +89,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz firma id' });
   }
 
-  const mevcut = await prisma.firma.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.firma.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Firma bulunamadi' });
 
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.FirmaUpdateInput = {};
+  const data: Record<string, unknown> = {};
 
   if (body.unvan !== undefined) {
     const unvan = metinAl(body.unvan, 191);
@@ -107,7 +108,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     if (!Number.isInteger(bayiId) || bayiId < 1) {
       return res.status(400).json({ mesaj: 'Gecerli bir bayi secin' });
     }
-    const bayi = await prisma.bayi.findUnique({ where: { id: bayiId } });
+    const bayi = await prismaMaster.bayi.findUnique({ where: { id: bayiId } });
     if (!bayi) return res.status(400).json({ mesaj: 'Bayi bulunamadi' });
     if (!bayi.durum) return res.status(400).json({ mesaj: 'Pasif bayiye firma atanamaz' });
     data.bayi = { connect: { id: bayiId } };
@@ -134,7 +135,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
   }
 
-  const guncel = await prisma.firma.update({
+  const guncel = await prismaMaster.firma.update({
     where: { id },
     data,
     include: firmaInclude,
@@ -149,10 +150,10 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz firma id' });
   }
 
-  const mevcut = await prisma.firma.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.firma.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Firma bulunamadi' });
 
-  await prisma.firma.delete({ where: { id } });
+  await prismaMaster.firma.delete({ where: { id } });
   return res.json({ mesaj: 'Firma silindi' });
 });
 

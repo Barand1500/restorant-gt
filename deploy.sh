@@ -50,6 +50,9 @@ echo "[1/6] Git guncelleniyor..."
 cd "$SITE/repo"
 git fetch origin "$GIT_BRANCH"
 git reset --hard "origin/$GIT_BRANCH"
+# Site kokundeki deploy.sh eski kalmasin — repodan kopyala
+cp "$SITE/repo/deploy.sh" "$SITE/deploy.sh"
+chmod +x "$SITE/deploy.sh"
 
 echo "[2/6] Frontend build..."
 cd "$SITE/repo"
@@ -73,7 +76,9 @@ npm ci
 chmod +x scripts/db-push-safe.sh 2>/dev/null || true
 
 echo "[5/6] Veritabani..."
-npx prisma generate
+PRISMA_SCHEMA="$(bash scripts/prisma-sema.sh .env)"
+echo "  DB sema: $PRISMA_SCHEMA"
+npx prisma generate --schema "$PRISMA_SCHEMA"
 DB_OK=1
 export DB_RESET
 if bash scripts/db-push-safe.sh; then

@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { Prisma } from '@prisma/client';
 import { lisansInclude, lisansListesiGetir, lisansYanitOlustur } from '../lib/lisansYardimci.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -21,11 +22,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   if (!Number.isInteger(firmaId) || firmaId < 1) return res.status(400).json({ mesaj: 'Gecerli firma secin' });
   if (!Number.isInteger(paketId) || paketId < 1) return res.status(400).json({ mesaj: 'Gecerli paket secin' });
 
-  const firma = await prisma.firma.findUnique({ where: { id: firmaId } });
+  const firma = await prismaMaster.firma.findUnique({ where: { id: firmaId } });
   if (!firma) return res.status(400).json({ mesaj: 'Firma bulunamadi' });
   if (!firma.durum) return res.status(400).json({ mesaj: 'Pasif firmaya lisans atanamaz' });
 
-  const paket = await prisma.paket.findUnique({ where: { id: paketId } });
+  const paket = await prismaMaster.paket.findUnique({ where: { id: paketId } });
   if (!paket) return res.status(400).json({ mesaj: 'Paket bulunamadi' });
   if (!paket.durum) return res.status(400).json({ mesaj: 'Pasif paket secilemez' });
 
@@ -34,7 +35,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   if (Number.isNaN(baslangic.getTime())) return res.status(400).json({ mesaj: 'Gecersiz baslangic tarihi' });
   if (bitis && Number.isNaN(bitis.getTime())) return res.status(400).json({ mesaj: 'Gecersiz bitis tarihi' });
 
-  const kayit = await prisma.lisans.create({
+  const kayit = await prismaMaster.lisans.create({
     data: {
       firmaId,
       paketId,
@@ -51,16 +52,16 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz lisans id' });
 
-  const mevcut = await prisma.lisans.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.lisans.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Lisans bulunamadi' });
 
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.LisansUpdateInput = {};
+  const data: Record<string, unknown> = {};
 
   if (body.paketId !== undefined) {
     const paketId = Number(body.paketId);
     if (!Number.isInteger(paketId) || paketId < 1) return res.status(400).json({ mesaj: 'Gecersiz paket' });
-    const paket = await prisma.paket.findUnique({ where: { id: paketId } });
+    const paket = await prismaMaster.paket.findUnique({ where: { id: paketId } });
     if (!paket?.durum) return res.status(400).json({ mesaj: 'Paket bulunamadi veya pasif' });
     data.paket = { connect: { id: paketId } };
   }
@@ -68,7 +69,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
   if (body.firmaId !== undefined) {
     const firmaId = Number(body.firmaId);
     if (!Number.isInteger(firmaId) || firmaId < 1) return res.status(400).json({ mesaj: 'Gecersiz firma' });
-    const firma = await prisma.firma.findUnique({ where: { id: firmaId } });
+    const firma = await prismaMaster.firma.findUnique({ where: { id: firmaId } });
     if (!firma) return res.status(400).json({ mesaj: 'Firma bulunamadi' });
     if (!firma.durum) return res.status(400).json({ mesaj: 'Pasif firmaya lisans atanamaz' });
     data.firma = { connect: { id: firmaId } };
@@ -94,7 +95,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
 
   if (Object.keys(data).length === 0) return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
 
-  const guncel = await prisma.lisans.update({
+  const guncel = await prismaMaster.lisans.update({
     where: { id },
     data,
     include: lisansInclude,
@@ -106,10 +107,10 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ mesaj: 'Gecersiz lisans id' });
 
-  const mevcut = await prisma.lisans.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.lisans.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Lisans bulunamadi' });
 
-  await prisma.lisans.delete({ where: { id } });
+  await prismaMaster.lisans.delete({ where: { id } });
   return res.json({ mesaj: 'Lisans silindi' });
 });
 

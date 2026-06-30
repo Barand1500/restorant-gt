@@ -1,20 +1,29 @@
 import type { Kullanici } from '@prisma/client';
+import { config } from '../config.js';
 import { prisma } from './prisma.js';
 import { rolAdiBul, tarihIso } from './mappers.js';
 
 export type MasterKullaniciKayit = Kullanici & {
-  rol: { rolAdi: string } | null;
-  bayi: { id: number; unvan: string } | null;
-  firma: { id: number; unvan: string; tabelaAdi: string | null } | null;
-  sube: { id: number; subeAdi: string } | null;
+  rol?: { rolAdi: string } | null;
+  bayi?: { id: number; unvan: string } | null;
+  firma?: { id: number; unvan: string; tabelaAdi: string | null } | null;
+  sube?: { id: number; subeAdi: string } | null;
 };
 
-const kullaniciInclude = {
+const masterKullaniciInclude = {
   rol: { select: { rolAdi: true } },
   bayi: { select: { id: true, unvan: true } },
   firma: { select: { id: true, unvan: true, tabelaAdi: true } },
   sube: { select: { id: true, subeAdi: true } },
 } as const;
+
+const subeKullaniciInclude = {
+  rol: { select: { rolAdi: true } },
+} as const;
+
+function kullaniciInclude() {
+  return config.dbTuru === 'master' ? masterKullaniciInclude : subeKullaniciInclude;
+}
 
 export async function masterKullaniciYanitOlustur(k: MasterKullaniciKayit) {
   return {
@@ -42,7 +51,7 @@ export async function masterKullaniciYanitOlustur(k: MasterKullaniciKayit) {
 export async function masterKullaniciListesiGetir() {
   const kayitlar = await prisma.kullanici.findMany({
     orderBy: [{ id: 'asc' }],
-    include: kullaniciInclude,
+    include: kullaniciInclude(),
   });
   return Promise.all(kayitlar.map(masterKullaniciYanitOlustur));
 }

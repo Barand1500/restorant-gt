@@ -1,4 +1,5 @@
-import type { Modul } from '@prisma/client';
+import type { Modul } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 import { prisma } from './prisma.js';
 import { VARSAYILAN_SISTEM_ROLLERI } from './modulSabitleri.js';
 
@@ -17,10 +18,10 @@ export function modulYanitOlustur(m: ModulSayim) {
 }
 
 export async function modulListesiGetir() {
-  const kayitlar = await prisma.modul.findMany({
+  const kayitlar = (await prismaMaster.modul.findMany({
     orderBy: [{ id: 'asc' }],
     include: { _count: { select: { roller: true } } },
-  });
+  })) as ModulSayim[];
   return kayitlar.map(modulYanitOlustur);
 }
 

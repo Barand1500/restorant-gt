@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
-# prisma db push — bildirim FK cakismasinda otomatik onarim dener
+# prisma db push — DB_TURU'na gore dogru sema dosyasini kullanir
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-PRISMA="npx prisma"
+SCHEMA="$(bash scripts/prisma-sema.sh .env)"
+PRISMA="npx prisma --schema $SCHEMA"
 LOG="$(mktemp)"
 
 cleanup() { rm -f "$LOG"; }
 trap cleanup EXIT
 
+echo "  Prisma sema: $SCHEMA"
+
 if [ "${DB_RESET:-0}" = "1" ]; then
+  echo "  DB_RESET=1 — tablolar sifirlanip yeniden olusturuluyor..."
   $PRISMA db push --force-reset
-  npm run db:seed
+  if [ "$SCHEMA" = "prisma/schema.prisma" ]; then
+    npm run db:seed
+  else
+    npm run db:seed:sube
+  fi
   exit 0
 fi
 
@@ -25,14 +33,8 @@ if [ "$PUSH_EXIT" -eq 0 ]; then
   exit 0
 fi
 
-if grep -q "bildirim_sube_id_fkey" "$LOG"; then
-  echo ""
-  echo "  bildirim FK onarimi deneniyor..."
-  $PRISMA db execute --file prisma/fix-bildirim-fk.sql 2>/dev/null || true
-  $PRISMA db push
-  exit $?
-fi
-
 echo ""
 echo "HATA: prisma db push basarisiz."
+echo "  sube1-db yari kalmis olabilir. Cozum (veri silinir):"
+echo "    DB_RESET=1 ./deploy.sh"
 exit 1

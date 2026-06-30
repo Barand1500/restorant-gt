@@ -1,5 +1,5 @@
-import type { Lisans } from '@prisma/client';
-import { prisma } from './prisma.js';
+import type { Lisans } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 
 export type LisansDurumKod = 'aktif' | 'pasif' | 'yakinda';
 
@@ -41,7 +41,7 @@ export const lisansInclude = {
 } as const;
 
 export async function lisansListesiGetir() {
-  const kayitlar = await prisma.lisans.findMany({
+  const kayitlar = await prismaMaster.lisans.findMany({
     orderBy: [{ id: 'asc' }],
     include: lisansInclude,
   });

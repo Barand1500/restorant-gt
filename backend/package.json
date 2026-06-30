@@ -8,14 +8,16 @@
     "dev": "tsx watch src/index.ts",
     "build": "node ./node_modules/typescript/bin/tsc",
     "start": "node dist/index.js",
-    "setup": "npm run db:push && npm run db:seed",
-    "db:generate": "node ./node_modules/prisma/build/index.js generate",
-    "db:push": "node ./node_modules/prisma/build/index.js db push",
-    "db:reset": "node ./node_modules/prisma/build/index.js db push --force-reset && node prisma/seed.mjs",
+    "setup": "bash scripts/db-push-safe.sh",
+    "db:generate": "node scripts/prisma-generate.mjs",
+    "db:push": "bash scripts/db-push-safe.sh",
+    "db:push:master": "DB_TURU=master bash scripts/db-push-safe.sh",
+    "db:reset": "DB_RESET=1 bash scripts/db-push-safe.sh",
     "db:migrate": "node ./node_modules/prisma/build/index.js migrate deploy",
     "db:seed": "node prisma/seed.mjs",
+    "db:seed:sube": "node prisma/seed-sube.mjs",
     "db:studio": "node ./node_modules/prisma/build/index.js studio",
-    "postinstall": "node ./node_modules/prisma/build/index.js generate"
+    "postinstall": "node scripts/prisma-generate.mjs"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"

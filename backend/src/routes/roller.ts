@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import type { Response } from 'express';
+import { config } from '../config.js';
 import { rolSatirlarindanOzet, yetkiListesiYanit } from '../lib/mappers.js';
+import { sanalModulListesi } from '../lib/panelModulleri.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import { prisma } from '../lib/prisma.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
@@ -8,19 +11,26 @@ import { authZorunlu } from '../middleware/auth.js';
 const router = Router();
 router.use(authZorunlu);
 
+async function modulListesiGetir() {
+  if (config.dbTuru === 'master') {
+    return prismaMaster.modul.findMany({ where: { durum: true }, orderBy: { prefix: 'asc' } });
+  }
+  return sanalModulListesi();
+}
+
 async function rolleriGetir() {
   const [satirlar, moduller] = await Promise.all([
     prisma.rol.findMany({
       where: { durum: true },
       orderBy: [{ rolAdi: 'asc' }, { modulId: 'asc' }],
     }),
-    prisma.modul.findMany({ where: { durum: true }, orderBy: { prefix: 'asc' } }),
+    modulListesiGetir(),
   ]);
 
   return {
     roller: rolSatirlarindanOzet(satirlar),
     yetkiler: yetkiListesiYanit(),
-    moduller: moduller.map((m) => ({
+    moduller: moduller.map((m: { id: number; modulAdi: string; prefix: string }) => ({
       id: m.id,
       ad: m.modulAdi,
       prefix: m.prefix,
@@ -46,7 +56,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Roller listesi gerekli' });
   }
 
-  const moduller = await prisma.modul.findMany({ where: { durum: true } });
+  const moduller = await modulListesiGetir();
   if (!moduller.length) {
     return res.status(400).json({ mesaj: 'Modul tanimi bulunamadi' });
   }

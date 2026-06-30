@@ -1,4 +1,5 @@
-// Guzel Teknoloji — MASTER_DB (resimdeki tablo yapisi)
+// Guzel Teknoloji — MASTER_DB (restoran-db)
+// Sube kurulumu icin schema-sube.prisma kullanilir (DB_TURU=sube)
 // Ek tablolar: ayarlar (panel), yedek_kaydi, kullanici_kisayol, kullanici_sekme_ayar,
 // eklenti_katalog, eklenti_kurulum, bildirim
 

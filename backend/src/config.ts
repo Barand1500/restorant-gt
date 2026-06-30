@@ -9,6 +9,7 @@ function zorunlu(anahtar: string, varsayilan?: string): string {
 export const config = {
   port: Number(process.env.PORT ?? 3006),
   nodeEnv: process.env.NODE_ENV ?? 'development',
+  dbTuru: (process.env.DB_TURU ?? 'sube') === 'master' ? 'master' : 'sube',
   databaseUrl: zorunlu('DATABASE_URL'),
   jwtSecret: zorunlu('JWT_SECRET', 'gelistirme-anahtari-degistirin'),
   jwtSureGun: Number(process.env.JWT_SURE_GUN ?? 7),

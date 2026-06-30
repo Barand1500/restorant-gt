@@ -1,5 +1,5 @@
-import type { Paket } from '@prisma/client';
-import { prisma } from './prisma.js';
+import type { Paket } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 
 export function paketYanitOlustur(p: Paket) {
   return {
@@ -17,17 +17,17 @@ export function paketYanitOlustur(p: Paket) {
 }
 
 export async function paketListesiGetir() {
-  const kayitlar = await prisma.paket.findMany({
+  const kayitlar = (await prismaMaster.paket.findMany({
     orderBy: [{ id: 'asc' }],
-  });
+  })) as Paket[];
   return kayitlar.map(paketYanitOlustur);
 }
 
 export async function paketLisansSayilariGetir() {
-  const sayimlar = await prisma.lisans.groupBy({
+  const sayimlar = await prismaMaster.lisans.groupBy({
     by: ['paketId'],
     where: { durum: true },
     _count: { id: true },
   });
-  return new Map(sayimlar.map((s) => [s.paketId, s._count.id]));
+  return new Map(sayimlar.map((s: { paketId: number; _count: { id: number } }) => [s.paketId, s._count.id]));
 }

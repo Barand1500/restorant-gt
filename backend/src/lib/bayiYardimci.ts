@@ -1,5 +1,5 @@
-import type { Bayi } from '@prisma/client';
-import { prisma } from './prisma.js';
+import type { Bayi } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 
 export type BayiSayim = Bayi & {
   ustBayi: { id: number; unvan: string } | null;
@@ -35,10 +35,10 @@ const bayiInclude = {
 } as const;
 
 export async function bayiListesiGetir() {
-  const kayitlar = await prisma.bayi.findMany({
+  const kayitlar = (await prismaMaster.bayi.findMany({
     orderBy: [{ id: 'asc' }],
     include: bayiInclude,
-  });
+  })) as BayiSayim[];
   return kayitlar.map(bayiYanitOlustur);
 }
 
@@ -54,7 +54,7 @@ export async function ustBayiGecerliMi(bayiId: number, ustId: number | null | un
     if (ziyaret.has(currentId)) return false;
     ziyaret.add(currentId);
 
-    const ust: { ustId: number | null } | null = await prisma.bayi.findUnique({
+    const ust: { ustId: number | null } | null = await prismaMaster.bayi.findUnique({
       where: { id: currentId },
       select: { ustId: true },
     });
@@ -66,7 +66,7 @@ export async function ustBayiGecerliMi(bayiId: number, ustId: number | null | un
 }
 
 export async function bayiTekGetir(id: number) {
-  const kayit = await prisma.bayi.findUnique({
+  const kayit = await prismaMaster.bayi.findUnique({
     where: { id },
     include: bayiInclude,
   });

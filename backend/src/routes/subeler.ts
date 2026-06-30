@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import { Prisma } from '@prisma/client';
 import { subeInclude, subeListesiGetir, subeTipiGecerliMi, subeYanitOlustur } from '../lib/subeYardimci.js';
 import { prisma } from '../lib/prisma.js';
+import { prismaMaster } from '../lib/prismaMaster.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { authZorunlu } from '../middleware/auth.js';
 
@@ -34,7 +35,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecerli bir firma secin' });
   }
 
-  const firma = await prisma.firma.findUnique({ where: { id: firmaId } });
+  const firma = await prismaMaster.firma.findUnique({ where: { id: firmaId } });
   if (!firma) return res.status(400).json({ mesaj: 'Firma bulunamadi' });
   if (!firma.durum) return res.status(400).json({ mesaj: 'Pasif firmaya sube atanamaz' });
 
@@ -44,7 +45,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const kayit = await prisma.sube.create({
+    const kayit = await prismaMaster.sube.create({
       data: {
         firmaId,
         subeAdi,
@@ -78,11 +79,11 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz sube id' });
   }
 
-  const mevcut = await prisma.sube.findUnique({ where: { id } });
+  const mevcut = await prismaMaster.sube.findUnique({ where: { id } });
   if (!mevcut) return res.status(404).json({ mesaj: 'Sube bulunamadi' });
 
   const body = req.body as Record<string, unknown>;
-  const data: Prisma.SubeUpdateInput = {};
+  const data: Record<string, unknown> = {};
 
   if (body.subeAdi !== undefined) {
     const subeAdi = metinAl(body.subeAdi, 100);
@@ -100,7 +101,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     if (!Number.isInteger(firmaId) || firmaId < 1) {
       return res.status(400).json({ mesaj: 'Gecerli bir firma secin' });
     }
-    const firma = await prisma.firma.findUnique({ where: { id: firmaId } });
+    const firma = await prismaMaster.firma.findUnique({ where: { id: firmaId } });
     if (!firma) return res.status(400).json({ mesaj: 'Firma bulunamadi' });
     if (!firma.durum) return res.status(400).json({ mesaj: 'Pasif firmaya sube atanamaz' });
     data.firma = { connect: { id: firmaId } };
@@ -132,7 +133,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Guncellenecek alan belirtilmedi' });
   }
 
-  const guncel = await prisma.sube.update({
+  const guncel = await prismaMaster.sube.update({
     where: { id },
     data,
     include: subeInclude,
@@ -147,7 +148,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Gecersiz sube id' });
   }
 
-  const mevcut = await prisma.sube.findUnique({
+  const mevcut = await prismaMaster.sube.findUnique({
     where: { id },
     include: { _count: { select: { kullanicilar: true } } },
   });
@@ -156,7 +157,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ mesaj: 'Kullanicilari olan sube silinemez' });
   }
 
-  await prisma.sube.delete({ where: { id } });
+  await prismaMaster.sube.delete({ where: { id } });
   return res.json({ mesaj: 'Silindi' });
 });
 

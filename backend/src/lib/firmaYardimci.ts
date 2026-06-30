@@ -1,5 +1,5 @@
-import type { Firma, Lisans } from '@prisma/client';
-import { prisma } from './prisma.js';
+import type { Firma, Lisans } from './masterTipler.js';
+import { prismaMaster } from './prismaMaster.js';
 
 export type FirmaLisansOzet = Pick<Lisans, 'durum' | 'bitisTarihi'>;
 
@@ -56,7 +56,7 @@ export const firmaInclude = {
 } as const;
 
 export async function firmaListesiGetir() {
-  const kayitlar = await prisma.firma.findMany({
+  const kayitlar = await prismaMaster.firma.findMany({
     orderBy: [{ durum: 'desc' }, { unvan: 'asc' }],
     include: firmaInclude,
   });
