@@ -190,6 +190,13 @@ export const MASTER_SEKME_REHBERLERI: Record<MasterSekmeId, ModulRehber> = {
         renk: 'turuncu',
       },
       {
+        ikon: '🌳',
+        baslik: 'Ağaç görünümü',
+        aciklama:
+          'Sağ üstteki tablo / ağaç ikonlarıyla paket → durum → firma hiyerarşisine geçin. Süresi yakın lisansları paket bazında gruplu takip edin.',
+        renk: 'yesil',
+      },
+      {
         ikon: '✏️',
         baslik: 'Hızlı güncelleme',
         aciklama:

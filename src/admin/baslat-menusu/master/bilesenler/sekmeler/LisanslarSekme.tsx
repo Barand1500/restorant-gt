@@ -38,6 +38,8 @@ import { masterPaketleriGetir } from '@/admin/baslat-menusu/master/paketler/api'
 import { HataDurumu, YukleniyorDurumu } from '@/admin/ortak/AdminBilesenleri';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
+import { LisansAgacGorunumu } from '@/admin/baslat-menusu/master/bilesenler/agac/LisansAgacGorunumu';
+import type { MasterGorunum } from '@/admin/baslat-menusu/master/bilesenler/MasterGorunumSegici';
 
 type Filtre = 'tumu' | 'aktif' | 'yakinda' | 'pasif';
 
@@ -54,7 +56,7 @@ function hucreMevcutDeger(lisans: MasterLisans, alan: LisansDuzenlenebilirAlan):
   }
 }
 
-export function LisanslarSekme() {
+export function LisanslarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [lisanslar, setLisanslar] = useState<MasterLisans[]>([]);
   const [firmalar, setFirmalar] = useState<Awaited<ReturnType<typeof masterFirmalariGetir>>['firmalar']>([]);
@@ -336,13 +338,15 @@ export function LisanslarSekme() {
                 </option>
               ))}
             </select>
-            <MasterTabloSutunAyarlari
-              baslik="Lisans tablosu sütunları"
-              sutunlar={LISANS_TABLO_SUTUNLARI}
-              gorunurSira={gorunurSutunlar}
-              varsayilanSira={LISANS_TABLO_VARSAYILAN_SIRA}
-              onDegistir={sutunlarDegistir}
-            />
+            {gorunum === 'tablo' && (
+              <MasterTabloSutunAyarlari
+                baslik="Lisans tablosu sütunları"
+                sutunlar={LISANS_TABLO_SUTUNLARI}
+                gorunurSira={gorunurSutunlar}
+                varsayilanSira={LISANS_TABLO_VARSAYILAN_SIRA}
+                onDegistir={sutunlarDegistir}
+              />
+            )}
           </>
         }
       />
@@ -372,6 +376,8 @@ export function LisanslarSekme() {
                   : 'Henüz lisans kaydı yok. Alt çubuktan Yeni Ekle ile başlayın.'}
           </p>
         </div>
+      ) : gorunum === 'agac' ? (
+        <LisansAgacGorunumu lisanslar={liste} paketler={paketler} filtre={filtre} />
       ) : (
         <>
           <LisansExcelTablo

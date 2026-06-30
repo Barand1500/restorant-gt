@@ -28,7 +28,7 @@ export function MasterSekmeIcerik({ sekme, gorunum = 'tablo' }: MasterSekmeIceri
     case 'paketler':
       return <PaketlerSekme />;
     case 'lisanslar':
-      return <LisanslarSekme />;
+      return <LisanslarSekme gorunum={gorunum} />;
     default:
       return null;
   }

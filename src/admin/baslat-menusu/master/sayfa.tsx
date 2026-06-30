@@ -8,7 +8,7 @@ import { masterSekmeBul, type MasterSekmeId } from '@/admin/baslat-menusu/master
 import { masterRehberModulId } from '@/admin/veri/adminMasterRehberleri';
 import { useAdminAksiyon } from '@/baglamlar/AdminAksiyonContext';
 
-const AGAC_SEKMELER = new Set<MasterSekmeId>(['bayiler', 'firmalar', 'subeler']);
+const AGAC_SEKMELER = new Set<MasterSekmeId>(['bayiler', 'firmalar', 'subeler', 'lisanslar']);
 
 export function MasterSayfasi() {
   const [sekme, setSekme] = useState<MasterSekmeId>('bayiler');
