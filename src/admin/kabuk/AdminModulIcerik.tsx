@@ -22,6 +22,12 @@ import { MarslanacakUrunlerSayfa } from '@/admin/baslat-menusu/marslanacak-urunl
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarModulBul } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 import { RaporlarBosSayfa } from '@/admin/baslat-menusu/raporlar/RaporlarBosSayfa';
+import { AktifMasalarSayfasi } from '@/admin/baslat-menusu/raporlar/aktif-masalar/sayfa';
+import { FiyatListesiSayfasi } from '@/admin/baslat-menusu/raporlar/fiyat-listesi/sayfa';
+import { AcikHesapListesiSayfasi } from '@/admin/baslat-menusu/raporlar/acik-hesap-listesi/sayfa';
+import { SatisRaporuSayfasi } from '@/admin/baslat-menusu/raporlar/satis-raporu/sayfa';
+import { SatisToplamlariSayfasi } from '@/admin/baslat-menusu/raporlar/satis-toplamlari/sayfa';
+import { OzelRaporlarSayfasi } from '@/admin/baslat-menusu/raporlar/ozel-raporlar/sayfa';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
 interface AdminModulIcerikProps {
@@ -82,6 +88,24 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
 
   const raporModul = raporlarModulBul(modulId);
   if (raporModul) {
+    if (modulId === 'aktif-masalar') {
+      return <AktifMasalarSayfasi />;
+    }
+    if (modulId === 'fiyat-listesi') {
+      return <FiyatListesiSayfasi />;
+    }
+    if (modulId === 'acik-hesap-listesi') {
+      return <AcikHesapListesiSayfasi />;
+    }
+    if (modulId === 'satis-raporu') {
+      return <SatisRaporuSayfasi />;
+    }
+    if (modulId === 'satis-toplamlari') {
+      return <SatisToplamlariSayfasi />;
+    }
+    if (modulId === 'ozel-raporlar') {
+      return <OzelRaporlarSayfasi />;
+    }
     return <RaporlarBosSayfa baslik={raporModul.baslik} aciklama={raporModul.aciklama} />;
   }
 

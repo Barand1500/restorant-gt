@@ -186,8 +186,64 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  'aktif-masalar': [
+    A('guncelle', 'Güncelle', true, true),
+    A('onizle', 'Yazdır', true),
+    A('kaydet', 'Kaydet', false),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'fiyat-listesi': [
+    A('kaydet', 'Tamam', true, true),
+    A('onizle', 'Önizleme', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'acik-hesap-listesi': [
+    A('kaydet', 'Tamam', true, true),
+    A('onizle', 'Önizleme', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'satis-raporu': [
+    A('kaydet', 'Excel', true, true),
+    A('onizle', 'Yazdır', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'satis-toplamlari': [
+    A('kaydet', 'Excel', true, true),
+    A('onizle', 'Yazdır', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'ozel-raporlar': [
+    A('kaydet', 'Tamam', true, true),
+    A('onizle', 'Önizleme', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
   ...Object.fromEntries(
-    RAPORLAR_MODUL_TANIMLARI.map((r) => [
+    RAPORLAR_MODUL_TANIMLARI.filter(
+      (r) =>
+        r.id !== 'aktif-masalar' &&
+        r.id !== 'fiyat-listesi' &&
+        r.id !== 'acik-hesap-listesi' &&
+        r.id !== 'satis-raporu' &&
+        r.id !== 'satis-toplamlari' &&
+        r.id !== 'ozel-raporlar'
+    ).map((r) => [
       r.id,
       [
         A('kaydet', 'Kaydet', false),
