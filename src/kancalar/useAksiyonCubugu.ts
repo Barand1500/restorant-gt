@@ -8,6 +8,10 @@ import type { YetkiKodu } from '@/admin/baslat-menusu/musteri-ajans/roller/api';
 import { TANIMLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { RAPORLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 import { RAPOR_SABLON_MODUL_IDLERI } from '@/admin/baslat-menusu/raporlar/raporSablonModulleri';
+import {
+  PAKET_SERVISI_RAPORLARI_MODUL_TANIMLARI,
+} from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
+import { PAKET_SERVISI_SABLON_MODUL_IDLERI } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiSablonModulleri';
 
 const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: boolean): AksiyonButonu => ({
   id,
@@ -246,6 +250,29 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
         r.id !== 'ozel-raporlar'
     ).map((r) => {
       const sablon = (RAPOR_SABLON_MODUL_IDLERI as readonly string[]).includes(r.id);
+      return [
+        r.id,
+        sablon
+          ? [
+              A('kaydet', 'Kaydet', false, true),
+              A('ekle', 'Yeni Ekle', false),
+              A('sil', 'Sil', false),
+              A('onizle', 'Yazdır', false),
+              A('yayinla', 'Yayınla', false),
+            ]
+          : [
+              A('kaydet', 'Kaydet', false),
+              A('ekle', 'Yeni Ekle', false),
+              A('sil', 'Sil', false),
+              A('onizle', 'Yazdır', false),
+              A('yayinla', 'Yayınla', false),
+            ],
+      ];
+    })
+  ),
+  ...Object.fromEntries(
+    PAKET_SERVISI_RAPORLARI_MODUL_TANIMLARI.map((r) => {
+      const sablon = (PAKET_SERVISI_SABLON_MODUL_IDLERI as readonly string[]).includes(r.id);
       return [
         r.id,
         sablon

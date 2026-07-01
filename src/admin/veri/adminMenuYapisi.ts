@@ -1,6 +1,7 @@
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import { tanimlarAdminModulleri } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarAdminModulleri } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
+import { paketServisiRaporlariAdminModulleri } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
 
 /** Master modülü menüde geçici gizli — tekrar açmak için true yapın */
 export const MASTER_MENU_GORUNUR = false;
@@ -8,6 +9,7 @@ export const MASTER_MENU_GORUNUR = false;
 export const adminModulleri: AdminModul[] = [
   ...tanimlarAdminModulleri(),
   ...raporlarAdminModulleri(),
+  ...paketServisiRaporlariAdminModulleri(),
   {
     id: 'master',
     baslik: 'Master',
@@ -75,6 +77,7 @@ export const adminGizliModuller: AdminModul[] = [
 export const adminKategoriler = [
   'Tanımlar',
   'Raporlar',
+  'Paket Servisi Raporları',
   ...(MASTER_MENU_GORUNUR ? (['Master'] as const) : []),
   'Müşteri / Ajans',
   'Sistem',
@@ -109,6 +112,7 @@ export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> 
   const modul = modulBul(modulId);
   if (modul?.kategori === 'Tanımlar') return true;
   if (modul?.kategori === 'Raporlar') return true;
+  if (modul?.kategori === 'Paket Servisi Raporları') return true;
   if (modulId === 'master') return MASTER_MENU_GORUNUR;
   if (PANEL_ALTYAPI_MODUL_IDLERI.has(modulId)) return true;
   if (!aktifPrefixler) return true;

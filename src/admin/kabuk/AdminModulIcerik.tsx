@@ -21,6 +21,8 @@ import { EFaturaAyarlariSayfa } from '@/admin/baslat-menusu/e-fatura-ayarlari/sa
 import { MarslanacakUrunlerSayfa } from '@/admin/baslat-menusu/marslanacak-urunler/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarModulBul } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
+import { paketServisiRaporlariModulBul } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
+import { paketServisiSablonMu } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiSablonModulleri';
 import { raporSablonMu } from '@/admin/baslat-menusu/raporlar/raporSablonModulleri';
 import { RaporSablonSayfa } from '@/admin/baslat-menusu/raporlar/sayfa';
 import { RaporlarBosSayfa } from '@/admin/baslat-menusu/raporlar/RaporlarBosSayfa';
@@ -112,6 +114,16 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
       return <OzelRaporlarSayfasi />;
     }
     return <RaporlarBosSayfa baslik={raporModul.baslik} aciklama={raporModul.aciklama} />;
+  }
+
+  const paketModul = paketServisiRaporlariModulBul(modulId);
+  if (paketModul) {
+    if (paketServisiSablonMu(modulId)) {
+      return (
+        <RaporSablonSayfa modulId={modulId} baslik={paketModul.baslik} aciklama={paketModul.aciklama} />
+      );
+    }
+    return <RaporlarBosSayfa baslik={paketModul.baslik} aciklama={paketModul.aciklama} />;
   }
 
   switch (modulId) {
