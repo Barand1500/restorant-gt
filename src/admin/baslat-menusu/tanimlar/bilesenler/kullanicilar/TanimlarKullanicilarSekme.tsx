@@ -385,6 +385,7 @@ export function TanimlarKullanicilarSekme() {
                 onKayitDegistir={setTaslakYetki}
                 onPersoneldenKopyala={personeldenYetkiKopyala}
                 onYetkiYapistir={yetkiYapistir}
+                onGeri={listeGorunumuneDon}
               />
             )}
 
@@ -394,6 +395,7 @@ export function TanimlarKullanicilarSekme() {
                 kayit={taslakSubeDepartman}
                 onKayitDegistir={setTaslakSubeDepartman}
                 onAta={subeDepartmanAta}
+                onGeri={listeGorunumuneDon}
               />
             )}
 
@@ -406,6 +408,7 @@ export function TanimlarKullanicilarSekme() {
                 onKayitDegistir={setTaslakUrunYetki}
                 onPersoneldenKopyala={personeldenUrunKopyala}
                 onYapistir={urunYapistir}
+                onGeri={listeGorunumuneDon}
               />
             )}
           </div>

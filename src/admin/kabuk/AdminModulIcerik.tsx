@@ -14,6 +14,11 @@ import { YaziciTanimlariSayfasi } from '@/admin/baslat-menusu/yazici-tanimlari/s
 import { FavorilerSayfasi } from '@/admin/baslat-menusu/favoriler/sayfa';
 import { OdemeGruplariSayfasi } from '@/admin/baslat-menusu/odeme-gruplari/sayfa';
 import { UrunEslestirSayfasi } from '@/admin/baslat-menusu/urun-eslestir/sayfa';
+import { MenuTanimlariSayfa } from '@/admin/baslat-menusu/menu-tanimlari/sayfa';
+import { CariTanimlariSayfa } from '@/admin/baslat-menusu/cari-tanimlari/sayfa';
+import { HappyHourFiyatListeleriSayfa } from '@/admin/baslat-menusu/happy-hour-fiyat-listeleri/sayfa';
+import { EFaturaAyarlariSayfa } from '@/admin/baslat-menusu/e-fatura-ayarlari/sayfa';
+import { MarslanacakUrunlerSayfa } from '@/admin/baslat-menusu/marslanacak-urunler/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
@@ -54,6 +59,21 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
   if (tanimModul) {
     if (modulId === 'tanimlar') {
       return <TanimlarSayfasi />;
+    }
+    if (modulId === 'menu-tanimlari') {
+      return <MenuTanimlariSayfa />;
+    }
+    if (modulId === 'cari-tanimlari') {
+      return <CariTanimlariSayfa />;
+    }
+    if (modulId === 'happy-hour-fiyat-listeleri') {
+      return <HappyHourFiyatListeleriSayfa />;
+    }
+    if (modulId === 'e-fatura-ayarlari') {
+      return <EFaturaAyarlariSayfa />;
+    }
+    if (modulId === 'marslanacak-urunler') {
+      return <MarslanacakUrunlerSayfa />;
     }
     return <TanimlarBosSayfa baslik={tanimModul.baslik} aciklama={tanimModul.aciklama} />;
   }

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
+import { TanimlarPanelGeriTusu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarPanelGeriTusu';
 import type { TanimlarKullanici } from '@/admin/baslat-menusu/tanimlar/kullanicilar/tipler';
 import {
   TANIMLAR_YETKI_TANIMLARI,
@@ -14,6 +15,7 @@ interface TanimlarKullaniciYetkilerPanelProps {
   onKayitDegistir: (kayit: TanimlarKullaniciYetkiKaydi) => void;
   onPersoneldenKopyala: (kaynakKullaniciId: number) => void;
   onYetkiYapistir: () => void;
+  onGeri: () => void;
 }
 
 function yetkiAramaEslesir(etiket: string, id: string, arama: string) {
@@ -32,6 +34,7 @@ export function TanimlarKullaniciYetkilerPanel({
   onKayitDegistir,
   onPersoneldenKopyala,
   onYetkiYapistir,
+  onGeri,
 }: TanimlarKullaniciYetkilerPanelProps) {
   const [kopyaKaynakId, setKopyaKaynakId] = useState<number | ''>('');
   const [arama, setArama] = useState('');
@@ -67,6 +70,9 @@ export function TanimlarKullaniciYetkilerPanel({
 
   return (
     <div className="ap-tanimlar-yetki-panel">
+      <div className="ap-tanimlar-panel-geri-sarmal">
+        <TanimlarPanelGeriTusu onGeri={onGeri} />
+      </div>
       <header className="ap-tanimlar-panel-baslik">
         <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Yetkiler</h3>
         <p className="ap-tanimlar-yetki-alt">

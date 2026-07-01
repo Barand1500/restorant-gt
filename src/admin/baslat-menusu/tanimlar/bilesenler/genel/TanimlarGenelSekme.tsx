@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { formSelectSinifi } from '@/formlar/FormAlani';
+import { FormAcilirSecim } from '@/formlar/FormAcilirSecim';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import {
   BUTON_BOYUTU_SECENEKLERI,
@@ -191,17 +192,12 @@ export function TanimlarGenelSekme({ onKirliDegisti }: TanimlarGenelSekmeProps) 
           <div className="ap-tanimlar-hesap-pusula-alt">
             <div className="ap-tanimlar-genel-alan">
               <label className="ap-muted mb-2 block text-xs font-semibold uppercase">Fatura Yazıcısı</label>
-              <select
-                className={formSelectSinifi}
+              <FormAcilirSecim
+                aria-label="Fatura yazıcısı"
                 value={form.faturaYazicisi}
-                onChange={(e) => setForm((f) => ({ ...f, faturaYazicisi: e.target.value }))}
-              >
-                {TANIMLAR_YAZICI_SECENEKLERI.map((y) => (
-                  <option key={y.value} value={y.value}>
-                    {y.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(faturaYazicisi) => setForm((f) => ({ ...f, faturaYazicisi }))}
+                secenekler={TANIMLAR_YAZICI_SECENEKLERI}
+              />
             </div>
 
             <p className="ap-muted ap-tanimlar-hesap-pusula-bilgi text-sm leading-relaxed">{HESAP_PUSULA_BILGI}</p>

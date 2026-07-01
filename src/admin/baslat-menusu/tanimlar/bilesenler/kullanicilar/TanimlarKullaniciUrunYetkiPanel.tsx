@@ -1,5 +1,6 @@
 import { type DragEvent, useMemo, useState } from 'react';
 import { formInputSinifi, formSelectSinifi } from '@/formlar/FormAlani';
+import { TanimlarPanelGeriTusu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarPanelGeriTusu';
 import type { TanimlarKullanici } from '@/admin/baslat-menusu/tanimlar/kullanicilar/tipler';
 import {
   TANIMLAR_URUN_GRUPLARI,
@@ -16,6 +17,7 @@ interface TanimlarKullaniciUrunYetkiPanelProps {
   onKayitDegistir: (kayit: TanimlarUrunYetkiKaydi) => void;
   onPersoneldenKopyala: (kaynakKullaniciId: number) => void;
   onYapistir: () => void;
+  onGeri: () => void;
 }
 
 type ListeTarafi = 'sol' | 'sag';
@@ -43,6 +45,7 @@ export function TanimlarKullaniciUrunYetkiPanel({
   onKayitDegistir,
   onPersoneldenKopyala,
   onYapistir,
+  onGeri,
 }: TanimlarKullaniciUrunYetkiPanelProps) {
   const [arama, setArama] = useState('');
   const [grupFiltre, setGrupFiltre] = useState<string>('Tümü');
@@ -167,6 +170,9 @@ export function TanimlarKullaniciUrunYetkiPanel({
 
   return (
     <div className="ap-tanimlar-urun-yetki-panel">
+      <div className="ap-tanimlar-panel-geri-sarmal">
+        <TanimlarPanelGeriTusu onGeri={onGeri} />
+      </div>
       <header className="ap-tanimlar-panel-baslik">
         <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Ürün Yetkilendir</h3>
         <p className="ap-tanimlar-yetki-alt">

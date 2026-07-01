@@ -142,6 +142,44 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
       ],
     ])
   ),
+  'menu-tanimlari': [
+    A('ekle', 'Yeni', true),
+    A('guncelle', 'Düzelt', false),
+    A('kaydet', 'Kaydet', false, true),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'cari-tanimlari': [
+    A('ekle', 'Yeni', true),
+    A('guncelle', 'Düzenle', false),
+    A('kaydet', 'Kaydet', false, true),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'happy-hour-fiyat-listeleri': [
+    A('ekle', 'Yeni Ekle', true),
+    A('guncelle', 'Fiyat Güncelle', false),
+    A('kaydet', 'Kaydet', false, true),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'e-fatura-ayarlari': [
+    A('kaydet', 'Kaydet', false, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'marslanacak-urunler': [
+    A('kaydet', 'Kaydet', false, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
 };
 
 const varsayilanAksiyonlar: AksiyonButonu[] = [

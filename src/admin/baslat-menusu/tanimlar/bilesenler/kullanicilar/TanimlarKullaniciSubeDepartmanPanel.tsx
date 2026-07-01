@@ -1,4 +1,5 @@
 import { formInputSinifi } from '@/formlar/FormAlani';
+import { TanimlarPanelGeriTusu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarPanelGeriTusu';
 import type { TanimlarKullanici } from '@/admin/baslat-menusu/tanimlar/kullanicilar/tipler';
 import type { TanimlarSubeDepartmanKaydi } from '@/admin/baslat-menusu/tanimlar/kullanicilar/subeDepartmanTipler';
 
@@ -7,6 +8,7 @@ interface TanimlarKullaniciSubeDepartmanPanelProps {
   kayit: TanimlarSubeDepartmanKaydi;
   onKayitDegistir: (kayit: TanimlarSubeDepartmanKaydi) => void;
   onAta: () => void;
+  onGeri: () => void;
 }
 
 export function TanimlarKullaniciSubeDepartmanPanel({
@@ -14,11 +16,15 @@ export function TanimlarKullaniciSubeDepartmanPanel({
   kayit,
   onKayitDegistir,
   onAta,
+  onGeri,
 }: TanimlarKullaniciSubeDepartmanPanelProps) {
   const kilitli = kayit.atanmis;
 
   return (
     <div className="ap-tanimlar-sube-dep-panel">
+      <div className="ap-tanimlar-panel-geri-sarmal">
+        <TanimlarPanelGeriTusu onGeri={onGeri} />
+      </div>
       <header className="ap-tanimlar-panel-baslik">
         <h3 className="ap-tanimlar-yetki-baslik">{kullanici.kullaniciAdi} — Şube / Departman</h3>
         <p className="ap-tanimlar-yetki-alt">Personel şube ve departman ataması</p>

@@ -1,3 +1,4 @@
+import { FormAcilirSecim } from '@/formlar/FormAcilirSecim';
 import { formSelectSinifi } from '@/formlar/FormAlani';
 import {
   TANIMLAR_TASARIM_DOSYALARI,
@@ -23,17 +24,12 @@ export function TanimlarEAdisyonPanel({ form, onFormDegistir }: TanimlarEAdisyon
       <div className="ap-tanimlar-print-grid">
         <fieldset className="ap-tanimlar-print-alan">
           <legend className="ap-tanimlar-print-legend">Yazıcı</legend>
-          <select
-            className={formSelectSinifi}
+          <FormAcilirSecim
+            aria-label="E Adisyon yazıcısı"
             value={form.eAdisyonYazicisi}
-            onChange={(e) => onFormDegistir({ ...form, eAdisyonYazicisi: e.target.value })}
-          >
-            {TANIMLAR_YAZICI_SECENEKLERI.map((y) => (
-              <option key={y.value} value={y.value}>
-                {y.label}
-              </option>
-            ))}
-          </select>
+            onChange={(eAdisyonYazicisi) => onFormDegistir({ ...form, eAdisyonYazicisi })}
+            secenekler={TANIMLAR_YAZICI_SECENEKLERI}
+          />
         </fieldset>
 
         <fieldset className="ap-tanimlar-print-alan">
