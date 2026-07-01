@@ -13873,7 +13873,423 @@ html:has(.admin-panel[data-tema='acik']) body {
   padding: 0.45rem 1rem;
 }
 
-.ap-satis-rapor-tablo .ap-master-excel-scroll {
+/* Paket servisi satış raporu */
+.ap-ps-satis-rapor-filtre-satir {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.ap-ps-satis-rapor-filtre-tus {
+  align-self: center;
+  min-width: 8rem;
+}
+
+.ap-satis-rapor-sayfa .ap-panel-kart-icerik,
+.ap-tahsilat-tarama-sayfa .ap-panel-kart-icerik {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ap-satis-rapor-tablo.ap-ps-satis-rapor-tablo,
+.ap-ps-satis-toplam-tablo,
+.ap-tahsilat-tarama-tablo {
+  width: 100%;
+  min-width: 0;
+}
+
+.ap-satis-rapor-tablo.ap-ps-satis-rapor-tablo .ap-master-excel-scroll,
+.ap-ps-satis-toplam-tablo .ap-master-excel-scroll,
+.ap-tahsilat-tarama-tablo .ap-master-excel-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ap-satis-rapor-tablo.ap-ps-satis-rapor-tablo .ap-master-excel-tablo,
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo,
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo {
+  width: 100%;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(1),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(1) {
+  width: 7%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(2) {
+  width: 6%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(3),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(3) {
+  width: 11%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(4),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(4) {
+  width: 9%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(5),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(5) {
+  width: 18%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(6) {
+  width: 6%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(7) {
+  width: 8%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(8),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(8) {
+  width: 11%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(9),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(9) {
+  width: 9%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(10),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(10) {
+  width: 15%;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-hucre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(5) {
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(10),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(6),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(7),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo td:nth-child(10) {
+  text-align: right;
+  padding-right: calc(0.65rem + 5px);
+}
+
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-ps-satis-rapor-tablo .ap-master-excel-tablo th:nth-child(10) {
+  letter-spacing: 0.02em;
+}
+
+.ap-ps-satis-rapor-telefon {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Paket satış toplamları tablosu */
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(1),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(1) {
+  width: 52%;
+}
+
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(2) {
+  width: 24%;
+}
+
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(3),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(3) {
+  width: 24%;
+}
+
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(3),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(2),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(3) {
+  text-align: right;
+  padding-right: calc(0.65rem + 5px);
+}
+
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo th:nth-child(3) {
+  letter-spacing: 0.02em;
+}
+
+.ap-ps-satis-toplam-tablo .ap-master-excel-tablo td:nth-child(1) {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ap-ps-satis-toplam-ozet-satir {
+  background: color-mix(in srgb, var(--ap-accent) 8%, var(--ap-surface-2));
+}
+
+.ap-ps-satis-toplam-ozet-satir .ap-master-excel-hucre {
+  border-bottom: none;
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+
+.ap-ps-satis-toplam-ozet-kutu {
+  display: inline-block;
+  min-width: 5.5rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--ap-border);
+  border-radius: 0.35rem;
+  background: var(--ap-input-bg, var(--ap-surface));
+  font-weight: 700;
+  text-align: right;
+}
+
+/* Eski tahsilat tarama */
+.ap-tahsilat-tarama-sayfa {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ap-tahsilat-tarama-ust {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 1rem;
+}
+
+.ap-tahsilat-tarama-kutu {
+  border: 1px solid var(--ap-border);
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--ap-accent) 5%, var(--ap-surface)) 0%,
+    var(--ap-surface) 60%
+  );
+  padding: 0.85rem 1rem 1rem;
+  min-width: 0;
+}
+
+.ap-tahsilat-tarama-kutu-baslik {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ap-heading);
+}
+
+.ap-tahsilat-tarama-modlar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.ap-tahsilat-tarama-mod-tus {
+  min-height: 2.65rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--ap-border);
+  border-radius: 0.55rem;
+  background: var(--ap-surface-2);
+  color: var(--ap-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ap-tahsilat-tarama-mod-tus:hover {
+  background: var(--ap-hover);
+}
+
+.ap-tahsilat-tarama-mod-tus-secili {
+  border-color: color-mix(in srgb, var(--ap-accent) 55%, var(--ap-border));
+  background: color-mix(in srgb, var(--ap-accent) 16%, var(--ap-surface));
+  color: var(--ap-heading);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ap-accent) 25%, transparent);
+}
+
+.ap-tahsilat-tarama-tarih-satir {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ap-tahsilat-tarama-nav-tus {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ap-border);
+  border-radius: 0.55rem;
+  background: var(--ap-surface-2);
+  color: var(--ap-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.ap-tahsilat-tarama-nav-tus:hover {
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface-2));
+  border-color: color-mix(in srgb, var(--ap-accent) 35%, var(--ap-border));
+}
+
+.ap-tahsilat-tarama-tarih-alanlar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ap-tahsilat-tarama-tarih-etiket {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ap-text-muted);
+}
+
+.ap-tahsilat-tarama-tarih-etiket input {
+  width: 100%;
+  min-width: 0;
+}
+
+.ap-tahsilat-tarama-tarih-ozet {
+  font-size: 0.72rem;
+  color: var(--ap-text-muted);
+}
+
+.ap-tahsilat-tarama-tarih-ayrac {
+  flex-shrink: 0;
+  padding-bottom: 0.55rem;
+  color: var(--ap-text-muted);
+  font-weight: 600;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(1),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(1) {
+  width: 13%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(2) {
+  width: 12%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(3),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(3) {
+  width: 11%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(4),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(4) {
+  width: 11%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(5),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(5) {
+  width: 10%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(6) {
+  width: 12%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(7) {
+  width: 10%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(8),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(8) {
+  width: 10%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(9),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(9) {
+  width: 11%;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-hucre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(8),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(9),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(7),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(8),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo td:nth-child(9) {
+  text-align: right;
+  padding-right: calc(0.65rem + 5px);
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(8),
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th:nth-child(9) {
+  letter-spacing: 0.02em;
+}
+
+.ap-tahsilat-tarama-personel {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ap-tahsilat-tarama-toplam-satir {
+  background: color-mix(in srgb, var(--ap-accent) 8%, var(--ap-surface-2));
+}
+
+.ap-tahsilat-tarama-toplam-etiket {
+  font-weight: 700;
+  color: var(--ap-heading);
+}
+
+.ap-tahsilat-tarama-alt {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 900px) {
+  .ap-tahsilat-tarama-ust {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-tahsilat-tarama-tarih-alanlar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ap-tahsilat-tarama-tarih-ayrac {
+    display: none;
+  }
+}
+
+.ap-tahsilat-tarama-tablo .ap-master-excel-tablo th {
+  white-space: normal;
+  line-height: 1.25;
+  vertical-align: bottom;
+}
+
+.ap-satis-rapor-tablo .ap-master-excel-scroll,
+.ap-tahsilat-tarama-tablo .ap-master-excel-scroll,
+.ap-ps-satis-toplam-tablo .ap-master-excel-scroll {
   max-height: calc(100vh - 24rem);
 }
 

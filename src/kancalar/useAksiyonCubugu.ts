@@ -244,6 +244,30 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('guncelle', 'Düzenle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  'ps-satis-raporu': [
+    A('kaydet', 'Excel', true, true),
+    A('onizle', 'Yazdır', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'ps-satis-toplamlari': [
+    A('kaydet', 'Excel', true, true),
+    A('onizle', 'Yazdır', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'ps-eski-tahsilat-tarama': [
+    A('kaydet', 'Kaydet', false),
+    A('onizle', 'Yazdır', true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('guncelle', 'Düzenle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
   ...Object.fromEntries(
     RAPORLAR_MODUL_TANIMLARI.filter(
       (r) =>
@@ -276,7 +300,12 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     })
   ),
   ...Object.fromEntries(
-    PAKET_SERVISI_RAPORLARI_MODUL_TANIMLARI.map((r) => {
+    PAKET_SERVISI_RAPORLARI_MODUL_TANIMLARI.filter(
+      (r) =>
+        r.id !== 'ps-satis-raporu' &&
+        r.id !== 'ps-satis-toplamlari' &&
+        r.id !== 'ps-eski-tahsilat-tarama'
+    ).map((r) => {
       const sablon = (PAKET_SERVISI_SABLON_MODUL_IDLERI as readonly string[]).includes(r.id);
       return [
         r.id,

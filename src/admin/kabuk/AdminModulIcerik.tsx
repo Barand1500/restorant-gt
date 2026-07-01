@@ -40,6 +40,9 @@ import { AcikHesapListesiSayfasi } from '@/admin/baslat-menusu/raporlar/acik-hes
 import { SatisRaporuSayfasi } from '@/admin/baslat-menusu/raporlar/satis-raporu/sayfa';
 import { SatisToplamlariSayfasi } from '@/admin/baslat-menusu/raporlar/satis-toplamlari/sayfa';
 import { OzelRaporlarSayfasi } from '@/admin/baslat-menusu/raporlar/ozel-raporlar/sayfa';
+import { PsEskiTahsilatTaramaSayfasi } from '@/admin/baslat-menusu/paket-servisi-raporlari/ps-eski-tahsilat-tarama/sayfa';
+import { PsSatisToplamlariSayfasi } from '@/admin/baslat-menusu/paket-servisi-raporlari/ps-satis-toplamlari/sayfa';
+import { PsSatisRaporuSayfasi } from '@/admin/baslat-menusu/paket-servisi-raporlari/ps-satis-raporu/sayfa';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
 interface AdminModulIcerikProps {
@@ -130,6 +133,15 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
       return (
         <RaporSablonSayfa modulId={modulId} baslik={paketModul.baslik} aciklama={paketModul.aciklama} />
       );
+    }
+    if (modulId === 'ps-eski-tahsilat-tarama') {
+      return <PsEskiTahsilatTaramaSayfasi />;
+    }
+    if (modulId === 'ps-satis-raporu') {
+      return <PsSatisRaporuSayfasi />;
+    }
+    if (modulId === 'ps-satis-toplamlari') {
+      return <PsSatisToplamlariSayfasi />;
     }
     return <RaporlarBosSayfa baslik={paketModul.baslik} aciklama={paketModul.aciklama} />;
   }

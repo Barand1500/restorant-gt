@@ -6,6 +6,9 @@ interface SatisRaporAltCubukProps {
   onExcel: () => void;
   onYazdir: () => void;
   excelAktif?: boolean;
+  tutarEtiket?: string;
+  miktarEtiket?: string;
+  ozetTutarOnce?: boolean;
 }
 
 function para(deger: number) {
@@ -24,7 +27,23 @@ export function SatisRaporAltCubuk({
   onExcel,
   onYazdir,
   excelAktif = true,
+  tutarEtiket = 'Tutar',
+  miktarEtiket = 'Miktar',
+  ozetTutarOnce = false,
 }: SatisRaporAltCubukProps) {
+  const miktarKutu = (
+    <div className="ap-satis-rapor-ozet-kutu">
+      <span className="ap-satis-rapor-ozet-etiket">{miktarEtiket}</span>
+      <strong>{miktarToplam}</strong>
+    </div>
+  );
+  const tutarKutu = (
+    <div className="ap-satis-rapor-ozet-kutu">
+      <span className="ap-satis-rapor-ozet-etiket">{tutarEtiket}</span>
+      <strong>{para(tutarToplam)}</strong>
+    </div>
+  );
+
   return (
     <footer className="ap-satis-rapor-alt">
       <div className="ap-satis-rapor-alt-sol">
@@ -35,14 +54,17 @@ export function SatisRaporAltCubuk({
       </div>
 
       <div className="ap-satis-rapor-alt-ozet">
-        <div className="ap-satis-rapor-ozet-kutu">
-          <span className="ap-satis-rapor-ozet-etiket">Miktar</span>
-          <strong>{miktarToplam}</strong>
-        </div>
-        <div className="ap-satis-rapor-ozet-kutu">
-          <span className="ap-satis-rapor-ozet-etiket">Tutar</span>
-          <strong>{para(tutarToplam)}</strong>
-        </div>
+        {ozetTutarOnce ? (
+          <>
+            {tutarKutu}
+            {miktarKutu}
+          </>
+        ) : (
+          <>
+            {miktarKutu}
+            {tutarKutu}
+          </>
+        )}
       </div>
 
       <div className="ap-satis-rapor-alt-sag">
