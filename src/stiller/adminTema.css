@@ -16696,3 +16696,67 @@ html:has(.admin-panel[data-tema='acik']) body {
   }
 }
 
+/* Şefim Merkez Bilgileri — Veri Yedekleme */
+.ap-sefim-merkez-kart {
+  margin-top: 0;
+}
+
+.ap-sefim-merkez-alanlar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ap-sefim-merkez-satir {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ap-sefim-merkez-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.ap-sefim-merkez-etiket {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-sefim-merkez-secenek {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--ap-heading);
+  cursor: pointer;
+}
+
+.ap-sefim-merkez-alt {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 720px) {
+  .ap-sefim-merkez-satir {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .ap-sefim-merkez-alt {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .ap-sefim-merkez-alt .ap-eklenti-islem-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

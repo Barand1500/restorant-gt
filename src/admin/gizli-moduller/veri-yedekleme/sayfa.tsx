@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FormAlani, formInputSinifi } from '@/formlar/FormAlani';
 import { DurumAnahtari } from '@/admin/baslat-menusu/sistem/ayarlar/bilesenler/SistemSekmeCubugu';
+import { SefimMerkezBilgileri } from '@/admin/gizli-moduller/veri-yedekleme/bilesenler/SefimMerkezBilgileri';
 import { useYedekleme } from '@/admin/gizli-moduller/veri-yedekleme/kullan-yedekleme';
 import { adminYedekApi } from '@/admin/ortak/api/adminSistemApi';
 import { sistemAyarlariGetir, sistemAyarlariGuncelle } from '@/admin/baslat-menusu/sistem/ayarlar/api';
@@ -35,6 +36,7 @@ export function VeriYedeklemeSayfasi() {
   const [geriDosyaAdi, setGeriDosyaAdi] = useState('');
   const [seciliDosya, setSeciliDosya] = useState<File | null>(null);
   const [indiriliyor, setIndiriliyor] = useState(false);
+  const [hizliSqlIndiriliyor, setHizliSqlIndiriliyor] = useState(false);
   const [yukleniyorGeri, setYukleniyorGeri] = useState(false);
 
   const format = sistemForm.yedeklemeFormati;
@@ -107,6 +109,21 @@ export function VeriYedeklemeSayfasi() {
       alert(err instanceof Error ? err.message : 'İndirme başarısız');
     } finally {
       setIndiriliyor(false);
+    }
+  }
+
+  async function hizliSqlIndirHandler() {
+    setHizliSqlIndiriliyor(true);
+    try {
+      await adminYedekApi.indir({
+        dosyaAdi: yedekDosyaAdiFormatla(indirDosyaAdi.trim() || varsayilanDosyaAdi, 'sql'),
+        format: 'sql',
+      });
+      await yenile();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'SQL yedekleme başarısız');
+    } finally {
+      setHizliSqlIndiriliyor(false);
     }
   }
 
@@ -255,14 +272,24 @@ export function VeriYedeklemeSayfasi() {
             <p className="ap-muted mt-1 text-xs">Otomatik format: site-adi-admin-tarih.{format}</p>
           </div>
 
-          <button
-            type="button"
-            disabled={indiriliyor || yukleniyor || ayarlarYukleniyor}
-            onClick={() => void indirHandler()}
-            className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
-          >
-            {indiriliyor ? 'İndiriliyor...' : `${formatAdi} İndir`}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={hizliSqlIndiriliyor || yukleniyor || ayarlarYukleniyor}
+              onClick={() => void hizliSqlIndirHandler()}
+              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+            >
+              {hizliSqlIndiriliyor ? 'Yedekleniyor...' : 'Hızlı SQL yedek al'}
+            </button>
+            <button
+              type="button"
+              disabled={indiriliyor || yukleniyor || ayarlarYukleniyor}
+              onClick={() => void indirHandler()}
+              className="rounded bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
+            >
+              {indiriliyor ? 'İndiriliyor...' : `${formatAdi} İndir`}
+            </button>
+          </div>
         </section>
 
         <section className="ap-card space-y-4 rounded-xl border p-5">
@@ -306,6 +333,8 @@ export function VeriYedeklemeSayfasi() {
           </button>
         </section>
       </div>
+
+      <SefimMerkezBilgileri />
 
       <section className="ap-card overflow-hidden rounded-xl border">
         <div className="border-b border-[var(--ap-border)] px-4 py-3">
