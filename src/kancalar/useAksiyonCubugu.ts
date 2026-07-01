@@ -78,8 +78,60 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  'urunler-tanimlari': [
+    A('oncekiKayit', 'Önceki', false),
+    A('sonrakiKayit', 'Sonraki', false),
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni', true),
+    A('sil', 'Sil', false),
+    A('onizle', 'Liste', false),
+  ],
+  'yazici-tanimlari': [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'tarilacak-urunler': [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  favoriler: [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'odeme-gruplari': [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', true),
+    A('sil', 'Sil', true),
+    A('onizle', 'Önizle', false),
+    A('yayinla', 'Yayınla', false),
+  ],
+  'urun-eslestir': [
+    A('kaydet', 'Kaydet', true, true),
+    A('ekle', 'Yeni Ekle', false),
+    A('sil', 'Sil', false),
+    A('onizle', 'Eşleştir', false),
+    A('yayinla', 'Yayınla', false),
+  ],
   ...Object.fromEntries(
-    TANIMLAR_MODUL_TANIMLARI.filter((t) => t.id !== 'tanimlar').map((t) => [
+    TANIMLAR_MODUL_TANIMLARI.filter(
+      (t) =>
+        t.id !== 'tanimlar' &&
+        t.id !== 'urunler-tanimlari' &&
+        t.id !== 'yazici-tanimlari' &&
+        t.id !== 'tarilacak-urunler' &&
+        t.id !== 'favoriler' &&
+        t.id !== 'odeme-gruplari' &&
+        t.id !== 'urun-eslestir'
+    ).map((t) => [
       t.id,
       [
         A('kaydet', 'Kaydet', false),

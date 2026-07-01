@@ -220,6 +220,87 @@ export const ADMIN_MODUL_REHBERLERI: Record<string, ModulRehber> = {
     ],
     ipucu: 'Düzenli yedek almayı alışkanlık haline getirin.',
   },
+
+  'urunler-tanimlari': {
+    baslik: 'Ürün Tanımları Rehberi',
+    altBaslik: 'Ürün kartları ve seçenekler',
+    bolumBaslik: 'Ürünler Tanımları',
+    kartlar: [
+      {
+        ikon: '🍽️',
+        baslik: 'Ürün Kartı',
+        aciklama:
+          'Sol listeden ürün seçin veya Yeni ile kart oluşturun. Kod, ad, fiyat, KDV ve grup bilgilerini doldurun.',
+        renk: 'mavi',
+      },
+      {
+        ikon: '🧩',
+        baslik: 'Seviye & Seçenekler',
+        aciklama:
+          'Combo ve menü ürünlerinde 1./2. seviye seçimler ile ek seçenek satırlarını tanımlayın.',
+        renk: 'mor',
+      },
+      {
+        ikon: '📋',
+        baslik: 'Liste Görünümü',
+        aciklama: 'Sağ üstteki Liste/Kart geçişi veya alt çubuktaki önizle ile tüm ürünleri tablo halinde görün.',
+        renk: 'turuncu',
+      },
+    ],
+  },
+
+  'yazici-tanimlari': {
+    baslik: 'Yazıcı Tanımları Rehberi',
+    altBaslik: 'Çıktı yönlendirme kuralları',
+    bolumBaslik: 'Yazıcı Tanımları',
+    kartlar: [
+      {
+        ikon: '🍳',
+        baslik: 'Mutfak Çıktıları',
+        aciklama:
+          'Bilgisayar, masa prefix, garson ve ürün eşleşmesine göre mutfak yazıcısı veya mutfak ekranı tanımlayın.',
+        renk: 'turuncu',
+      },
+      {
+        ikon: '🧾',
+        baslik: 'Pusula & Adisyon',
+        aciklama: 'Pusula ve resmi adisyon sekmelerinde bilgisayar + garson → yazıcı eşleştirmesi yapın.',
+        renk: 'mavi',
+      },
+      {
+        ikon: '✳️',
+        baslik: 'Tümü (*)',
+        aciklama: 'Alan yanındaki Tümü butonu veya * değeri, o alan için tüm kayıtları kapsar.',
+        renk: 'mor',
+      },
+    ],
+  },
+
+  'tarilacak-urunler': {
+    baslik: 'Tartılacak Ürünler Rehberi',
+    altBaslik: 'Gramajla satılan ürünler',
+    bolumBaslik: 'Tartılacak Ürünler',
+    kartlar: [
+      {
+        ikon: '⚖️',
+        baslik: 'Ürün işaretleme',
+        aciklama: 'Satıra tıklayarak ürünü tartılı olarak işaretleyin. Kasada gramaj girişi açılır.',
+        renk: 'mavi',
+      },
+      {
+        ikon: '🔍',
+        baslik: 'Arama ve filtre',
+        aciklama: 'Ürün adı, stok kodu veya gruba göre arayın. Filtredekileri toplu seç/kaldır kullanın.',
+        renk: 'mor',
+      },
+      {
+        ikon: '📂',
+        baslik: 'Grup seçimi',
+        aciklama: 'Grup başlığındaki kutucukla o gruptaki tüm ürünleri tek seferde seçebilirsiniz.',
+        renk: 'turuncu',
+      },
+    ],
+  },
 };
 
 const VARSAYILAN_REHBER: ModulRehber = {

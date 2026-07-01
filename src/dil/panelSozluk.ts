@@ -41,6 +41,8 @@ export const PANEL_SOZLUK_TR: Record<string, string> = {
   'aksiyon.guncelle': 'Güncelle',
   'aksiyon.onizle': 'Önizle',
   'aksiyon.yayinla': 'Yayınla',
+  'aksiyon.oncekiKayit': 'Önceki',
+  'aksiyon.sonrakiKayit': 'Sonraki',
 
   // Sistem ayarları
   'sistem.baslik': 'Sistem Ayarları',
@@ -113,6 +115,8 @@ export const PANEL_SOZLUK_EN: Record<string, string> = {
   'aksiyon.guncelle': 'Update',
   'aksiyon.onizle': 'Preview',
   'aksiyon.yayinla': 'Publish',
+  'aksiyon.oncekiKayit': 'Previous',
+  'aksiyon.sonrakiKayit': 'Next',
 
   'sistem.baslik': 'System Settings',
   'sistem.aciklama': 'Site status, maintenance, 404 and panel preferences',

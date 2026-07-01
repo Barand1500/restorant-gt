@@ -8,6 +8,12 @@ import { SekmeYonetimiSayfasi } from '@/admin/baslat-menusu/sistem/sekme-yonetim
 import { KisayolAyarlariSayfasi } from '@/admin/baslat-menusu/sistem/kisayol-ayarlari/sayfa';
 import { TanimlarBosSayfa } from '@/admin/baslat-menusu/tanimlar/TanimlarBosSayfa';
 import { TanimlarSayfasi } from '@/admin/baslat-menusu/tanimlar/sayfa';
+import { UrunlerTanimlariSayfasi } from '@/admin/baslat-menusu/urunler-tanimlari/sayfa';
+import { TarilacakUrunlerSayfasi } from '@/admin/baslat-menusu/tarilacak-urunler/sayfa';
+import { YaziciTanimlariSayfasi } from '@/admin/baslat-menusu/yazici-tanimlari/sayfa';
+import { FavorilerSayfasi } from '@/admin/baslat-menusu/favoriler/sayfa';
+import { OdemeGruplariSayfasi } from '@/admin/baslat-menusu/odeme-gruplari/sayfa';
+import { UrunEslestirSayfasi } from '@/admin/baslat-menusu/urun-eslestir/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
@@ -25,6 +31,25 @@ export function AdminModulIcerik({ modulId, onModulAc }: AdminModulIcerikProps) 
 }
 
 function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
+  if (modulId === 'urunler-tanimlari') {
+    return <UrunlerTanimlariSayfasi />;
+  }
+  if (modulId === 'yazici-tanimlari') {
+    return <YaziciTanimlariSayfasi />;
+  }
+  if (modulId === 'tarilacak-urunler') {
+    return <TarilacakUrunlerSayfasi />;
+  }
+  if (modulId === 'favoriler') {
+    return <FavorilerSayfasi />;
+  }
+  if (modulId === 'odeme-gruplari') {
+    return <OdemeGruplariSayfasi />;
+  }
+  if (modulId === 'urun-eslestir') {
+    return <UrunEslestirSayfasi />;
+  }
+
   const tanimModul = tanimlarModulBul(modulId);
   if (tanimModul) {
     if (modulId === 'tanimlar') {

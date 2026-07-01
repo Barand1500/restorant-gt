@@ -28,6 +28,8 @@ export function useModulAksiyonlari(
     handlers.sil,
     handlers.onizle,
     handlers.yayinla,
+    handlers.oncekiKayit,
+    handlers.sonrakiKayit,
   ]);
 
   useEffect(() => {
@@ -44,5 +46,7 @@ export function useModulAksiyonlari(
     durumlar?.sil,
     durumlar?.onizle,
     durumlar?.yayinla,
+    durumlar?.oncekiKayit,
+    durumlar?.sonrakiKayit,
   ]);
 }
