@@ -12,6 +12,11 @@ import {
   PAKET_SERVISI_RAPORLARI_MODUL_TANIMLARI,
 } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
 import { PAKET_SERVISI_SABLON_MODUL_IDLERI } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiSablonModulleri';
+import {
+  REZERVASYON_RAPORLARI_MODUL_TANIMLARI,
+} from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonRaporlariModulleri';
+import { REZERVASYON_SABLON_MODUL_IDLERI } from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonSablonModulleri';
+import { UYGULAMA_AYARLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/uygulama-ayarlari/uygulamaAyarlarModulleri';
 
 const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: boolean): AksiyonButonu => ({
   id,
@@ -290,6 +295,95 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
               A('onizle', 'Yazdır', false),
               A('yayinla', 'Yayınla', false),
             ],
+      ];
+    })
+  ),
+  ...Object.fromEntries(
+    REZERVASYON_RAPORLARI_MODUL_TANIMLARI.map((r) => {
+      const sablon = (REZERVASYON_SABLON_MODUL_IDLERI as readonly string[]).includes(r.id);
+      return [
+        r.id,
+        sablon
+          ? [
+              A('kaydet', 'Kaydet', false, true),
+              A('ekle', 'Yeni Ekle', false),
+              A('sil', 'Sil', false),
+              A('onizle', 'Yazdır', false),
+              A('yayinla', 'Yayınla', false),
+            ]
+          : [
+              A('kaydet', 'Kaydet', false),
+              A('ekle', 'Yeni Ekle', false),
+              A('sil', 'Sil', false),
+              A('onizle', 'Yazdır', false),
+              A('yayinla', 'Yayınla', false),
+            ],
+      ];
+    })
+  ),
+  ...Object.fromEntries(
+    UYGULAMA_AYARLAR_MODUL_TANIMLARI.map((m) => {
+      if (m.id === 'arctos-db-ayarlari') {
+        return [
+          m.id,
+          [
+            A('kaydet', 'Kaydet', false, true),
+            A('guncelle', 'Sına', true),
+            A('ekle', 'Yeni Ekle', false),
+            A('sil', 'Sil', false),
+            A('onizle', 'Önizle', false),
+            A('yayinla', 'Yayınla', false),
+          ],
+        ];
+      }
+      if (m.id === 'firma-donem-secimi') {
+        return [
+          m.id,
+          [
+            A('kaydet', 'Kaydet', false, true),
+            A('ekle', 'Yeni Ekle', false),
+            A('sil', 'Sil', false),
+            A('guncelle', 'Düzenle', false),
+            A('onizle', 'Önizle', false),
+            A('yayinla', 'Yayınla', false),
+          ],
+        ];
+      }
+      if (m.id === 'lisans-ayarlari') {
+        return [
+          m.id,
+          [
+            A('ekle', 'Lisans Ekle', true, true),
+            A('kaydet', 'Kaydet', false, true),
+            A('sil', 'Sil', false),
+            A('guncelle', 'Düzenle', false),
+            A('onizle', 'Önizle', false),
+            A('yayinla', 'Yayınla', false),
+          ],
+        ];
+      }
+      if (m.id === 'web-api-ayarlari') {
+        return [
+          m.id,
+          [
+            A('kaydet', 'Kaydet ve Servisi Başlat', true, true),
+            A('ekle', 'Yeni Ekle', false),
+            A('sil', 'Sil', false),
+            A('guncelle', 'Düzenle', false),
+            A('onizle', 'Önizle', false),
+            A('yayinla', 'Yayınla', false),
+          ],
+        ];
+      }
+      return [
+        m.id,
+        [
+          A('kaydet', 'Kaydet', false),
+          A('ekle', 'Yeni Ekle', false),
+          A('sil', 'Sil', false),
+          A('onizle', 'Önizle', false),
+          A('yayinla', 'Yayınla', false),
+        ],
       ];
     })
   ),

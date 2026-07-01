@@ -16238,3 +16238,461 @@ html:has(.admin-panel[data-tema='acik']) body {
 .ap-rapor-saat-girdi {
   min-width: 0;
 }
+
+/* Arctos Db Ayarları */
+.ap-arctos-db-form {
+  max-width: 32rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ap-arctos-db-baslik {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ap-border);
+}
+
+.ap-arctos-db-baslik-ikon {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+  border: 1px solid color-mix(in srgb, var(--ap-accent) 22%, var(--ap-border));
+}
+
+.ap-arctos-db-baslik-metin {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ap-heading);
+  line-height: 1.3;
+}
+
+.ap-arctos-db-baslik-alt {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ap-muted);
+  line-height: 1.4;
+}
+
+.ap-arctos-db-alanlar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ap-arctos-db-alan {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.ap-arctos-db-etiket {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-arctos-db-alt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ap-border);
+}
+
+@media (max-width: 520px) {
+  .ap-arctos-db-alan {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .ap-arctos-db-alt {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .ap-arctos-db-alt .ap-eklenti-islem-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Firma / Dönem Seçimi */
+.ap-firma-donem-form {
+  max-width: 32rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ap-firma-donem-baslik {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ap-border);
+}
+
+.ap-firma-donem-baslik-ikon {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+  border: 1px solid color-mix(in srgb, var(--ap-accent) 22%, var(--ap-border));
+}
+
+.ap-firma-donem-baslik-metin {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ap-heading);
+  line-height: 1.3;
+}
+
+.ap-firma-donem-baslik-alt {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ap-muted);
+  line-height: 1.4;
+}
+
+.ap-firma-donem-alanlar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ap-firma-donem-alan {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.ap-firma-donem-etiket {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-firma-donem-alt {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ap-border);
+}
+
+@media (max-width: 520px) {
+  .ap-firma-donem-alan {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .ap-firma-donem-alt .ap-eklenti-islem-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Lisans Ayarları */
+.ap-lisans-modul {
+  width: 100%;
+  min-width: 0;
+}
+
+.ap-lisans-liste-tablo .ap-master-excel-scroll {
+  max-height: min(52vh, 24rem);
+}
+
+.ap-lisans-th-islem {
+  width: 3.25rem;
+  text-align: center;
+}
+
+.ap-lisans-ad {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ap-lisans-satir-secili .ap-master-excel-hucre {
+  background: color-mix(in srgb, var(--ap-accent) 10%, var(--ap-surface));
+}
+
+.ap-lisans-islem-hucre {
+  text-align: center;
+  padding: 0.25rem !important;
+}
+
+.ap-lisans-islem-tus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--ap-border);
+  border-radius: 0.45rem;
+  background: var(--ap-surface);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ap-lisans-islem-yenile {
+  color: var(--ap-accent);
+}
+
+.ap-lisans-islem-yenile:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+  border-color: color-mix(in srgb, var(--ap-accent) 35%, var(--ap-border));
+}
+
+.ap-lisans-islem-sil {
+  color: #c0392b;
+  font-size: 1.15rem;
+}
+
+.ap-lisans-islem-sil:hover {
+  background: color-mix(in srgb, #c0392b 10%, var(--ap-surface));
+  border-color: color-mix(in srgb, #c0392b 35%, var(--ap-border));
+}
+
+.ap-lisans-islem-tus:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.ap-lisans-bos {
+  text-align: center;
+  color: var(--ap-muted);
+  padding: 2rem 1rem !important;
+}
+
+.ap-lisans-liste-alt {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ap-border);
+}
+
+.ap-lisans-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100%;
+}
+
+.ap-lisans-form-baslik-band {
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ap-accent) 88%, #1a2744) 0%,
+    color-mix(in srgb, var(--ap-accent) 65%, #0f172a) 100%
+  );
+}
+
+.ap-lisans-form-baslik-metin {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.ap-lisans-form-alanlar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ap-lisans-form-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ap-lisans-form-alan-tam {
+  width: 100%;
+}
+
+.ap-lisans-form-etiket {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-lisans-form-ikili {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.ap-lisans-form-alt {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  margin-top: auto;
+}
+
+@media (max-width: 640px) {
+  .ap-lisans-form-ikili {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Web Api Ayarları */
+.ap-web-api-form {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.ap-web-api-baslik {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ap-border);
+}
+
+.ap-web-api-baslik-ikon {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+  border: 1px solid color-mix(in srgb, var(--ap-accent) 22%, var(--ap-border));
+}
+
+.ap-web-api-baslik-metin {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ap-heading);
+  line-height: 1.3;
+}
+
+.ap-web-api-baslik-alt {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ap-muted);
+  line-height: 1.4;
+}
+
+.ap-web-api-bolum {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--ap-border);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--ap-surface-2) 22%, var(--ap-surface));
+}
+
+.ap-web-api-bolum-baslik {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ap-muted);
+}
+
+.ap-web-api-ikili {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+.ap-web-api-alanlar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ap-web-api-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ap-web-api-etiket {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ap-heading);
+}
+
+.ap-web-api-secenekler {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ap-web-api-secenek {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ap-web-api-secenek-metin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8125rem;
+  color: var(--ap-heading);
+  line-height: 1.35;
+}
+
+.ap-web-api-secenek-metin strong {
+  font-weight: 600;
+}
+
+.ap-web-api-secenek-aciklama {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--ap-muted);
+}
+
+.ap-web-api-alt {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 720px) {
+  .ap-web-api-ikili {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-web-api-alt .ap-eklenti-islem-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

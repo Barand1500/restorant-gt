@@ -2,6 +2,8 @@ import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import { tanimlarAdminModulleri } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarAdminModulleri } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 import { paketServisiRaporlariAdminModulleri } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
+import { rezervasyonRaporlariAdminModulleri } from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonRaporlariModulleri';
+import { uygulamaAyarlarAdminModulleri } from '@/admin/baslat-menusu/uygulama-ayarlari/uygulamaAyarlarModulleri';
 
 /** Master modülü menüde geçici gizli — tekrar açmak için true yapın */
 export const MASTER_MENU_GORUNUR = false;
@@ -10,6 +12,8 @@ export const adminModulleri: AdminModul[] = [
   ...tanimlarAdminModulleri(),
   ...raporlarAdminModulleri(),
   ...paketServisiRaporlariAdminModulleri(),
+  ...rezervasyonRaporlariAdminModulleri(),
+  ...uygulamaAyarlarAdminModulleri(),
   {
     id: 'master',
     baslik: 'Master',
@@ -78,6 +82,8 @@ export const adminKategoriler = [
   'Tanımlar',
   'Raporlar',
   'Paket Servisi Raporları',
+  'Rezervasyon Raporları',
+  'Ayarlar',
   ...(MASTER_MENU_GORUNUR ? (['Master'] as const) : []),
   'Müşteri / Ajans',
   'Sistem',
@@ -113,6 +119,8 @@ export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> 
   if (modul?.kategori === 'Tanımlar') return true;
   if (modul?.kategori === 'Raporlar') return true;
   if (modul?.kategori === 'Paket Servisi Raporları') return true;
+  if (modul?.kategori === 'Rezervasyon Raporları') return true;
+  if (modul?.kategori === 'Ayarlar') return true;
   if (modulId === 'master') return MASTER_MENU_GORUNUR;
   if (PANEL_ALTYAPI_MODUL_IDLERI.has(modulId)) return true;
   if (!aktifPrefixler) return true;

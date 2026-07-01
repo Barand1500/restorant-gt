@@ -23,6 +23,14 @@ import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulle
 import { raporlarModulBul } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 import { paketServisiRaporlariModulBul } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
 import { paketServisiSablonMu } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiSablonModulleri';
+import { rezervasyonRaporlariModulBul } from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonRaporlariModulleri';
+import { rezervasyonSablonMu } from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonSablonModulleri';
+import { uygulamaAyarlarModulBul } from '@/admin/baslat-menusu/uygulama-ayarlari/uygulamaAyarlarModulleri';
+import { AyarlarBosSayfa } from '@/admin/baslat-menusu/uygulama-ayarlari/AyarlarBosSayfa';
+import { ArctosDbAyarlariSayfasi } from '@/admin/baslat-menusu/uygulama-ayarlari/arctos-db-ayarlari/sayfa';
+import { FirmaDonemSecimiSayfasi } from '@/admin/baslat-menusu/uygulama-ayarlari/firma-donem-secimi/sayfa';
+import { LisansAyarlariSayfasi } from '@/admin/baslat-menusu/uygulama-ayarlari/lisans-ayarlari/sayfa';
+import { WebApiAyarlariSayfasi } from '@/admin/baslat-menusu/uygulama-ayarlari/web-api-ayarlari/sayfa';
 import { raporSablonMu } from '@/admin/baslat-menusu/raporlar/raporSablonModulleri';
 import { RaporSablonSayfa } from '@/admin/baslat-menusu/raporlar/sayfa';
 import { RaporlarBosSayfa } from '@/admin/baslat-menusu/raporlar/RaporlarBosSayfa';
@@ -124,6 +132,37 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
       );
     }
     return <RaporlarBosSayfa baslik={paketModul.baslik} aciklama={paketModul.aciklama} />;
+  }
+
+  const rezervasyonModul = rezervasyonRaporlariModulBul(modulId);
+  if (rezervasyonModul) {
+    if (rezervasyonSablonMu(modulId)) {
+      return (
+        <RaporSablonSayfa
+          modulId={modulId}
+          baslik={rezervasyonModul.baslik}
+          aciklama={rezervasyonModul.aciklama}
+        />
+      );
+    }
+    return <RaporlarBosSayfa baslik={rezervasyonModul.baslik} aciklama={rezervasyonModul.aciklama} />;
+  }
+
+  const uygulamaAyarModul = uygulamaAyarlarModulBul(modulId);
+  if (uygulamaAyarModul) {
+    if (modulId === 'arctos-db-ayarlari') {
+      return <ArctosDbAyarlariSayfasi />;
+    }
+    if (modulId === 'firma-donem-secimi') {
+      return <FirmaDonemSecimiSayfasi />;
+    }
+    if (modulId === 'lisans-ayarlari') {
+      return <LisansAyarlariSayfasi />;
+    }
+    if (modulId === 'web-api-ayarlari') {
+      return <WebApiAyarlariSayfasi />;
+    }
+    return <AyarlarBosSayfa baslik={uygulamaAyarModul.baslik} aciklama={uygulamaAyarModul.aciklama} />;
   }
 
   switch (modulId) {

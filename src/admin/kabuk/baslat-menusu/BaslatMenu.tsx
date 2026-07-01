@@ -18,6 +18,8 @@ const KATEGORI_IKON: Record<string, string> = {
   Tanımlar: '📋',
   Raporlar: '📊',
   'Paket Servisi Raporları': '📦',
+  'Rezervasyon Raporları': '📆',
+  Ayarlar: '🛠️',
   Sistem: '⚙️',
 };
 

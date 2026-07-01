@@ -2,6 +2,8 @@ import type { SistemAyarlariForm } from '@/admin/baslat-menusu/sistem/ayarlar/ti
 import { tanimlarSeedKayitlari } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarSeedKayitlari } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 import { paketServisiRaporlariSeedKayitlari } from '@/admin/baslat-menusu/paket-servisi-raporlari/paketServisiRaporlariModulleri';
+import { rezervasyonRaporlariSeedKayitlari } from '@/admin/baslat-menusu/rezervasyon-raporlari/rezervasyonRaporlariModulleri';
+import { uygulamaAyarlarSeedKayitlari } from '@/admin/baslat-menusu/uygulama-ayarlari/uygulamaAyarlarModulleri';
 
 const OFFLINE_SISTEM_ANAHTAR = 'restorant-offline-sistem-ayarlari';
 const OFFLINE_MODUL_ANAHTAR = 'restorant-offline-moduller';
@@ -159,6 +161,24 @@ const VARSAYILAN_OFFLINE_MODULLER: OfflineModul[] = [
   })),
   ...paketServisiRaporlariSeedKayitlari().map((r, i) => ({
     id: 300 + i,
+    ad: r.modulAdi,
+    prefix: r.prefix,
+    aktif: true,
+    rolSayisi: 6,
+    kayitTarihi: '',
+    guncellemeTarihi: '',
+  })),
+  ...rezervasyonRaporlariSeedKayitlari().map((r, i) => ({
+    id: 400 + i,
+    ad: r.modulAdi,
+    prefix: r.prefix,
+    aktif: true,
+    rolSayisi: 6,
+    kayitTarihi: '',
+    guncellemeTarihi: '',
+  })),
+  ...uygulamaAyarlarSeedKayitlari().map((r, i) => ({
+    id: 500 + i,
     ad: r.modulAdi,
     prefix: r.prefix,
     aktif: true,
