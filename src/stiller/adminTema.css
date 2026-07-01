@@ -15256,6 +15256,7 @@ html:has(.admin-panel[data-tema='acik']) body {
   flex-direction: column;
   gap: 0.35rem;
   max-width: 28rem;
+  position: relative;
 }
 
 .ap-fiyat-alt-panel-etiket {
@@ -15365,16 +15366,20 @@ html:has(.admin-panel[data-tema='acik']) body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.15rem;
+  width: 2.35rem;
+  min-height: 2.35rem;
   padding: 0;
   border: none;
   border-left: 1px solid var(--ap-border);
   background: color-mix(in srgb, var(--ap-accent) 22%, var(--ap-surface));
   color: var(--ap-heading);
-  font-size: 0.6rem;
-  line-height: 1;
   cursor: pointer;
   transition: background 0.12s ease;
+}
+
+.ap-sayi-girdi-hesap-ikon {
+  font-size: 0.95rem;
+  line-height: 1;
 }
 
 .ap-sayi-girdi-hesap-tus:hover,
@@ -15382,74 +15387,140 @@ html:has(.admin-panel[data-tema='acik']) body {
   background: color-mix(in srgb, var(--ap-accent) 35%, var(--ap-surface));
 }
 
+.ap-sayi-girdi-hesap-kutu-hesap-acik {
+  border-color: var(--ap-accent);
+  box-shadow: 0 0 0 1px var(--ap-accent);
+}
+
 .ap-mini-hesap-panel {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  left: 0;
-  z-index: 20;
-  width: 100%;
-  max-width: 16.5rem;
-  border: 1px solid var(--ap-border);
-  border-radius: 0.45rem;
-  background: var(--ap-surface);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
-  padding: 0.4rem;
+  width: 236px;
+  min-width: 236px;
+  border: 1px solid var(--ap-mini-border);
+  border-radius: 12px;
+  background-color: var(--ap-mini-surface);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  padding: 0.55rem;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.ap-mini-hesap-panel-portal {
+  position: fixed;
+  z-index: 5000;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ap-mini-hesap-tema-koyu {
+  --ap-mini-surface: #1e293b;
+  --ap-mini-surface-2: #334155;
+  --ap-mini-surface-3: #475569;
+  --ap-mini-border: #475569;
+  --ap-mini-text: #e2e8f0;
+  --ap-mini-rakam: #60a5fa;
+  --ap-mini-fn: #f87171;
+  --ap-mini-op: #f87171;
+  --ap-mini-ekran-bg: #0f172a;
+  --ap-mini-tamam: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+  --ap-mini-tamam-text: #1e293b;
+}
+
+.ap-mini-hesap-tema-acik {
+  --ap-mini-surface: #ffffff;
+  --ap-mini-surface-2: #f1f5f9;
+  --ap-mini-surface-3: #e2e8f0;
+  --ap-mini-border: #cbd5e1;
+  --ap-mini-text: #334155;
+  --ap-mini-rakam: #2563eb;
+  --ap-mini-fn: #dc2626;
+  --ap-mini-op: #dc2626;
+  --ap-mini-ekran-bg: #f8fafc;
+  --ap-mini-tamam: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  --ap-mini-tamam-text: #1e293b;
+}
+
+.ap-mini-hesap-panel-yukari {
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ap-mini-hesap-icerik {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
 .ap-mini-hesap-ekran {
-  margin-bottom: 0.35rem;
-  padding: 0.35rem 0.45rem;
-  border: 1px solid var(--ap-border);
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--ap-accent) 5%, var(--ap-input-bg, var(--ap-surface)));
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--ap-mini-border);
+  border-radius: 8px;
+  background-color: var(--ap-mini-ekran-bg);
+  font-size: 0.95rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: right;
-  min-height: 1.75rem;
+  min-height: 2rem;
   line-height: 1.5;
+  color: var(--ap-mini-text);
 }
 
 .ap-mini-hesap-tuslar {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.2rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.28rem;
 }
 
-.ap-mini-hesap-tus {
-  min-height: 1.55rem;
-  padding: 0.1rem 0.15rem;
-  border: 1px solid var(--ap-border);
-  border-radius: 0.3rem;
-  background: color-mix(in srgb, var(--ap-heading) 4%, var(--ap-surface));
-  color: var(--ap-text);
-  font-size: 0.62rem;
-  font-weight: 600;
+.ap-mini-hesap-panel .ap-mini-hesap-tus {
+  min-height: 1.85rem;
+  min-width: 0;
+  padding: 0.15rem 0.1rem;
+  border: 1px solid var(--ap-mini-border);
+  border-radius: 7px;
+  background-color: var(--ap-mini-surface-2);
+  color: var(--ap-mini-text);
+  font-size: 0.68rem;
+  font-weight: 700;
   cursor: pointer;
   line-height: 1.1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: background-color 0.1s ease, transform 0.08s ease;
 }
 
-.ap-mini-hesap-tus:hover {
-  background: color-mix(in srgb, var(--ap-accent) 12%, var(--ap-surface));
+.ap-mini-hesap-panel .ap-mini-hesap-tus:hover {
+  background-color: var(--ap-mini-surface-3);
 }
 
-.ap-mini-hesap-tus-bos {
-  visibility: hidden;
-  pointer-events: none;
+.ap-mini-hesap-panel .ap-mini-hesap-tus:active {
+  transform: translateY(1px);
 }
 
-.ap-mini-hesap-tus-fn,
-.ap-mini-hesap-tus-bellek,
-.ap-mini-hesap-tus-op {
+.ap-mini-hesap-panel .ap-mini-hesap-tus-rakam {
+  color: var(--ap-mini-rakam);
+}
+
+.ap-mini-hesap-panel .ap-mini-hesap-tus-fn,
+.ap-mini-hesap-panel .ap-mini-hesap-tus-bellek,
+.ap-mini-hesap-panel .ap-mini-hesap-tus-op {
+  color: var(--ap-mini-fn);
+}
+
+.ap-mini-hesap-panel .ap-mini-hesap-tus-op {
+  color: var(--ap-mini-op);
+}
+
+.ap-mini-hesap-panel .ap-mini-hesap-tus-kucuk {
   font-size: 0.58rem;
+  letter-spacing: -0.02em;
 }
 
-.ap-mini-hesap-tus-bellek {
-  color: #f87171;
+.ap-mini-hesap-panel .ap-mini-hesap-tus-tamam {
+  background: var(--ap-mini-tamam);
+  border-color: color-mix(in srgb, #f59e0b 60%, var(--ap-mini-border));
+  color: var(--ap-mini-tamam-text);
+  font-size: 0.62rem;
 }
 
-.ap-mini-hesap-tus-op {
-  color: color-mix(in srgb, var(--ap-accent) 75%, white);
+.ap-mini-hesap-panel .ap-mini-hesap-tus-esit {
+  font-size: 0.78rem;
 }
 
 .ap-fiyat-kural-tablo-scroll {

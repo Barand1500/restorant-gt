@@ -145,48 +145,54 @@ export function MinimalHesapMakinesi({ baslangicDeger, onUygula }: MinimalHesapM
 
   const uygula = () => onUygula(gosterimdenSayi(ekran) || ekran);
 
-  const tus = (etiket: string, onClick: () => void, sinif = '') => (
-    <button key={etiket} type="button" className={`ap-mini-hesap-tus ${sinif}`.trim()} onClick={onClick}>
+  const tus = (etiket: string, onClick: () => void, sinif = '', span = 1) => (
+    <button
+      key={etiket}
+      type="button"
+      className={`ap-mini-hesap-tus ${sinif}`.trim()}
+      style={span > 1 ? { gridColumn: `span ${span}` } : undefined}
+      onClick={onClick}
+    >
       {etiket}
     </button>
   );
 
   return (
-    <div className="ap-mini-hesap-panel" role="dialog" aria-label="Hesap makinesi">
+    <div className="ap-mini-hesap-icerik">
       <div className="ap-mini-hesap-ekran">{ekran}</div>
       <div className="ap-mini-hesap-tuslar">
-        {tus('', uygula, 'ap-mini-hesap-tus-bos')}
-        {tus('Back', geriAl, 'ap-mini-hesap-tus-fn')}
-        {tus('CE', girisTemizle, 'ap-mini-hesap-tus-fn')}
+        {tus('OK', uygula, 'ap-mini-hesap-tus-tamam')}
+        {tus('Back', geriAl, 'ap-mini-hesap-tus-fn', 2)}
+        {tus('CE', girisTemizle, 'ap-mini-hesap-tus-fn', 2)}
         {tus('C', temizle, 'ap-mini-hesap-tus-fn')}
 
         {tus('MC', () => setBellek(0), 'ap-mini-hesap-tus-bellek')}
-        {tus('7', () => rakamEkle('7'))}
-        {tus('8', () => rakamEkle('8'))}
-        {tus('9', () => rakamEkle('9'))}
+        {tus('7', () => rakamEkle('7'), 'ap-mini-hesap-tus-rakam')}
+        {tus('8', () => rakamEkle('8'), 'ap-mini-hesap-tus-rakam')}
+        {tus('9', () => rakamEkle('9'), 'ap-mini-hesap-tus-rakam')}
         {tus('/', () => islemSec('/'), 'ap-mini-hesap-tus-op')}
-        {tus('√', kok, 'ap-mini-hesap-tus-op')}
+        {tus('sqrt', kok, 'ap-mini-hesap-tus-op ap-mini-hesap-tus-kucuk')}
 
         {tus('MR', () => setEkran(gosterimdenSayi(String(bellek)) || '0'), 'ap-mini-hesap-tus-bellek')}
-        {tus('4', () => rakamEkle('4'))}
-        {tus('5', () => rakamEkle('5'))}
-        {tus('6', () => rakamEkle('6'))}
-        {tus('×', () => islemSec('*'), 'ap-mini-hesap-tus-op')}
+        {tus('4', () => rakamEkle('4'), 'ap-mini-hesap-tus-rakam')}
+        {tus('5', () => rakamEkle('5'), 'ap-mini-hesap-tus-rakam')}
+        {tus('6', () => rakamEkle('6'), 'ap-mini-hesap-tus-rakam')}
+        {tus('*', () => islemSec('*'), 'ap-mini-hesap-tus-op')}
         {tus('%', yuzde, 'ap-mini-hesap-tus-op')}
 
         {tus('MS', () => setBellek(sayiyaCevir(ekran)), 'ap-mini-hesap-tus-bellek')}
-        {tus('1', () => rakamEkle('1'))}
-        {tus('2', () => rakamEkle('2'))}
-        {tus('3', () => rakamEkle('3'))}
-        {tus('−', () => islemSec('-'), 'ap-mini-hesap-tus-op')}
-        {tus('1/x', ters, 'ap-mini-hesap-tus-op')}
+        {tus('1', () => rakamEkle('1'), 'ap-mini-hesap-tus-rakam')}
+        {tus('2', () => rakamEkle('2'), 'ap-mini-hesap-tus-rakam')}
+        {tus('3', () => rakamEkle('3'), 'ap-mini-hesap-tus-rakam')}
+        {tus('-', () => islemSec('-'), 'ap-mini-hesap-tus-op')}
+        {tus('1/x', ters, 'ap-mini-hesap-tus-op ap-mini-hesap-tus-kucuk')}
 
         {tus('M+', () => setBellek((b) => b + sayiyaCevir(ekran)), 'ap-mini-hesap-tus-bellek')}
-        {tus('±', isaretDegistir)}
-        {tus('0', () => rakamEkle('0'))}
-        {tus(',', virgulEkle)}
+        {tus('0', () => rakamEkle('0'), 'ap-mini-hesap-tus-rakam')}
+        {tus('+/-', isaretDegistir, 'ap-mini-hesap-tus-rakam ap-mini-hesap-tus-kucuk')}
+        {tus(',', virgulEkle, 'ap-mini-hesap-tus-rakam')}
         {tus('+', () => islemSec('+'), 'ap-mini-hesap-tus-op')}
-        {tus('=', esittir, 'ap-mini-hesap-tus-op')}
+        {tus('=', esittir, 'ap-mini-hesap-tus-op ap-mini-hesap-tus-esit')}
       </div>
     </div>
   );
