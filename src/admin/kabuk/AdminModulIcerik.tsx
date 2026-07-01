@@ -21,6 +21,8 @@ import { EFaturaAyarlariSayfa } from '@/admin/baslat-menusu/e-fatura-ayarlari/sa
 import { MarslanacakUrunlerSayfa } from '@/admin/baslat-menusu/marslanacak-urunler/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
 import { raporlarModulBul } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
+import { raporSablonMu } from '@/admin/baslat-menusu/raporlar/raporSablonModulleri';
+import { RaporSablonSayfa } from '@/admin/baslat-menusu/raporlar/sayfa';
 import { RaporlarBosSayfa } from '@/admin/baslat-menusu/raporlar/RaporlarBosSayfa';
 import { AktifMasalarSayfasi } from '@/admin/baslat-menusu/raporlar/aktif-masalar/sayfa';
 import { FiyatListesiSayfasi } from '@/admin/baslat-menusu/raporlar/fiyat-listesi/sayfa';
@@ -88,6 +90,9 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
 
   const raporModul = raporlarModulBul(modulId);
   if (raporModul) {
+    if (raporSablonMu(modulId)) {
+      return <RaporSablonSayfa modulId={modulId} baslik={raporModul.baslik} aciklama={raporModul.aciklama} />;
+    }
     if (modulId === 'aktif-masalar') {
       return <AktifMasalarSayfasi />;
     }
