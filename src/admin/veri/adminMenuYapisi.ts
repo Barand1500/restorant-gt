@@ -1,11 +1,13 @@
 import type { AdminModul } from '@/admin/ortak/tipler/admin';
 import { tanimlarAdminModulleri } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
+import { raporlarAdminModulleri } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 
 /** Master modülü menüde geçici gizli — tekrar açmak için true yapın */
 export const MASTER_MENU_GORUNUR = false;
 
 export const adminModulleri: AdminModul[] = [
   ...tanimlarAdminModulleri(),
+  ...raporlarAdminModulleri(),
   {
     id: 'master',
     baslik: 'Master',
@@ -72,6 +74,7 @@ export const adminGizliModuller: AdminModul[] = [
 
 export const adminKategoriler = [
   'Tanımlar',
+  'Raporlar',
   ...(MASTER_MENU_GORUNUR ? (['Master'] as const) : []),
   'Müşteri / Ajans',
   'Sistem',
@@ -105,6 +108,7 @@ const PANEL_ALTYAPI_MODUL_IDLERI = new Set(['ayarlar', 'sekme-yonetimi', 'kisayo
 export function modulMenuGorunurMu(modulId: string, aktifPrefixler: Set<string> | null | undefined): boolean {
   const modul = modulBul(modulId);
   if (modul?.kategori === 'Tanımlar') return true;
+  if (modul?.kategori === 'Raporlar') return true;
   if (modulId === 'master') return MASTER_MENU_GORUNUR;
   if (PANEL_ALTYAPI_MODUL_IDLERI.has(modulId)) return true;
   if (!aktifPrefixler) return true;

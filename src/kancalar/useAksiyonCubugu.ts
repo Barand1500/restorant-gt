@@ -6,6 +6,7 @@ import type { AksiyonId } from '@/baglamlar/AdminAksiyonContext';
 import { useYetkiler } from '@/kancalar/useYetkiler';
 import type { YetkiKodu } from '@/admin/baslat-menusu/musteri-ajans/roller/api';
 import { TANIMLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
+import { RAPORLAR_MODUL_TANIMLARI } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 
 const A = (id: AksiyonButonu['id'], etiket: string, aktif: boolean, birincil?: boolean): AksiyonButonu => ({
   id,
@@ -130,7 +131,12 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
         t.id !== 'tarilacak-urunler' &&
         t.id !== 'favoriler' &&
         t.id !== 'odeme-gruplari' &&
-        t.id !== 'urun-eslestir'
+        t.id !== 'urun-eslestir' &&
+        t.id !== 'menu-tanimlari' &&
+        t.id !== 'cari-tanimlari' &&
+        t.id !== 'happy-hour-fiyat-listeleri' &&
+        t.id !== 'e-fatura-ayarlari' &&
+        t.id !== 'marslanacak-urunler'
     ).map((t) => [
       t.id,
       [
@@ -180,6 +186,18 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
     A('onizle', 'Önizle', false),
     A('yayinla', 'Yayınla', false),
   ],
+  ...Object.fromEntries(
+    RAPORLAR_MODUL_TANIMLARI.map((r) => [
+      r.id,
+      [
+        A('kaydet', 'Kaydet', false),
+        A('ekle', 'Yeni Ekle', false),
+        A('sil', 'Sil', false),
+        A('onizle', 'Yazdır', false),
+        A('yayinla', 'Yayınla', false),
+      ],
+    ])
+  ),
 };
 
 const varsayilanAksiyonlar: AksiyonButonu[] = [

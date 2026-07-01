@@ -1,5 +1,6 @@
 import type { SistemAyarlariForm } from '@/admin/baslat-menusu/sistem/ayarlar/tipler';
 import { tanimlarSeedKayitlari } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
+import { raporlarSeedKayitlari } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
 
 const OFFLINE_SISTEM_ANAHTAR = 'restorant-offline-sistem-ayarlari';
 const OFFLINE_MODUL_ANAHTAR = 'restorant-offline-moduller';
@@ -141,6 +142,15 @@ const VARSAYILAN_OFFLINE_MODULLER: OfflineModul[] = [
     id: 100 + i,
     ad: t.modulAdi,
     prefix: t.prefix,
+    aktif: true,
+    rolSayisi: 6,
+    kayitTarihi: '',
+    guncellemeTarihi: '',
+  })),
+  ...raporlarSeedKayitlari().map((r, i) => ({
+    id: 200 + i,
+    ad: r.modulAdi,
+    prefix: r.prefix,
     aktif: true,
     rolSayisi: 6,
     kayitTarihi: '',

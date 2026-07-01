@@ -20,6 +20,8 @@ import { HappyHourFiyatListeleriSayfa } from '@/admin/baslat-menusu/happy-hour-f
 import { EFaturaAyarlariSayfa } from '@/admin/baslat-menusu/e-fatura-ayarlari/sayfa';
 import { MarslanacakUrunlerSayfa } from '@/admin/baslat-menusu/marslanacak-urunler/sayfa';
 import { tanimlarModulBul } from '@/admin/baslat-menusu/tanimlar/tanimlarModulleri';
+import { raporlarModulBul } from '@/admin/baslat-menusu/raporlar/raporlarModulleri';
+import { RaporlarBosSayfa } from '@/admin/baslat-menusu/raporlar/RaporlarBosSayfa';
 import { ModulKabuk } from '@/baglamlar/ModulKabukContext';
 
 interface AdminModulIcerikProps {
@@ -76,6 +78,11 @@ function AdminModulGovde({ modulId }: AdminModulIcerikProps) {
       return <MarslanacakUrunlerSayfa />;
     }
     return <TanimlarBosSayfa baslik={tanimModul.baslik} aciklama={tanimModul.aciklama} />;
+  }
+
+  const raporModul = raporlarModulBul(modulId);
+  if (raporModul) {
+    return <RaporlarBosSayfa baslik={raporModul.baslik} aciklama={raporModul.aciklama} />;
   }
 
   switch (modulId) {
