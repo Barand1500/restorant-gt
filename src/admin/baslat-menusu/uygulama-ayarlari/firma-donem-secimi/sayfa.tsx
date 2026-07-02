@@ -45,7 +45,7 @@ export function FirmaDonemSecimiSayfasi() {
   useModulAksiyonlari(
     { kaydet },
     {
-      kaydet: kirli && !kaydediliyor,
+      kaydet: !kaydediliyor,
       ekle: false,
       guncelle: false,
       sil: false,
@@ -62,12 +62,7 @@ export function FirmaDonemSecimiSayfasi() {
       onizleGoster={false}
     >
       <AdminPanelKarti>
-        <FirmaDonemSecimForm
-          kayit={taslak}
-          onKayitDegistir={setTaslak}
-          onKaydet={kaydet}
-          kaydediliyor={kaydediliyor}
-        />
+        <FirmaDonemSecimForm kayit={taslak} onKayitDegistir={setTaslak} />
       </AdminPanelKarti>
     </AdminModulKabuk>
   );

@@ -47,7 +47,7 @@ export function WebApiAyarlariSayfasi() {
   useModulAksiyonlari(
     { kaydet: kaydetVeBaslat },
     {
-      kaydet: (kirli || webApiKayitGecerli(taslak)) && !kaydediliyor && !servisBaslatiliyor,
+      kaydet: !kaydediliyor && !servisBaslatiliyor,
       ekle: false,
       guncelle: false,
       sil: false,

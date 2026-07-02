@@ -12,16 +12,9 @@ import {
 interface FirmaDonemSecimFormProps {
   kayit: FirmaDonemKayit;
   onKayitDegistir: (kayit: FirmaDonemKayit) => void;
-  onKaydet: () => void;
-  kaydediliyor?: boolean;
 }
 
-export function FirmaDonemSecimForm({
-  kayit,
-  onKayitDegistir,
-  onKaydet,
-  kaydediliyor,
-}: FirmaDonemSecimFormProps) {
+export function FirmaDonemSecimForm({ kayit, onKayitDegistir }: FirmaDonemSecimFormProps) {
   const donemler = useMemo(() => {
     if (!kayit.firma) return [];
     return DONEM_SECENEKLERI[kayit.firma] ?? [];
@@ -77,23 +70,18 @@ export function FirmaDonemSecimForm({
       </header>
 
       <div className="ap-firma-donem-alanlar">
-        {secim('firma', 'Firma', [...FIRMA_SECENEKLERI], firmaDegistir)}
-        {secim('donem', 'Dönem', donemler, undefined, !kayit.firma)}
-        {secim('depo', 'Depo', [...DEPO_SECENEKLERI])}
-        {secim('sube', 'Şube', [...SUBE_SECENEKLERI])}
-        {secim('kasa', 'Kasa', [...KASA_SECENEKLERI])}
+        <div className="ap-firma-donem-satir">
+          {secim('firma', 'Firma', [...FIRMA_SECENEKLERI], firmaDegistir)}
+          {secim('donem', 'Dönem', donemler, undefined, !kayit.firma)}
+        </div>
+        <div className="ap-firma-donem-satir">
+          {secim('depo', 'Depo', [...DEPO_SECENEKLERI])}
+          {secim('sube', 'Şube', [...SUBE_SECENEKLERI])}
+        </div>
+        <div className="ap-firma-donem-satir ap-firma-donem-satir-tek">
+          {secim('kasa', 'Kasa', [...KASA_SECENEKLERI])}
+        </div>
       </div>
-
-      <footer className="ap-firma-donem-alt">
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
-          onClick={onKaydet}
-          disabled={kaydediliyor}
-        >
-          {kaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
-        </button>
-      </footer>
     </div>
   );
 }

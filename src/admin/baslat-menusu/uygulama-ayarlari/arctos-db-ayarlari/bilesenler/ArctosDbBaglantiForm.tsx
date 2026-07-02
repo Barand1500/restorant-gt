@@ -1,31 +1,23 @@
+import { useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import type { ArctosDbKayit } from '@/admin/baslat-menusu/uygulama-ayarlari/arctos-db-ayarlari/tipler';
 
 interface ArctosDbBaglantiFormProps {
   kayit: ArctosDbKayit;
   onKayitDegistir: (kayit: ArctosDbKayit) => void;
-  onSina: () => void;
-  onKaydet: () => void;
-  sinaniyor?: boolean;
-  kaydediliyor?: boolean;
 }
 
-export function ArctosDbBaglantiForm({
-  kayit,
-  onKayitDegistir,
-  onSina,
-  onKaydet,
-  sinaniyor,
-  kaydediliyor,
-}: ArctosDbBaglantiFormProps) {
-  const alan = (alan: keyof ArctosDbKayit, etiket: string, tip: 'text' | 'password' = 'text') => (
+export function ArctosDbBaglantiForm({ kayit, onKayitDegistir }: ArctosDbBaglantiFormProps) {
+  const [parolaGoster, setParolaGoster] = useState(false);
+
+  const alan = (alanAdi: keyof ArctosDbKayit, etiket: string, tip: 'text' | 'password' = 'text') => (
     <label className="ap-arctos-db-alan">
       <span className="ap-arctos-db-etiket">{etiket}</span>
       <input
         type={tip}
         className={formInputSinifi}
-        value={kayit[alan]}
-        onChange={(e) => onKayitDegistir({ ...kayit, [alan]: e.target.value })}
+        value={kayit[alanAdi]}
+        onChange={(e) => onKayitDegistir({ ...kayit, [alanAdi]: e.target.value })}
         autoComplete={tip === 'password' ? 'off' : 'on'}
       />
     </label>
@@ -44,30 +36,36 @@ export function ArctosDbBaglantiForm({
       </header>
 
       <div className="ap-arctos-db-alanlar">
-        {alan('sunucu', 'Sunucu')}
-        {alan('kullaniciAdi', 'Kullanıcı Adı')}
-        {alan('kullaniciParola', 'Kullanıcı Parola', 'password')}
-        {alan('veritabani', 'Veritabanı')}
+        <div className="ap-arctos-db-satir">
+          {alan('sunucu', 'Sunucu')}
+          {alan('veritabani', 'Veritabanı')}
+        </div>
+        <div className="ap-arctos-db-satir">
+          {alan('kullaniciAdi', 'Kullanıcı Adı')}
+          <label className="ap-arctos-db-alan">
+            <span className="ap-arctos-db-etiket">Kullanıcı Parola</span>
+            <div className="ap-arctos-db-parola-sarmal">
+              <input
+                type={parolaGoster ? 'text' : 'password'}
+                className={formInputSinifi}
+                value={kayit.kullaniciParola}
+                onChange={(e) => onKayitDegistir({ ...kayit, kullaniciParola: e.target.value })}
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                className="ap-arctos-db-maymun-btn"
+                onClick={() => setParolaGoster((g) => !g)}
+                aria-label={parolaGoster ? 'Parolayı gizle' : 'Parolayı göster'}
+                aria-pressed={parolaGoster}
+                title={parolaGoster ? 'Parolayı gizle' : 'Parolayı göster'}
+              >
+                {parolaGoster ? '🐵' : '🙈'}
+              </button>
+            </div>
+          </label>
+        </div>
       </div>
-
-      <footer className="ap-arctos-db-alt">
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-ikincil"
-          onClick={onSina}
-          disabled={sinaniyor || kaydediliyor}
-        >
-          {sinaniyor ? 'Sınanıyor…' : 'Sına'}
-        </button>
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
-          onClick={onKaydet}
-          disabled={kaydediliyor || sinaniyor}
-        >
-          {kaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
-        </button>
-      </footer>
     </div>
   );
 }

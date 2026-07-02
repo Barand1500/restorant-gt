@@ -356,7 +356,7 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
         return [
           m.id,
           [
-            A('kaydet', 'Kaydet', false, true),
+            A('kaydet', 'Kaydet', true, true),
             A('guncelle', 'Sına', true),
             A('ekle', 'Yeni Ekle', false),
             A('sil', 'Sil', false),
@@ -369,7 +369,7 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
         return [
           m.id,
           [
-            A('kaydet', 'Kaydet', false, true),
+            A('kaydet', 'Kaydet', true, true),
             A('ekle', 'Yeni Ekle', false),
             A('sil', 'Sil', false),
             A('guncelle', 'Düzenle', false),
@@ -454,10 +454,16 @@ export function useAksiyonCubugu(modulId: string) {
 
     return temel.map((aksiyon) => {
       const dinamik = aksiyonDurumlari[aksiyon.id as AksiyonId];
-      const varsayilan = varsayilanAksiyonlar.find((a) => a.id === aksiyon.id);
-      const modulOzelEtiket = varsayilan && aksiyon.etiket !== varsayilan.etiket ? aksiyon.etiket : undefined;
-      const etiket = modulOzelEtiket ?? t(`aksiyon.${aksiyon.id}`, aksiyon.etiket);
-      const guncel = { ...aksiyon, etiket };
+      const modulOzelCeviri = t(`aksiyon.${aksiyon.id}.${modulId}`, '\0');
+      let etiket: string;
+      if (modulOzelCeviri !== '\0') {
+        etiket = modulOzelCeviri;
+      } else {
+        const varsayilan = varsayilanAksiyonlar.find((a) => a.id === aksiyon.id);
+        const modulOzelEtiket =
+          varsayilan && aksiyon.etiket !== varsayilan.etiket ? aksiyon.etiket : undefined;
+        etiket = modulOzelEtiket ?? t(`aksiyon.${aksiyon.id}`, aksiyon.etiket);
+      }      const guncel = { ...aksiyon, etiket };
 
       const yetkiKodu = modulYetki[aksiyon.id as AksiyonId] ?? AKSIYON_YETKI[aksiyon.id as AksiyonId];
       const yetkiUygun = !yetkiKodu || yetkiVar(yetkiKodu);

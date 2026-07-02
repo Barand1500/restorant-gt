@@ -59,8 +59,8 @@ export function ArctosDbAyarlariSayfasi() {
   useModulAksiyonlari(
     { kaydet, guncelle: sina },
     {
-      kaydet: kirli && !sinaniyor,
-      guncelle: !sinaniyor && arctosDbBaglantiGecerli(taslak),
+      kaydet: !sinaniyor && !kaydediliyor,
+      guncelle: !sinaniyor && !kaydediliyor && arctosDbBaglantiGecerli(taslak),
       ekle: false,
       sil: false,
       onizle: false,
@@ -76,14 +76,7 @@ export function ArctosDbAyarlariSayfasi() {
       onizleGoster={false}
     >
       <AdminPanelKarti>
-        <ArctosDbBaglantiForm
-          kayit={taslak}
-          onKayitDegistir={setTaslak}
-          onSina={sina}
-          onKaydet={kaydet}
-          sinaniyor={sinaniyor}
-          kaydediliyor={kaydediliyor}
-        />
+        <ArctosDbBaglantiForm kayit={taslak} onKayitDegistir={setTaslak} />
       </AdminPanelKarti>
     </AdminModulKabuk>
   );

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import type { WebApiKayit } from '@/admin/baslat-menusu/uygulama-ayarlari/web-api-ayarlari/tipler';
 
@@ -6,21 +7,16 @@ interface WebApiAyarlariFormProps {
   onKayitDegistir: (kayit: WebApiKayit) => void;
 }
 
-function metinAlani(
-  etiket: string,
-  deger: string,
-  onChange: (v: string) => void,
-  tip: 'text' | 'password' | 'url' = 'text'
-) {
+function metinAlani(etiket: string, deger: string, onChange: (v: string) => void) {
   return (
     <label className="ap-web-api-alan">
       <span className="ap-web-api-etiket">{etiket}</span>
       <input
-        type={tip === 'password' ? 'password' : 'text'}
+        type="text"
         className={formInputSinifi}
         value={deger}
         onChange={(e) => onChange(e.target.value)}
-        autoComplete={tip === 'password' ? 'off' : 'on'}
+        autoComplete="on"
       />
     </label>
   );
@@ -48,10 +44,8 @@ function secenek(
   );
 }
 
-export function WebApiAyarlariForm({
-  kayit,
-  onKayitDegistir,
-}: WebApiAyarlariFormProps) {
+export function WebApiAyarlariForm({ kayit, onKayitDegistir }: WebApiAyarlariFormProps) {
+  const [parolaGoster, setParolaGoster] = useState(false);
   const guncelle = (parcalar: Partial<WebApiKayit>) => onKayitDegistir({ ...kayit, ...parcalar });
 
   return (
@@ -68,20 +62,49 @@ export function WebApiAyarlariForm({
 
       <section className="ap-web-api-bolum">
         <h3 className="ap-web-api-bolum-baslik">Veritabanı Bağlantısı</h3>
-        <div className="ap-web-api-ikili">
-          {metinAlani('Sunucu IP', kayit.sunucuIp, (v) => guncelle({ sunucuIp: v }))}
-          {metinAlani('Veritabanı Adı', kayit.veritabaniAdi, (v) => guncelle({ veritabaniAdi: v }))}
-          {metinAlani('Kullanıcı Adı', kayit.kullaniciAdi, (v) => guncelle({ kullaniciAdi: v }))}
-          {metinAlani('Kullanıcı Parola', kayit.kullaniciParola, (v) => guncelle({ kullaniciParola: v }), 'password')}
+        <div className="ap-web-api-alanlar">
+          <div className="ap-web-api-satir">
+            {metinAlani('Sunucu IP', kayit.sunucuIp, (v) => guncelle({ sunucuIp: v }))}
+            {metinAlani('Veritabanı Adı', kayit.veritabaniAdi, (v) => guncelle({ veritabaniAdi: v }))}
+          </div>
+          <div className="ap-web-api-satir">
+            {metinAlani('Kullanıcı Adı', kayit.kullaniciAdi, (v) => guncelle({ kullaniciAdi: v }))}
+            <label className="ap-web-api-alan">
+              <span className="ap-web-api-etiket">Kullanıcı Parola</span>
+              <div className="ap-web-api-parola-sarmal">
+                <input
+                  type={parolaGoster ? 'text' : 'password'}
+                  className={formInputSinifi}
+                  value={kayit.kullaniciParola}
+                  onChange={(e) => guncelle({ kullaniciParola: e.target.value })}
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  className="ap-web-api-maymun-btn"
+                  onClick={() => setParolaGoster((g) => !g)}
+                  aria-label={parolaGoster ? 'Parolayı gizle' : 'Parolayı göster'}
+                  aria-pressed={parolaGoster}
+                  title={parolaGoster ? 'Parolayı gizle' : 'Parolayı göster'}
+                >
+                  {parolaGoster ? '🐵' : '🙈'}
+                </button>
+              </div>
+            </label>
+          </div>
         </div>
       </section>
 
       <section className="ap-web-api-bolum">
         <h3 className="ap-web-api-bolum-baslik">API Adresleri</h3>
         <div className="ap-web-api-alanlar">
-          {metinAlani('Token URL', kayit.tokenUrl, (v) => guncelle({ tokenUrl: v }), 'url')}
-          {metinAlani('Servis URL', kayit.servisUrl, (v) => guncelle({ servisUrl: v }), 'url')}
-          {metinAlani('vePosDB Adı', kayit.vePosDbAdi, (v) => guncelle({ vePosDbAdi: v }))}
+          <div className="ap-web-api-satir">
+            {metinAlani('Token URL', kayit.tokenUrl, (v) => guncelle({ tokenUrl: v }))}
+            {metinAlani('Servis URL', kayit.servisUrl, (v) => guncelle({ servisUrl: v }))}
+          </div>
+          <div className="ap-web-api-satir ap-web-api-satir-tek">
+            {metinAlani('vePosDB Adı', kayit.vePosDbAdi, (v) => guncelle({ vePosDbAdi: v }))}
+          </div>
         </div>
       </section>
 
