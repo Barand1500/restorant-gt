@@ -52,6 +52,8 @@ function AdminPanelGovde() {
   const [rehberAcik, setRehberAcik] = useState(false);
   /** Kapatılan sekmenin modülü — URL gecikince useEffect'in sekmeyi yeniden açmasını engeller */
   const sonKapatilanModulRef = useRef<string | null>(null);
+  /** Üst sekme tıklaması sonrası URL senkronunu bekletir (eski URL ile yanlış sekmeye dönmeyi önler) */
+  const beklenenSekmeIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const handler = () => setSekmeAyarlari(sekmeAyarlariOku());
@@ -165,18 +167,38 @@ function AdminPanelGovde() {
   }
 
   function sekmeSecHandler(sekmeId: string) {
-    setAktifSekmeId(sekmeId);
     const sekme = sekmeler.find((s) => s.id === sekmeId);
     const modul = sekme ? modulBul(sekme.modulId) : undefined;
     if (!modul) return;
+
+    beklenenSekmeIdRef.current = sekmeId;
+    setAktifSekmeId(sekmeId);
+
     const hedef = modul.yol.replace(/\/+$/, '') || '/gt-admin';
     const mevcut = location.pathname.replace(/\/+$/, '') || '/gt-admin';
-    if (mevcut !== hedef) navigate(hedef);
+    if (mevcut !== hedef) {
+      navigate(hedef);
+      return;
+    }
+
+    beklenenSekmeIdRef.current = null;
   }
 
   useEffect(() => {
     const modul = modulYolundanBul(location.pathname);
     if (!modul) return;
+
+    if (beklenenSekmeIdRef.current) {
+      const beklenenSekme = sekmeler.find((s) => s.id === beklenenSekmeIdRef.current);
+      if (!beklenenSekme) {
+        beklenenSekmeIdRef.current = null;
+      } else if (beklenenSekme.modulId === modul.id) {
+        beklenenSekmeIdRef.current = null;
+        return;
+      } else {
+        return;
+      }
+    }
 
     if (sonKapatilanModulRef.current) {
       if (sonKapatilanModulRef.current === modul.id) return;
@@ -193,7 +215,7 @@ function AdminPanelGovde() {
     }
 
     sekmeAc(modul);
-  }, [location.pathname, aktifSekmeId, sekmeler, sekmeAc, setAktifSekmeId]);
+  }, [location.pathname, sekmeler, sekmeAc, setAktifSekmeId]);
 
   async function logKaydet(islem: string, modulId?: string, aksiyonId?: string) {
     try {

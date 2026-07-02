@@ -1,18 +1,24 @@
+import { TanimlarPanelGeriTusu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarPanelGeriTusu';
 import type { TanimlarMasaGrubu, TanimlarMasaGrubuAyarlar } from '@/admin/baslat-menusu/tanimlar/masa-gruplari/tipler';
 
 interface TanimlarMasaGrubuAyarlarPanelProps {
   grup: TanimlarMasaGrubu;
   ayarlar: TanimlarMasaGrubuAyarlar;
   onAyarlarDegistir: (ayarlar: TanimlarMasaGrubuAyarlar) => void;
+  onGeri: () => void;
 }
 
 export function TanimlarMasaGrubuAyarlarPanel({
   grup,
   ayarlar,
   onAyarlarDegistir,
+  onGeri,
 }: TanimlarMasaGrubuAyarlarPanelProps) {
   return (
     <div className="ap-tanimlar-masa-ayar-panel">
+      <div className="ap-tanimlar-panel-geri-sarmal">
+        <TanimlarPanelGeriTusu onGeri={onGeri} />
+      </div>
       <header className="ap-tanimlar-panel-baslik">
         <h3 className="ap-tanimlar-yetki-baslik">Ayarlar</h3>
         <p className="ap-tanimlar-yetki-alt">{grup.grup} masa grubu</p>

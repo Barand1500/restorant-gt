@@ -194,6 +194,7 @@ export function TanimlarMasaGruplariSekme() {
                 grup={ayarGrup}
                 ayarlar={kayit.ayarlar[ayarGrup.id] ?? bosMasaGrubuAyarlar()}
                 onAyarlarDegistir={ayarlarGuncelle}
+                onGeri={listeGorunumuneDon}
               />
             )}
           </div>

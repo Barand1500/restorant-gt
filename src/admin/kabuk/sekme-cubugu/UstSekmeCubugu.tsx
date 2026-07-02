@@ -102,14 +102,29 @@ function SekmeButonu({
   const isimGoster = gorunumModu === 'isim' || gorunumModu === 'ikon-isim';
   const ikonGoster = gorunumModu === 'ikon' || gorunumModu === 'ikon-isim';
 
+  function sekmeSecTikla(e: MouseEvent) {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    onSekmeSec(sekme.id);
+  }
+
   return (
     <div
       draggable
-      onDragStart={(e) => onDragStart(e, sekme.id)}
+      onDragStart={(e) => {
+        if ((e.target as HTMLElement).closest('.ap-sekme-tab-sec')) {
+          e.preventDefault();
+          return;
+        }
+        onDragStart(e, sekme.id);
+      }}
       onDragOver={(e) => onDragOver(e, sekme.id)}
       onDrop={(e) => onDrop(e, sekme.id)}
       onDragEnd={onDragEnd}
-      onMouseDown={(e) => onPointerDown(e, sekme.id)}
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).closest('.ap-sekme-tab-sec')) return;
+        onPointerDown(e, sekme.id);
+      }}
       onMouseMove={onPointerMove}
       onMouseUp={onPointerUp}
       title={hoverOnizleme ? sekme.baslik : undefined}
@@ -129,8 +144,8 @@ function SekmeButonu({
       <button
         type="button"
         draggable={false}
-        onClick={() => onSekmeSec(sekme.id)}
-        className="flex min-h-[inherit] min-w-0 flex-1 items-center gap-1 truncate px-3 py-1.5"
+        className="ap-sekme-tab-sec flex min-h-[inherit] min-w-0 flex-1 cursor-pointer items-center gap-1 truncate px-3 py-1.5"
+        onMouseDown={sekmeSecTikla}
       >
         {sekme.kaydedilmedi && (
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" title="Kaydedilmemiş değişiklik" />
