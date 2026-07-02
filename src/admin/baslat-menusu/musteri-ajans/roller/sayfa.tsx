@@ -158,7 +158,8 @@ export function RollerSayfasi() {
       kaydet: superAdminMi && degisti && !kaydediliyor,
       ekle: superAdminMi && !kaydediliyor,
       sil: silAktif && !kaydediliyor,
-    }
+    },
+    superAdminMi && degisti
   );
 
   if (!yetkili) {

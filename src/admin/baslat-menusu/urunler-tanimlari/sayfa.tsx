@@ -182,7 +182,8 @@ export function UrunlerTanimlariSayfasi() {
       oncekiKayit: seciliIndex > 0,
       sonrakiKayit: seciliIndex >= 0 && seciliIndex < kayit.urunler.length - 1,
       onizle: true,
-    }
+    },
+    kirli
   );
 
   useEffect(() => {

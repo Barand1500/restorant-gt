@@ -51,7 +51,8 @@ export function FirmaDonemSecimiSayfasi() {
       sil: false,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

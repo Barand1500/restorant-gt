@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { formInputSinifi } from '@/formlar/FormAlani';
 import { RestoranVardiyaSaatSecici } from '@/admin/baslat-menusu/tanimlar/bilesenler/restoran-durumu/RestoranVardiyaSaatSecici';
 import {
@@ -15,9 +15,16 @@ const VARDIYA_ALANLARI: { alan: RestoranDurumuAlan; baslik: string; ikon: string
   { alan: 'aksam', baslik: 'Akşam', ikon: '🌙' },
 ];
 
-export function TanimlarRestoranDurumuSekme() {
+export function TanimlarRestoranDurumuSekme({ onKirliDegisti }: { onKirliDegisti?: (kirli: boolean) => void }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [ayar, setAyar] = useState<RestoranDurumuAyar>(() => ({ ...RESTORAN_DURUMU_VARSAYILAN }));
+  const [sonKayitli, setSonKayitli] = useState<RestoranDurumuAyar>(() => ({ ...RESTORAN_DURUMU_VARSAYILAN }));
+
+  const kirli = useMemo(() => JSON.stringify(ayar) !== JSON.stringify(sonKayitli), [ayar, sonKayitli]);
+
+  useEffect(() => {
+    onKirliDegisti?.(kirli);
+  }, [kirli, onKirliDegisti]);
 
   const alanDegistir = useCallback((alan: RestoranDurumuAlan, deger: string) => {
     setAyar((onceki) => ({ ...onceki, [alan]: deger }));
@@ -36,11 +43,13 @@ export function TanimlarRestoranDurumuSekme() {
       return;
     }
     basariBildir('Restoran durumu kaydedildi.');
+    setSonKayitli({ ...ayar });
   }, [ayar, basariBildir, hataBildir]);
 
   useModulAksiyonlari(
     { kaydet },
-    { kaydet: true, ekle: false, sil: false, onizle: false, yayinla: false }
+    { kaydet: kirli, ekle: false, sil: false, onizle: false, yayinla: false },
+    kirli
   );
 
   return (

@@ -64,6 +64,7 @@ export function AdminSagTikMenu({ aksiyonlar }: { aksiyonlar: AdminSagTikAksiyon
       const panel = (e.target as HTMLElement)?.closest('.admin-panel');
       if (!panel) return;
       if ((e.target as HTMLElement).closest('.ap-sag-tik-menu')) return;
+      if ((e.target as HTMLElement).closest('.ap-sekme-tab')) return;
 
       e.preventDefault();
       setMenu({ x: e.clientX, y: e.clientY, hedef: e.target });

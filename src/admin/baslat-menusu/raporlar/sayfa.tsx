@@ -52,7 +52,8 @@ export function RaporSablonSayfa({ modulId, baslik, aciklama }: RaporSablonSayfa
       sil: false,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

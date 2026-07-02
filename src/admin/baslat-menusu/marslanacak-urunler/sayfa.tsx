@@ -54,7 +54,8 @@ export function MarslanacakUrunlerSayfa() {
       sil: false,
       yayinla: false,
       onizle: false,
-    }
+    },
+    kirli
   );
 
   return (

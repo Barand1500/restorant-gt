@@ -74,6 +74,8 @@ interface AdminAksiyonContextType {
     tur?: 'basari' | 'hata'
   ) => void;
   aksiyonCalistir: (id: string) => Promise<void>;
+  aksiyonCalistirModul: (modulId: string, id: string) => Promise<boolean>;
+  modulAksiyonVarMi: (modulId: string, id: AksiyonId) => boolean;
 }
 
 const AdminAksiyonContext = createContext<AdminAksiyonContextType | null>(null);
@@ -137,9 +139,9 @@ export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
     [focusModulId]
   );
 
-  const aksiyonCalistir = useCallback(
-    async (id: string) => {
-      const handlers = kayitlarRef.current.get(focusModulId)?.handlers ?? {};
+  const aksiyonCalistirIc = useCallback(
+    async (modulId: string, id: string, bildirimGoster = true): Promise<boolean> => {
+      const handlers = kayitlarRef.current.get(modulId)?.handlers ?? {};
       const aksiyonId = id as AksiyonId;
 
       try {
@@ -153,18 +155,39 @@ export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
         else if (id === 'yayinla' && handlers.yayinla) await handlers.yayinla();
         else if (id === 'oncekiKayit' && handlers.oncekiKayit) handlers.oncekiKayit();
         else if (id === 'sonrakiKayit' && handlers.sonrakiKayit) handlers.sonrakiKayit();
-        else return;
+        else return false;
 
-        if (AKSİYON_BASARI[aksiyonId]) {
+        if (bildirimGoster && AKSİYON_BASARI[aksiyonId]) {
           aksiyonGeriBildirimiGoster(aksiyonId);
         }
+        return true;
       } catch {
-        aksiyonGeriBildirimiGoster(aksiyonId, 'İşlem başarısız', 'hata');
-        adminIslemBildirimi('İşlem başarısız', 'hata');
+        if (bildirimGoster) {
+          aksiyonGeriBildirimiGoster(aksiyonId, 'İşlem başarısız', 'hata');
+          adminIslemBildirimi('İşlem başarısız', 'hata');
+        }
+        return false;
       }
     },
-    [focusModulId, aksiyonGeriBildirimiGoster]
+    [aksiyonGeriBildirimiGoster]
   );
+
+  const aksiyonCalistir = useCallback(
+    async (id: string) => {
+      await aksiyonCalistirIc(focusModulId, id, true);
+    },
+    [focusModulId, aksiyonCalistirIc]
+  );
+
+  const aksiyonCalistirModul = useCallback(
+    async (modulId: string, id: string) => aksiyonCalistirIc(modulId, id, modulId === focusModulId),
+    [focusModulId, aksiyonCalistirIc]
+  );
+
+  const modulAksiyonVarMi = useCallback((modulId: string, id: AksiyonId) => {
+    const handlers = kayitlarRef.current.get(modulId)?.handlers ?? {};
+    return Boolean(handlers[id]);
+  }, []);
 
   return (
     <AdminAksiyonContext.Provider
@@ -180,6 +203,8 @@ export function AdminAksiyonProvider({ children }: { children: ReactNode }) {
         aksiyonGeriBildirim,
         aksiyonGeriBildirimiGoster,
         aksiyonCalistir,
+        aksiyonCalistirModul,
+        modulAksiyonVarMi,
       }}
     >
       {children}

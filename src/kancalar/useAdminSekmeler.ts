@@ -14,6 +14,19 @@ function sonrakiAktifSekme(liste: AdminSekme[], kapatilanId: string): string {
   return komşu?.id ?? liste[0]?.id ?? 'kullanicilar';
 }
 
+function grupIdleriTemizle(liste: AdminSekme[]): AdminSekme[] {
+  const sayilar = new Map<string, number>();
+  for (const s of liste) {
+    if (s.grupId) sayilar.set(s.grupId, (sayilar.get(s.grupId) ?? 0) + 1);
+  }
+  return liste.map((s) => {
+    if (s.grupId && sayilar.get(s.grupId) === 1) {
+      return { ...s, grupId: undefined };
+    }
+    return s;
+  });
+}
+
 interface SekmeDurumu {
   sekmeler: AdminSekme[];
   aktifSekmeId: string;
@@ -73,6 +86,21 @@ export function useAdminSekmeler() {
           : onceki.aktifSekmeId;
 
       return { sekmeler: yeni, aktifSekmeId: yeniAktif };
+    });
+  }, []);
+
+  const sekmeTopluKapat = useCallback((kapatilacakIds: string[], yeniAktifId: string) => {
+    setDurum((onceki) => {
+      const kapatSet = new Set(kapatilacakIds);
+      if (kapatSet.size === 0) return onceki;
+
+      let yeni = onceki.sekmeler.filter((s) => !kapatSet.has(s.id));
+      if (yeni.length === 0 || yeni.length >= onceki.sekmeler.length) return onceki;
+
+      yeni = grupIdleriTemizle(yeni);
+      const aktifId = yeni.some((s) => s.id === yeniAktifId) ? yeniAktifId : yeni[0].id;
+
+      return { sekmeler: yeni, aktifSekmeId: aktifId };
     });
   }, []);
 
@@ -165,6 +193,7 @@ export function useAdminSekmeler() {
     setAktifSekmeId: sekmeSec,
     sekmeAc,
     sekmeKapat,
+    sekmeTopluKapat,
     sekmeTasi,
     sekmeBirlestir,
     kaydedilmediIsaretle,

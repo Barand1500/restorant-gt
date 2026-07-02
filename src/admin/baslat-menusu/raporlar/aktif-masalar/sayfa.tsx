@@ -140,14 +140,6 @@ export function AktifMasalarSayfasi() {
 
               <button
                 type="button"
-                className="ap-eklenti-islem-btn ap-eklenti-islem-btn-ikincil"
-                onClick={yazdir}
-                disabled={satirlar.length === 0}
-              >
-                Yazdır
-              </button>
-              <button
-                type="button"
                 className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
                 onClick={guncelle}
               >

@@ -512,6 +512,7 @@ export function SubelerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum })
   }, [seciliId, subeler, yukle, basariBildir, hataBildir]);
 
   const islemde = kaydediliyor || islemId !== null;
+  const kirli = panelAcik || seciliDegisiklikVar;
 
   useModulAksiyonlari(
     {
@@ -523,7 +524,8 @@ export function SubelerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum })
       ekle: !islemde && !panelAcik && aktifFirmalar.length > 0,
       sil: (panelAcik || seciliId != null) && !islemde && !seciliDegisiklikVar,
       kaydet: panelAcik ? !kaydediliyor : seciliDegisiklikVar && !kaydediliyor,
-    }
+    },
+    kirli
   );
 
   async function durumDegistir(sube: MasterSube, aktif: boolean) {

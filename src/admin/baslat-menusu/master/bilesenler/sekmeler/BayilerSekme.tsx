@@ -439,6 +439,7 @@ export function BayilerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum })
   }, [seciliId, bayiler, yukle, basariBildir, hataBildir]);
 
   const islemde = kaydediliyor || islemId !== null;
+  const kirli = panelAcik || seciliDegisiklikVar || duzenlemeHucre != null;
 
   useModulAksiyonlari(
     {
@@ -450,7 +451,8 @@ export function BayilerSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum })
       ekle: !islemde && !panelAcik,
       sil: (panelAcik || seciliId != null) && !islemde && !seciliDegisiklikVar,
       kaydet: panelAcik ? !kaydediliyor : seciliDegisiklikVar && !kaydediliyor,
-    }
+    },
+    kirli
   );
 
   async function durumDegistir(bayi: MasterBayi, aktif: boolean) {

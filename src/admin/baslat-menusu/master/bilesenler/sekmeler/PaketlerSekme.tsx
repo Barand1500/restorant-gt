@@ -375,6 +375,7 @@ export function PaketlerSekme() {
   }, []);
 
   const islemde = kaydediliyor || islemId !== null;
+  const kirli = panelAcik || eklemeAcik || seciliDegisiklikVar;
 
   useModulAksiyonlari(
     {
@@ -390,7 +391,8 @@ export function PaketlerSekme() {
         : panelAcik
           ? !kaydediliyor
           : seciliDegisiklikVar && !kaydediliyor,
-    }
+    },
+    kirli
   );
 
   async function durumDegistir(p: MasterPaket, aktif: boolean) {

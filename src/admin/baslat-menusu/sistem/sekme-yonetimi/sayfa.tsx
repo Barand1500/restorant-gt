@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { AdminModulKabuk, AdminPanelKarti } from '@/admin/ortak/AdminBilesenleri';
 import { UstSekmeCubugu } from '@/admin/kabuk/sekme-cubugu/UstSekmeCubugu';
@@ -98,18 +98,26 @@ function ornekSekmeBirlestir(liste: AdminSekme[], kaynakId: string, hedefId: str
 
 export function SekmeYonetimiSayfasi() {
   const [ayarlar, setAyarlar] = useState<SekmePanelAyarlari>(() => sekmeAyarlariOku());
+  const [sonKayitli, setSonKayitli] = useState<SekmePanelAyarlari>(() => sekmeAyarlariOku());
   const [ornekSekmeler, setOrnekSekmeler] = useState<AdminSekme[]>(ORNEK_SEKMELER_BASLANGIC);
   const [ornekAktif, setOrnekAktif] = useState('o1');
 
+  const kirli = useMemo(() => JSON.stringify(ayarlar) !== JSON.stringify(sonKayitli), [ayarlar, sonKayitli]);
+
   const kaydet = useCallback(() => {
     sekmeAyarlariKaydet(ayarlar);
+    setSonKayitli({ ...ayarlar });
     window.dispatchEvent(new CustomEvent('ap-sekme-ayarlari-guncellendi'));
   }, [ayarlar]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: true });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli }, kirli);
 
   useEffect(() => {
-    const handler = () => setAyarlar(sekmeAyarlariOku());
+    const handler = () => {
+      const guncel = sekmeAyarlariOku();
+      setAyarlar(guncel);
+      setSonKayitli(guncel);
+    };
     window.addEventListener('ap-sekme-ayarlari-guncellendi', handler);
     return () => window.removeEventListener('ap-sekme-ayarlari-guncellendi', handler);
   }, []);

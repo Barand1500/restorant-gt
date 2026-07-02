@@ -184,7 +184,8 @@ export function MenuTanimlariSayfa() {
       sil: mod === 'pasif' && seciliId != null,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   const gosterilecekMenu = taslak ?? bosMenuTanim(0);

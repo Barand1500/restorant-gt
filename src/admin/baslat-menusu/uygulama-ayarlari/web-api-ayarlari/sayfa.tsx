@@ -53,7 +53,8 @@ export function WebApiAyarlariSayfasi() {
       sil: false,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

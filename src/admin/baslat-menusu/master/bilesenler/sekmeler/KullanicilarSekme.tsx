@@ -329,6 +329,7 @@ export function KullanicilarSekme() {
   }
 
   const islemde = kaydediliyor || hucreKaydediliyor || islemId !== null;
+  const kirli = panelAcik || aktifHucre != null;
 
   useModulAksiyonlari(
     {
@@ -340,7 +341,8 @@ export function KullanicilarSekme() {
       kaydet: panelAcik && !kaydediliyor,
       ekle: !islemde && !panelAcik && !aktifHucre,
       sil: (panelAcik || !!seciliKullanici) && !islemde && !aktifHucre,
-    }
+    },
+    kirli
   );
 
   if (yukleniyor && !panelAcik) return <YukleniyorDurumu mesaj="Kullanıcılar yükleniyor…" />;

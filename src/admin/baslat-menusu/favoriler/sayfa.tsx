@@ -26,7 +26,7 @@ export function FavorilerSayfasi() {
     basariBildir('Favori menü atamaları kaydedildi.');
   }, [kayit, basariBildir]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: kirli || Object.keys(kayit.atamalar).length >= 0 });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli || Object.keys(kayit.atamalar).length >= 0 }, kirli);
 
   const atanmisSayisi = useMemo(
     () => Object.values(kayit.atamalar).filter((f) => f && f !== 'Yok').length,

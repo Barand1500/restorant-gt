@@ -101,7 +101,8 @@ export function UrunEslestirSayfasi() {
     {
       kaydet: kirli || Object.keys(kayit.harita).length >= 0,
       onizle: Boolean(seciliId),
-    }
+    },
+    kirli
   );
 
   return (

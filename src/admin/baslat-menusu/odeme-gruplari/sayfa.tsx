@@ -71,7 +71,8 @@ export function OdemeGruplariSayfasi() {
       kaydet: kirli || kayit.satirlar.length >= 0,
       ekle: true,
       sil: seciliId != null,
-    }
+    },
+    kirli
   );
 
   return (

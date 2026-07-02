@@ -148,6 +148,7 @@ export function ModullerSekme() {
   }, [seciliModul, yukle, basariBildir, hataBildir]);
 
   const islemde = kaydediliyor || islemId !== null;
+  const kirli = eklemeAcik;
 
   useModulAksiyonlari(
     {
@@ -159,7 +160,8 @@ export function ModullerSekme() {
       kaydet: eklemeAcik && !kaydediliyor,
       ekle: !islemde && !eklemeAcik,
       sil: (eklemeAcik || !!seciliModul) && !islemde,
-    }
+    },
+    kirli
   );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Modüller yükleniyor…" />;

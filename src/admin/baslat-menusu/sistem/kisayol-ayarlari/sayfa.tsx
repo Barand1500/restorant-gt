@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { AdminModulKabuk, AdminPanelKarti, BildirimKutusu } from '@/admin/ortak/AdminBilesenleri';
 import {
@@ -14,9 +14,12 @@ import {
 
 export function KisayolAyarlariSayfasi() {
   const [harita, setHarita] = useState<KisayolHaritasi>(() => kisayolAyarlariOku());
+  const [sonKayitli, setSonKayitli] = useState<KisayolHaritasi>(() => kisayolAyarlariOku());
   const [dinlenen, setDinlenen] = useState<KisayolIslemId | null>(null);
   const [hata, setHata] = useState('');
   const [basari, setBasari] = useState('');
+
+  const kirli = useMemo(() => JSON.stringify(harita) !== JSON.stringify(sonKayitli), [harita, sonKayitli]);
 
   const kaydet = useCallback(() => {
     setHata('');
@@ -28,11 +31,12 @@ export function KisayolAyarlariSayfasi() {
       }
     }
     kisayolAyarlariKaydet(harita);
+    setSonKayitli({ ...harita });
     window.dispatchEvent(new CustomEvent('ap-kisayol-ayarlari-guncellendi'));
     setBasari('Kısayol ayarları kaydedildi.');
   }, [harita]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: true });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli }, kirli);
 
   useEffect(() => {
     if (!dinlenen) return;
@@ -52,6 +56,7 @@ export function KisayolAyarlariSayfasi() {
       setHarita((h) => {
         const yeni = { ...h, [islem]: komb };
         kisayolAyarlariKaydet(yeni);
+        setSonKayitli({ ...yeni });
         window.dispatchEvent(new CustomEvent('ap-kisayol-ayarlari-guncellendi'));
         return yeni;
       });

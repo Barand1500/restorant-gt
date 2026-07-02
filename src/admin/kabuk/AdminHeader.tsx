@@ -6,6 +6,7 @@ import { AdminProfilModal } from '@/admin/ortak/AdminProfilModal';
 import { BaslatMenu } from './baslat-menusu/BaslatMenu';
 import { UstSekmeCubugu } from './sekme-cubugu/UstSekmeCubugu';
 import type { AdminModul, AdminSekme } from '@/admin/ortak/tipler/admin';
+import type { SekmeSagTikIslem } from '@/admin/kabuk/sekme-cubugu/sekmeSagTikYardimci';
 
 interface AdminHeaderProps {
   sekmeler: AdminSekme[];
@@ -16,6 +17,7 @@ interface AdminHeaderProps {
   onSekmeBirlestir: (kaynakId: string, hedefId: string) => void;
   onModulSec: (modul: AdminModul) => void;
   onSekmeAyir?: (sekmeId: string) => void;
+  onSekmeSagTikIslem?: (sekmeId: string, islem: SekmeSagTikIslem) => void;
 }
 
 export function AdminHeader({
@@ -27,6 +29,7 @@ export function AdminHeader({
   onSekmeBirlestir,
   onModulSec,
   onSekmeAyir,
+  onSekmeSagTikIslem,
 }: AdminHeaderProps) {
   const { kullanici } = useAuth();
   const { temaDegistir, koyuMu } = useAdminTema();
@@ -70,6 +73,7 @@ export function AdminHeader({
           onSekmeBirlestir={onSekmeBirlestir}
           onSekmeAyir={onSekmeAyir}
           onModulSec={onModulSec}
+          onSekmeSagTikIslem={onSekmeSagTikIslem}
         />
 
         <div className="flex items-center gap-3 border-l border-[var(--ap-border)] px-4">

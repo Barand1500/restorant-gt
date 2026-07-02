@@ -5,13 +5,17 @@ import {
   type AksiyonHandlerlar,
 } from '@/baglamlar/AdminAksiyonContext';
 import { useAktifModulId } from '@/baglamlar/ModulKabukContext';
+import { useSekmeKirli } from '@/kancalar/useSekmeKirli';
 
 export function useModulAksiyonlari(
   handlers: AksiyonHandlerlar,
-  durumlar?: AksiyonDurumlari
+  durumlar?: AksiyonDurumlari,
+  kirli?: boolean
 ) {
   const modulId = useAktifModulId();
   const { registerHandlers, clearHandlers, setAksiyonDurumlari } = useAdminAksiyon();
+
+  useSekmeKirli(kirli);
 
   useEffect(() => {
     registerHandlers(modulId, handlers);

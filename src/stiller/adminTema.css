@@ -5617,10 +5617,14 @@ html:has(.admin-panel[data-tema='acik']) body {
 }
 
 .ap-sistem-modal-alt-v2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin-top: 0;
   padding: 0.9rem 1.25rem;
   border-top: 1px solid var(--ap-border);
   background: color-mix(in srgb, var(--ap-hover) 60%, transparent);
+  gap: 0.75rem;
   justify-content: flex-end;
 }
 
@@ -7846,6 +7850,27 @@ html:has(.admin-panel[data-tema='acik']) body {
   text-align: center;
 }
 
+.ap-sekme-sag-tik-menu .ap-sekme-sag-tik-ikon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--ap-muted);
+}
+
+.ap-sekme-sag-tik-menu .ap-sag-tik-oge:hover:not(:disabled) .ap-sekme-sag-tik-ikon-wrap,
+.ap-sekme-sag-tik-menu .ap-sag-tik-oge-aktif .ap-sekme-sag-tik-ikon-wrap {
+  color: var(--ap-heading);
+}
+
+.ap-sekme-sag-tik-ikon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+}
+
 .ap-sag-tik-ok {
   margin-left: auto;
   opacity: 0.55;
@@ -9534,6 +9559,9 @@ html:has(.admin-panel[data-tema='acik']) body {
 
 .ap-master-modal .ap-sistem-modal-aksiyonlar,
 .ap-master-modal-aksiyonlar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   margin-top: 1.25rem;
   padding-top: 1rem;
   border-top: 1px solid var(--ap-border);

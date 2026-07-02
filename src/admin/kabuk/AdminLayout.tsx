@@ -21,6 +21,14 @@ import { AdminSagTikMenu } from '@/admin/kabuk/sag-tik/AdminSagTikMenu';
 import { PanelDilKabuk } from '@/admin/kabuk/PanelDilKabuk';
 import { sekmeAyarlariOku, splitSekmeleriHesapla } from '@/admin/baslat-menusu/sistem/sekme-yonetimi/yardimci';
 import { kisayolAyarlariOku, klavyeOlayiEslesir } from '@/admin/baslat-menusu/sistem/kisayol-ayarlari/yardimci';
+import {
+  kapatilacakSekmeIdleri,
+  kirliKapatilacakSekmeler,
+  sekmeKapatSonrasiAktifId,
+  type SekmeSagTikIslem,
+} from '@/admin/kabuk/sekme-cubugu/sekmeSagTikYardimci';
+import { SekmeKapatOnayModal } from '@/admin/kabuk/sekme-cubugu/SekmeKapatOnayModal';
+import { AdminSekmeKabuk } from '@/baglamlar/AdminSekmeKabukContext';
 import type { AdminModul, AdminSekme } from '@/admin/ortak/tipler/admin';
 import '@/stiller/adminTema.css';
 
@@ -38,22 +46,35 @@ function AdminPanelGovde() {
     setAktifSekmeId,
     sekmeAc,
     sekmeKapat,
+    sekmeTopluKapat,
     sekmeTasi,
     sekmeBirlestir,
+    kaydedilmediIsaretle,
   } = useAdminSekmeler();
 
   const { tema, temaDegistir } = useAdminTema();
-  const { focusModulId, setFocusModulId, aksiyonCalistir } = useAdminAksiyon();
+  const { focusModulId, setFocusModulId, aksiyonCalistir, aksiyonCalistirModul, modulAksiyonVarMi } =
+    useAdminAksiyon();
   const location = useLocation();
   const navigate = useNavigate();
   const aksiyonlar = useAksiyonCubugu(focusModulId);
   const [sekmeAyarlari, setSekmeAyarlari] = useState(sekmeAyarlariOku);
   const [ayriPencereler, setAyriPencereler] = useState<AyriPencere[]>([]);
   const [rehberAcik, setRehberAcik] = useState(false);
+  const [sekmeKapatOnay, setSekmeKapatOnay] = useState<{
+    hedefId: string;
+    islem: SekmeSagTikIslem;
+    kirliSayisi: number;
+  } | null>(null);
+  const [sekmeKapatYukleniyor, setSekmeKapatYukleniyor] = useState(false);
   /** Kapatılan sekmenin modülü — URL gecikince useEffect'in sekmeyi yeniden açmasını engeller */
   const sonKapatilanModulRef = useRef<string | null>(null);
   /** Üst sekme tıklaması sonrası URL senkronunu bekletir (eski URL ile yanlış sekmeye dönmeyi önler) */
   const beklenenSekmeIdRef = useRef<string | null>(null);
+  const sekmelerRef = useRef(sekmeler);
+  const aktifSekmeIdRef = useRef(aktifSekmeId);
+  sekmelerRef.current = sekmeler;
+  aktifSekmeIdRef.current = aktifSekmeId;
 
   useEffect(() => {
     const handler = () => setSekmeAyarlari(sekmeAyarlariOku());
@@ -184,6 +205,103 @@ function AdminPanelGovde() {
     beklenenSekmeIdRef.current = null;
   }
 
+  async function modulKaydetHandlerBekle(modulId: string) {
+    for (let i = 0; i < 40; i++) {
+      if (modulAksiyonVarMi(modulId, 'kaydet')) return true;
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    return false;
+  }
+
+  async function sekmeKaydetAsync(sekmeId: string) {
+    const liste = sekmelerRef.current;
+    const sekme = liste.find((s) => s.id === sekmeId);
+    if (!sekme?.kaydedilmedi) return;
+
+    if (aktifSekmeIdRef.current !== sekmeId) {
+      sekmeSecHandler(sekmeId);
+      await modulKaydetHandlerBekle(sekme.modulId);
+    }
+
+    setFocusModulId(sekme.modulId);
+    await aksiyonCalistirModul(sekme.modulId, 'kaydet');
+    kaydedilmediIsaretle(sekmeId, false);
+  }
+
+  function topluKapatUrlSenkron(
+    liste: AdminSekme[],
+    kapatilacakIds: string[],
+    yeniAktifId: string
+  ) {
+    const mevcutPathModul = modulYolundanBul(location.pathname);
+    const kapatilanUrlModulu =
+      mevcutPathModul &&
+      kapatilacakIds.some((id) => liste.find((s) => s.id === id)?.modulId === mevcutPathModul.id);
+    const aktifDegisti = aktifSekmeIdRef.current !== yeniAktifId;
+
+    if (kapatilanUrlModulu || aktifDegisti) {
+      const yeniSekme = liste.find((s) => s.id === yeniAktifId);
+      const modul = yeniSekme ? modulBul(yeniSekme.modulId) : undefined;
+      if (modul) {
+        const hedef = modul.yol.replace(/\/+$/, '') || '/gt-admin';
+        navigate(hedef, { replace: true });
+      }
+    }
+
+    for (const id of kapatilacakIds) {
+      const kapatilan = liste.find((s) => s.id === id);
+      if (kapatilan) sonKapatilanModulRef.current = kapatilan.modulId;
+    }
+    beklenenSekmeIdRef.current = yeniAktifId;
+  }
+
+  async function sekmeKapatUygula(hedefId: string, islem: SekmeSagTikIslem, kaydet: boolean) {
+    const liste = sekmelerRef.current;
+    const kapatilacak = kapatilacakSekmeIdleri(liste, hedefId, islem);
+    if (islem === 'kapat' && liste.length <= 1) {
+      setSekmeKapatOnay(null);
+      return;
+    }
+    if (islem !== 'kapat' && kapatilacak.length === 0) {
+      setSekmeKapatOnay(null);
+      return;
+    }
+
+    if (kaydet) {
+      setSekmeKapatYukleniyor(true);
+      const kirli = kirliKapatilacakSekmeler(liste, kapatilacak);
+      for (const sekme of kirli) {
+        await sekmeKaydetAsync(sekme.id);
+      }
+      setSekmeKapatYukleniyor(false);
+    }
+
+    if (islem === 'kapat') {
+      sekmeKapatHandler(hedefId);
+    } else {
+      const yeniAktif = sekmeKapatSonrasiAktifId(liste, hedefId, islem, aktifSekmeIdRef.current);
+      topluKapatUrlSenkron(liste, kapatilacak, yeniAktif);
+      sekmeTopluKapat(kapatilacak, yeniAktif);
+    }
+
+    setSekmeKapatOnay(null);
+  }
+
+  function sekmeSagTikIslemHandler(hedefId: string, islem: SekmeSagTikIslem) {
+    const liste = sekmelerRef.current;
+    const kapatilacak = kapatilacakSekmeIdleri(liste, hedefId, islem);
+    if (islem === 'kapat' && liste.length <= 1) return;
+    if (islem !== 'kapat' && kapatilacak.length === 0) return;
+
+    const kirli = kirliKapatilacakSekmeler(liste, kapatilacak);
+    if (kirli.length > 0) {
+      setSekmeKapatOnay({ hedefId, islem, kirliSayisi: kirli.length });
+      return;
+    }
+
+    void sekmeKapatUygula(hedefId, islem, false);
+  }
+
   useEffect(() => {
     const modul = modulYolundanBul(location.pathname);
     if (!modul) return;
@@ -285,7 +403,9 @@ function AdminPanelGovde() {
           onMouseDown={() => setFocusModulId(sekme.modulId)}
           onFocusCapture={() => setFocusModulId(sekme.modulId)}
         >
-          <AdminModulIcerik modulId={sekme.modulId} onModulAc={modulSecHandler} />
+          <AdminSekmeKabuk sekmeId={sekme.id} kaydedilmediIsaretle={kaydedilmediIsaretle}>
+            <AdminModulIcerik modulId={sekme.modulId} onModulAc={modulSecHandler} />
+          </AdminSekmeKabuk>
         </div>
       </div>
     );
@@ -303,6 +423,7 @@ function AdminPanelGovde() {
         onSekmeBirlestir={sekmeBirlestir}
         onModulSec={modulAcHandler}
         onSekmeAyir={sekmeAyarlari.surukleAyirPencere ? sekmeAyir : undefined}
+        onSekmeSagTikIslem={sekmeSagTikIslemHandler}
       />
 
       <main className="ap-scroll flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-[var(--ap-bg)]">
@@ -338,7 +459,9 @@ function AdminPanelGovde() {
             className="ap-ayri-pencere-icerik overflow-y-auto p-4"
             onMouseDown={() => setFocusModulId(pencere.modulId)}
           >
-            <AdminModulIcerik modulId={pencere.modulId} onModulAc={modulSecHandler} />
+            <AdminSekmeKabuk sekmeId={pencere.sekmeId} kaydedilmediIsaretle={kaydedilmediIsaretle}>
+              <AdminModulIcerik modulId={pencere.modulId} onModulAc={modulSecHandler} />
+            </AdminSekmeKabuk>
           </div>
         </div>
       ))}
@@ -358,6 +481,21 @@ function AdminPanelGovde() {
         onKaydet={() => void aksiyonCalistir('kaydet')}
         onOnizle={() => void aksiyonCalistir('onizle')}
         onTemaDegistir={temaDegistir}
+      />
+
+      <SekmeKapatOnayModal
+        acik={sekmeKapatOnay !== null}
+        kirliSayisi={sekmeKapatOnay?.kirliSayisi ?? 0}
+        yukleniyor={sekmeKapatYukleniyor}
+        onKapat={() => !sekmeKapatYukleniyor && setSekmeKapatOnay(null)}
+        onKaydetVeKapat={() => {
+          if (!sekmeKapatOnay) return;
+          void sekmeKapatUygula(sekmeKapatOnay.hedefId, sekmeKapatOnay.islem, true);
+        }}
+        onKaydetmedenKapat={() => {
+          if (!sekmeKapatOnay) return;
+          void sekmeKapatUygula(sekmeKapatOnay.hedefId, sekmeKapatOnay.islem, false);
+        }}
       />
     </div>
     </SistemKesifProvider>

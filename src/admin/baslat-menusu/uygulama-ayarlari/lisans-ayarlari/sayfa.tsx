@@ -22,6 +22,7 @@ export function LisansAyarlariSayfasi() {
   const [lisanslar, setLisanslar] = useState<LisansKaydi[]>(() => lisansListesiOku());
   const [seciliId, setSeciliId] = useState<string | null>(null);
   const [taslak, setTaslak] = useState<LisansKaydi>(() => bosLisansFormu());
+  const [formOrijinal, setFormOrijinal] = useState<LisansKaydi | null>(null);
   const [duzenleme, setDuzenleme] = useState(false);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [yenileniyorId, setYenileniyorId] = useState<string | null>(null);
@@ -29,11 +30,14 @@ export function LisansAyarlariSayfasi() {
   const listeGorunumuneDon = useCallback(() => {
     setGorunum('liste');
     setDuzenleme(false);
+    setFormOrijinal(null);
     setTaslak(bosLisansFormu());
   }, []);
 
   const lisansEkle = useCallback(() => {
-    setTaslak(bosLisansFormu());
+    const bos = bosLisansFormu();
+    setTaslak(bos);
+    setFormOrijinal(bosLisansFormu());
     setDuzenleme(false);
     setGorunum('form');
   }, []);
@@ -42,7 +46,9 @@ export function LisansAyarlariSayfasi() {
     (id: string) => {
       const bulunan = lisanslar.find((l) => l.id === id);
       if (!bulunan) return;
-      setTaslak(lisansKaydiKopyala(bulunan));
+      const kopya = lisansKaydiKopyala(bulunan);
+      setTaslak(kopya);
+      setFormOrijinal(lisansKaydiKopyala(bulunan));
       setDuzenleme(true);
       setGorunum('form');
     },
@@ -106,6 +112,11 @@ export function LisansAyarlariSayfasi() {
 
   const formAcik = gorunum === 'form';
 
+  const kirli = useMemo(() => {
+    if (!formAcik || !formOrijinal) return false;
+    return JSON.stringify(taslak) !== JSON.stringify(formOrijinal);
+  }, [formAcik, formOrijinal, taslak]);
+
   useModulAksiyonlari(
     formAcik ? { kaydet: lisansKaydet } : { ekle: lisansEkle },
     {
@@ -115,7 +126,8 @@ export function LisansAyarlariSayfasi() {
       sil: false,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   const panelBaslik = useMemo(

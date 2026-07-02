@@ -209,7 +209,8 @@ export function CariTanimlariSayfa() {
       kaydet: gorunum === 'kart',
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TanimlarKullaniciExcelTablo } from '@/admin/baslat-menusu/tanimlar/bilesenler/kullanicilar/TanimlarKullaniciExcelTablo';
 import { TanimlarKullaniciUrunYetkiPanel } from '@/admin/baslat-menusu/tanimlar/bilesenler/kullanicilar/TanimlarKullaniciUrunYetkiPanel';
 import { TanimlarKullaniciSubeDepartmanPanel } from '@/admin/baslat-menusu/tanimlar/bilesenler/kullanicilar/TanimlarKullaniciSubeDepartmanPanel';
@@ -63,7 +63,16 @@ function urunYetkiHaritasiBaslat(): Record<number, TanimlarUrunYetkiKaydi> {
   return harita;
 }
 
-export function TanimlarKullanicilarSekme() {
+function kullaniciAnlikDurumOlustur(
+  kullanicilar: TanimlarKullanici[],
+  yetkiHaritasi: Record<number, TanimlarKullaniciYetkiKaydi>,
+  subeDepartmanHaritasi: Record<number, TanimlarSubeDepartmanKaydi>,
+  urunYetkiHaritasi: Record<number, TanimlarUrunYetkiKaydi>
+) {
+  return JSON.stringify({ kullanicilar, yetkiHaritasi, subeDepartmanHaritasi, urunYetkiHaritasi });
+}
+
+export function TanimlarKullanicilarSekme({ onKirliDegisti }: { onKirliDegisti?: (kirli: boolean) => void }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [gorunum, setGorunum] = useState<Gorunum>('liste');
   const [kullanicilar, setKullanicilar] = useState<TanimlarKullanici[]>(() =>
@@ -86,6 +95,14 @@ export function TanimlarKullanicilarSekme() {
   const [uyariMesaji, setUyariMesaji] = useState<string | null>(null);
   const [yetkiPano, setYetkiPano] = useState<Record<string, boolean> | null>(null);
   const [urunPano, setUrunPano] = useState<TanimlarUrunYetkiKaydi | null>(null);
+  const [sonKayitAnahtar, setSonKayitAnahtar] = useState(() =>
+    kullaniciAnlikDurumOlustur(
+      TANIMLAR_KULLANICI_VARSAYILAN.map((k) => ({ ...k })),
+      yetkiHaritasiBaslat(),
+      subeDepartmanHaritasiBaslat(),
+      urunYetkiHaritasiBaslat()
+    )
+  );
 
   const yetkiKullanici = useMemo(
     () => (yetkiKullaniciId != null ? kullanicilar.find((k) => k.id === yetkiKullaniciId) ?? null : null),
@@ -193,24 +210,69 @@ export function TanimlarKullanicilarSekme() {
     basariBildir('Kullanıcı silindi.');
   }, [seciliId, kullanicilar, hucreIptal, basariBildir]);
 
+  const kirli = useMemo(() => {
+    if (aktifHucre) return true;
+    if (gorunum === 'yetkiler' && taslakYetki && yetkiKullaniciId != null) {
+      const mevcut = yetkiHaritasi[yetkiKullaniciId];
+      return JSON.stringify(mevcut) !== JSON.stringify(taslakYetki);
+    }
+    if (gorunum === 'sube-departman' && taslakSubeDepartman && subeKullaniciId != null) {
+      const mevcut = subeDepartmanHaritasi[subeKullaniciId];
+      return JSON.stringify(mevcut) !== JSON.stringify(taslakSubeDepartman);
+    }
+    if (gorunum === 'urun-yetki' && taslakUrunYetki && urunKullaniciId != null) {
+      const mevcut = urunYetkiHaritasi[urunKullaniciId];
+      return JSON.stringify(mevcut) !== JSON.stringify(taslakUrunYetki);
+    }
+    return (
+      kullaniciAnlikDurumOlustur(kullanicilar, yetkiHaritasi, subeDepartmanHaritasi, urunYetkiHaritasi) !==
+      sonKayitAnahtar
+    );
+  }, [
+    aktifHucre,
+    gorunum,
+    taslakYetki,
+    yetkiKullaniciId,
+    yetkiHaritasi,
+    taslakSubeDepartman,
+    subeKullaniciId,
+    subeDepartmanHaritasi,
+    taslakUrunYetki,
+    urunKullaniciId,
+    urunYetkiHaritasi,
+    kullanicilar,
+    sonKayitAnahtar,
+  ]);
+
+  useEffect(() => {
+    onKirliDegisti?.(kirli);
+  }, [kirli, onKirliDegisti]);
+
   const kaydet = useCallback(() => {
+    let guncelYetki = yetkiHaritasi;
+    let guncelSube = subeDepartmanHaritasi;
+    let guncelUrun = urunYetkiHaritasi;
+
     if (gorunum === 'yetkiler' && yetkiKullaniciId != null && taslakYetki) {
-      setYetkiHaritasi((onceki) => ({
-        ...onceki,
+      guncelYetki = {
+        ...yetkiHaritasi,
         [yetkiKullaniciId]: yetkiKaydiKopyala(taslakYetki),
-      }));
+      };
+      setYetkiHaritasi(guncelYetki);
     }
     if (gorunum === 'sube-departman' && subeKullaniciId != null && taslakSubeDepartman) {
-      setSubeDepartmanHaritasi((onceki) => ({
-        ...onceki,
+      guncelSube = {
+        ...subeDepartmanHaritasi,
         [subeKullaniciId]: subeDepartmanKopyala(taslakSubeDepartman),
-      }));
+      };
+      setSubeDepartmanHaritasi(guncelSube);
     }
     if (gorunum === 'urun-yetki' && urunKullaniciId != null && taslakUrunYetki) {
-      setUrunYetkiHaritasi((onceki) => ({
-        ...onceki,
+      guncelUrun = {
+        ...urunYetkiHaritasi,
         [urunKullaniciId]: urunYetkiKopyala(taslakUrunYetki),
-      }));
+      };
+      setUrunYetkiHaritasi(guncelUrun);
     }
 
     const bosAd = kullanicilar.find((k) => !k.kullaniciAdi.trim());
@@ -219,6 +281,7 @@ export function TanimlarKullanicilarSekme() {
       return;
     }
     basariBildir('Kullanıcılar kaydedildi.');
+    setSonKayitAnahtar(kullaniciAnlikDurumOlustur(kullanicilar, guncelYetki, guncelSube, guncelUrun));
   }, [
     gorunum,
     yetkiKullaniciId,
@@ -228,6 +291,9 @@ export function TanimlarKullanicilarSekme() {
     urunKullaniciId,
     taslakUrunYetki,
     kullanicilar,
+    yetkiHaritasi,
+    subeDepartmanHaritasi,
+    urunYetkiHaritasi,
     basariBildir,
     hataBildir,
   ]);
@@ -340,12 +406,13 @@ export function TanimlarKullanicilarSekme() {
       ? { kaydet, ekle: yeniKullanici, sil: kullaniciSil }
       : { kaydet },
     {
-      kaydet: true,
+      kaydet: kirli,
       ekle: gorunum === 'liste',
       sil: gorunum === 'liste' && seciliId != null,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

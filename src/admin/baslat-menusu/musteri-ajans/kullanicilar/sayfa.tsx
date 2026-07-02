@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KullaniciDuzenleFormu, KullaniciListesi, type AtanabilirRol } from '@/admin/baslat-menusu/musteri-ajans/kullanicilar/bilesenler/KullaniciBilesenleri';
 import { useAuth } from '@/baglamlar/AuthContext';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
@@ -116,13 +116,33 @@ export function KullanicilarSayfasi() {
     }
   }, [seciliId, yeniBaslat]);
 
+  const seciliKullanici = useMemo(
+    () => (seciliId ? kullanicilar.find((k) => k.id === seciliId) ?? null : null),
+    [seciliId, kullanicilar]
+  );
+
+  const kirli = useMemo(() => {
+    if (seciliKullanici) {
+      const kayitli = kullanicidanForm(seciliKullanici);
+      return (
+        sifreDegisti ||
+        form.email !== kayitli.email ||
+        form.ad !== kayitli.ad ||
+        form.rol !== kayitli.rol ||
+        form.aktif !== kayitli.aktif
+      );
+    }
+    return form.email.trim() !== '' || form.ad.trim() !== '' || form.sifre.trim() !== '';
+  }, [seciliKullanici, form, sifreDegisti]);
+
   useModulAksiyonlari(
     { kaydet, ekle: yeniBaslat, sil },
     {
-      kaydet: !kaydediliyor,
+      kaydet: kirli && !kaydediliyor,
       ekle: true,
       sil: !!seciliId && !kaydediliyor,
-    }
+    },
+    kirli
   );
 
   if (!yetkili) {

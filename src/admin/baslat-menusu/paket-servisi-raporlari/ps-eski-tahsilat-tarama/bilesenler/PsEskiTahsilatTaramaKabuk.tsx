@@ -114,11 +114,7 @@ export function PsEskiTahsilatTaramaKabuk() {
         <AdminPanelKarti baslik="Eski Tahsilatlar" altBaslik={`${donemMetni} · ${satirlar.length} personel`}>
           <TahsilatTaramaTablosu satirlar={satirlar} />
 
-          <TahsilatTaramaAltCubuk
-            subeEtiket={subeEtiketi(filtre)}
-            onSubeDepartman={subeModalAc}
-            onYazdir={yazdir}
-          />
+          <TahsilatTaramaAltCubuk subeEtiket={subeEtiketi(filtre)} onSubeDepartman={subeModalAc} />
         </AdminPanelKarti>
       </div>
 

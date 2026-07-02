@@ -325,6 +325,7 @@ export function FirmalarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }
   }
 
   const islemde = kaydediliyor || hucreKaydediliyor || islemId !== null;
+  const kirli = panelAcik || aktifHucre != null;
 
   useModulAksiyonlari(
     {
@@ -336,7 +337,8 @@ export function FirmalarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum }
       kaydet: panelAcik && !kaydediliyor,
       ekle: !islemde && !panelAcik && aktifBayiler.length > 0 && !aktifHucre,
       sil: (panelAcik || !!seciliFirma) && !islemde && !aktifHucre,
-    }
+    },
+    kirli
   );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Firmalar yükleniyor…" />;

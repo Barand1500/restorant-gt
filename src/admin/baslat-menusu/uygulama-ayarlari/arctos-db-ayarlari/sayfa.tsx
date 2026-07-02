@@ -65,7 +65,8 @@ export function ArctosDbAyarlariSayfasi() {
       sil: false,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

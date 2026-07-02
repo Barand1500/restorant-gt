@@ -63,7 +63,8 @@ export function EFaturaAyarlariSayfa() {
       sil: false,
       yayinla: false,
       onizle: false,
-    }
+    },
+    kirli
   );
 
   return (

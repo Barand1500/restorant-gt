@@ -16,19 +16,19 @@ interface TanimlarSekmeIcerikProps {
 export function TanimlarSekmeIcerik({ sekme, onKirliDegisti }: TanimlarSekmeIcerikProps) {
   switch (sekme) {
     case 'kullanicilar':
-      return <TanimlarKullanicilarSekme />;
+      return <TanimlarKullanicilarSekme onKirliDegisti={onKirliDegisti} />;
     case 'masa-gruplari':
-      return <TanimlarMasaGruplariSekme />;
+      return <TanimlarMasaGruplariSekme onKirliDegisti={onKirliDegisti} />;
     case 'barkod':
-      return <TanimlarBarkodSekme />;
+      return <TanimlarBarkodSekme onKirliDegisti={onKirliDegisti} />;
     case 'diger':
       return <TanimlarDigerSekme onKirliDegisti={onKirliDegisti} />;
     case 'paket-servisi-ucretleri':
-      return <TanimlarPaketServisiUcretleriSekme />;
+      return <TanimlarPaketServisiUcretleriSekme onKirliDegisti={onKirliDegisti} />;
     case 'sms-ayarlari':
       return <TanimlarSmsAyarlariSekme onKirliDegisti={onKirliDegisti} />;
     case 'restoran-durumu':
-      return <TanimlarRestoranDurumuSekme />;
+      return <TanimlarRestoranDurumuSekme onKirliDegisti={onKirliDegisti} />;
     default:
       return <TanimlarBosSekme sekme={sekme} />;
   }

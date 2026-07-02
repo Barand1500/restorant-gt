@@ -8,6 +8,7 @@ import {
   sefimMerkezKayitEsit,
 } from '@/admin/gizli-moduller/veri-yedekleme/merkezBilgileri/yardimci';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
+import { useSekmeKirli } from '@/kancalar/useSekmeKirli';
 
 function kayitKopyala(k: SefimMerkezKayit): SefimMerkezKayit {
   return { ...k };
@@ -21,6 +22,7 @@ export function SefimMerkezBilgileri() {
   const [kaydediliyor, setKaydediliyor] = useState(false);
 
   const kirli = useMemo(() => !sefimMerkezKayitEsit(kayit, taslak), [kayit, taslak]);
+  useSekmeKirli(kirli);
 
   const kaydet = useCallback(() => {
     if (!sefimMerkezBaglantiGecerli(taslak)) {

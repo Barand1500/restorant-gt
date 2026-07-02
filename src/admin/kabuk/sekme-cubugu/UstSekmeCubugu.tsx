@@ -6,6 +6,8 @@ import {
   type SekmePanelAyarlari,
 } from '@/admin/baslat-menusu/sistem/sekme-yonetimi/yardimci';
 import { SekmeCubuguArama } from './SekmeCubuguArama';
+import { SekmeSagTikMenu, type SekmeSagTikMenuDurum } from './SekmeSagTikMenu';
+import type { SekmeSagTikIslem } from './sekmeSagTikYardimci';
 
 interface UstSekmeCubuguProps {
   sekmeler: AdminSekme[];
@@ -17,6 +19,7 @@ interface UstSekmeCubuguProps {
   sekmeAyarlari?: SekmePanelAyarlari;
   onSekmeAyir?: (sekmeId: string) => void;
   onModulSec?: (modul: AdminModul) => void;
+  onSekmeSagTikIslem?: (sekmeId: string, islem: SekmeSagTikIslem) => void;
 }
 
 type GrupOgesi =
@@ -75,6 +78,7 @@ function SekmeButonu({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onSagTik,
 }: {
   sekme: AdminSekme;
   aktif: boolean;
@@ -94,6 +98,7 @@ function SekmeButonu({
   onPointerDown: (e: MouseEvent, id: string) => void;
   onPointerMove: (e: MouseEvent) => void;
   onPointerUp: () => void;
+  onSagTik: (e: MouseEvent, sekmeId: string) => void;
 }) {
   const tasinan = surukleniyor === sekme.id;
   const hedef = dropHedef === sekme.id;
@@ -127,6 +132,11 @@ function SekmeButonu({
       }}
       onMouseMove={onPointerMove}
       onMouseUp={onPointerUp}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSagTik(e, sekme.id);
+      }}
       title={hoverOnizleme ? sekme.baslik : undefined}
       className={`ap-sekme-tab group relative flex max-w-[200px] shrink-0 cursor-grab items-center rounded-t-md border border-b-0 active:cursor-grabbing ${
         gruplu ? 'rounded-none first:rounded-tl-md last:rounded-tr-md' : ''
@@ -182,8 +192,10 @@ export function UstSekmeCubugu({
   sekmeAyarlari: disAyarlari,
   onSekmeAyir,
   onModulSec,
+  onSekmeSagTikIslem,
 }: UstSekmeCubuguProps) {
   const [ayarlar, setAyarlar] = useState<SekmePanelAyarlari>(() => disAyarlari ?? sekmeAyarlariOku());
+  const [sagTikMenu, setSagTikMenu] = useState<SekmeSagTikMenuDurum | null>(null);
   const [surukleniyor, setSurukleniyor] = useState<string | null>(null);
   const [dropHedef, setDropHedef] = useState<string | null>(null);
   const [dropMod, setDropMod] = useState<DropMod | null>(null);
@@ -291,6 +303,14 @@ export function UstSekmeCubugu({
     setDropMod(null);
   }
 
+  function sekmeSagTik(e: MouseEvent, sekmeId: string) {
+    setSagTikMenu({ x: e.clientX, y: e.clientY, sekmeId });
+  }
+
+  function sekmeSagTikIslem(sekmeId: string, islem: SekmeSagTikIslem) {
+    onSekmeSagTikIslem?.(sekmeId, islem);
+  }
+
   const ortakSekmeProps = {
     surukleniyor,
     dropHedef,
@@ -307,6 +327,7 @@ export function UstSekmeCubugu({
     onPointerDown,
     onPointerMove,
     onPointerUp,
+    onSagTik: sekmeSagTik,
   };
 
   return (
@@ -360,6 +381,13 @@ export function UstSekmeCubugu({
       {ayarlar.sekmeAramaAktif && onModulSec && (
         <SekmeCubuguArama gorunum={ayarlar.sekmeAramaGorunum} onModulSec={onModulSec} />
       )}
+
+      <SekmeSagTikMenu
+        menu={sagTikMenu}
+        sekmeler={sekmeler}
+        onKapat={() => setSagTikMenu(null)}
+        onIslem={sekmeSagTikIslem}
+      />
     </div>
   );
 }

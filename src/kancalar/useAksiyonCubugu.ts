@@ -454,7 +454,9 @@ export function useAksiyonCubugu(modulId: string) {
 
     return temel.map((aksiyon) => {
       const dinamik = aksiyonDurumlari[aksiyon.id as AksiyonId];
-      const etiket = t(`aksiyon.${aksiyon.id}`, aksiyon.etiket);
+      const varsayilan = varsayilanAksiyonlar.find((a) => a.id === aksiyon.id);
+      const modulOzelEtiket = varsayilan && aksiyon.etiket !== varsayilan.etiket ? aksiyon.etiket : undefined;
+      const etiket = modulOzelEtiket ?? t(`aksiyon.${aksiyon.id}`, aksiyon.etiket);
       const guncel = { ...aksiyon, etiket };
 
       const yetkiKodu = modulYetki[aksiyon.id as AksiyonId] ?? AKSIYON_YETKI[aksiyon.id as AksiyonId];

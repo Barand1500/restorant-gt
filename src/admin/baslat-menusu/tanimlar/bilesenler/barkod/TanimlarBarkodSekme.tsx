@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BarkodDesenListesi } from '@/admin/baslat-menusu/tanimlar/bilesenler/barkod/BarkodDesenListesi';
 import { BarkodDesenYardimPaneli } from '@/admin/baslat-menusu/tanimlar/bilesenler/barkod/BarkodDesenYardimPaneli';
 import { TANIMLAR_VARSAYILAN_BARKOD_DESENLERI } from '@/admin/baslat-menusu/tanimlar/barkod/varsayilanBarkodDesenleri';
@@ -6,10 +6,17 @@ import { barkodDesenGecerli } from '@/admin/baslat-menusu/tanimlar/barkod/barkod
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 
-export function TanimlarBarkodSekme() {
+export function TanimlarBarkodSekme({ onKirliDegisti }: { onKirliDegisti?: (kirli: boolean) => void }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [desenler, setDesenler] = useState<string[]>(() => [...TANIMLAR_VARSAYILAN_BARKOD_DESENLERI]);
+  const [sonKayitli, setSonKayitli] = useState<string[]>(() => [...TANIMLAR_VARSAYILAN_BARKOD_DESENLERI]);
   const [seciliIndex, setSeciliIndex] = useState<number | null>(0);
+
+  const kirli = useMemo(() => JSON.stringify(desenler) !== JSON.stringify(sonKayitli), [desenler, sonKayitli]);
+
+  useEffect(() => {
+    onKirliDegisti?.(kirli);
+  }, [kirli, onKirliDegisti]);
 
   const desenDegistir = useCallback((index: number, deger: string) => {
     setDesenler((onceki) => onceki.map((d, i) => (i === index ? deger : d)));
@@ -47,6 +54,7 @@ export function TanimlarBarkodSekme() {
       return;
     }
     setDesenler(temiz);
+    setSonKayitli([...temiz]);
     basariBildir('Barkod desenleri kaydedildi.');
   }, [desenler, basariBildir, hataBildir]);
 
@@ -65,12 +73,13 @@ export function TanimlarBarkodSekme() {
   useModulAksiyonlari(
     { kaydet, ekle: yeniDesen, sil: desenSil },
     {
-      kaydet: true,
+      kaydet: kirli,
       ekle: true,
       sil: seciliIndex != null && desenler.length > 0,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

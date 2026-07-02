@@ -4,7 +4,6 @@ interface SatisRaporAltCubukProps {
   subeEtiket: string;
   onSubeDepartman: () => void;
   onExcel: () => void;
-  onYazdir: () => void;
   excelAktif?: boolean;
   tutarEtiket?: string;
   miktarEtiket?: string;
@@ -25,7 +24,6 @@ export function SatisRaporAltCubuk({
   subeEtiket,
   onSubeDepartman,
   onExcel,
-  onYazdir,
   excelAktif = true,
   tutarEtiket = 'Tutar',
   miktarEtiket = 'Miktar',
@@ -70,9 +68,6 @@ export function SatisRaporAltCubuk({
       <div className="ap-satis-rapor-alt-sag">
         <button type="button" className="ap-satis-rapor-aksiyon-tus" onClick={onExcel} disabled={!excelAktif}>
           Excel
-        </button>
-        <button type="button" className="ap-satis-rapor-aksiyon-tus" onClick={onYazdir}>
-          Yazdır
         </button>
       </div>
     </footer>

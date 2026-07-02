@@ -125,9 +125,15 @@ export function SatisRaporKabuk({ mod, baslik, aciklama, panelBaslik }: SatisRap
     basariBildir('Şube / departman filtresi uygulandı.');
   }, [taslakFiltre, modalFiltre, basariBildir]);
 
+  const kirli = useMemo(
+    () => JSON.stringify(taslakFiltre) !== JSON.stringify(aktifFiltre),
+    [taslakFiltre, aktifFiltre]
+  );
+
   useModulAksiyonlari(
     { kaydet: excel, onizle: yazdir },
-    { kaydet: gorunenSatirlar.length > 0, onizle: true }
+    { kaydet: gorunenSatirlar.length > 0, onizle: true },
+    kirli
   );
 
   return (
@@ -153,7 +159,6 @@ export function SatisRaporKabuk({ mod, baslik, aciklama, panelBaslik }: SatisRap
             subeEtiket={subeEtiketi(aktifFiltre)}
             onSubeDepartman={subeModalAc}
             onExcel={excel}
-            onYazdir={yazdir}
             excelAktif={gorunenSatirlar.length > 0}
           />
         </AdminPanelKarti>

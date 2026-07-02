@@ -298,6 +298,7 @@ export function LisanslarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum 
   }
 
   const islemde = kaydediliyor || hucreKaydediliyor || islemId !== null;
+  const kirli = panelAcik || aktifHucre != null;
 
   useModulAksiyonlari(
     {
@@ -309,7 +310,8 @@ export function LisanslarSekme({ gorunum = 'tablo' }: { gorunum?: MasterGorunum 
       kaydet: panelAcik && !kaydediliyor,
       ekle: !islemde && !panelAcik && !aktifHucre && aktifFirmalar.length > 0 && aktifPaketler.length > 0,
       sil: (panelAcik || !!seciliLisans) && !islemde && !aktifHucre,
-    }
+    },
+    kirli
   );
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Lisanslar yükleniyor…" />;

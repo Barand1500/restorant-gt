@@ -92,9 +92,15 @@ export function PsSatisToplamlariKabuk() {
     basariBildir('Şube / departman filtresi uygulandı.');
   }, [taslakFiltre, modalFiltre, basariBildir]);
 
+  const kirli = useMemo(
+    () => JSON.stringify(taslakFiltre) !== JSON.stringify(aktifFiltre),
+    [taslakFiltre, aktifFiltre]
+  );
+
   useModulAksiyonlari(
     { kaydet: excel, onizle: yazdir },
-    { kaydet: satirlar.length > 0, onizle: true }
+    { kaydet: satirlar.length > 0, onizle: true },
+    kirli
   );
 
   return (
@@ -124,7 +130,6 @@ export function PsSatisToplamlariKabuk() {
             subeEtiket={subeEtiketi(aktifFiltre)}
             onSubeDepartman={subeModalAc}
             onExcel={excel}
-            onYazdir={yazdir}
             excelAktif={satirlar.length > 0}
             miktarEtiket="Toplam Satış"
             ozetTutarOnce

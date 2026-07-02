@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PaketServisUcretTablo } from '@/admin/baslat-menusu/tanimlar/bilesenler/paket-servisi/PaketServisUcretTablo';
 import { PAKET_SERVIS_VARSAYILAN_KURALLAR } from '@/admin/baslat-menusu/tanimlar/paket-servisi-ucretleri/varsayilanVeri';
 import {
@@ -15,12 +15,25 @@ function sonrakiId(liste: PaketServisUcretKurali[]) {
   return liste.reduce((max, k) => Math.max(max, k.id), 0) + 1;
 }
 
-export function TanimlarPaketServisiUcretleriSekme() {
+export function TanimlarPaketServisiUcretleriSekme({
+  onKirliDegisti,
+}: {
+  onKirliDegisti?: (kirli: boolean) => void;
+}) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [kurallar, setKurallar] = useState<PaketServisUcretKurali[]>(() =>
     PAKET_SERVIS_VARSAYILAN_KURALLAR.map((k) => ({ ...k }))
   );
+  const [sonKayitli, setSonKayitli] = useState<PaketServisUcretKurali[]>(() =>
+    PAKET_SERVIS_VARSAYILAN_KURALLAR.map((k) => ({ ...k }))
+  );
   const [seciliId, setSeciliId] = useState<number | null>(1);
+
+  const kirli = useMemo(() => JSON.stringify(kurallar) !== JSON.stringify(sonKayitli), [kurallar, sonKayitli]);
+
+  useEffect(() => {
+    onKirliDegisti?.(kirli);
+  }, [kirli, onKirliDegisti]);
 
   const kuralDegistir = useCallback((id: number, alan: PaketServisUcretAlan, deger: string) => {
     setKurallar((onceki) => onceki.map((k) => (k.id === id ? { ...k, [alan]: deger } : k)));
@@ -77,18 +90,20 @@ export function TanimlarPaketServisiUcretleriSekme() {
       (a, b) => Number(a.tutaraKadar.replace(',', '.')) - Number(b.tutaraKadar.replace(',', '.'))
     );
     setKurallar(sirali);
+    setSonKayitli(sirali.map((k) => ({ ...k })));
     basariBildir('Paket servisi ücretleri kaydedildi.');
   }, [kurallar, basariBildir, hataBildir]);
 
   useModulAksiyonlari(
     { kaydet, ekle: yeniKural, sil: kuralSil },
     {
-      kaydet: true,
+      kaydet: kirli,
       ekle: true,
       sil: seciliId != null,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (

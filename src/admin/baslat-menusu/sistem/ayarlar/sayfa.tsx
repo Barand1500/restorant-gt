@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useModulAksiyonlari } from '@/kancalar/useModulAksiyonlari';
 import { useAdminAksiyon } from '@/baglamlar/AdminAksiyonContext';
 import { useAdminSayfaBildirimi } from '@/kancalar/useAdminSayfaBildirimi';
@@ -40,6 +40,9 @@ export function SistemAyarlariSayfasi() {
   const [sekme, setSekme] = useState<SistemSekmeId>('genel');
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [sonKayitliForm, setSonKayitliForm] = useState<SistemAyarlariForm>(bosSistemForm);
+
+  const kirli = useMemo(() => JSON.stringify(form) !== JSON.stringify(sonKayitliForm), [form, sonKayitliForm]);
 
   const kaydet = useCallback(async () => {
     setKaydediliyor(true);
@@ -51,6 +54,7 @@ export function SistemAyarlariSayfasi() {
       setSurum(veri.surum);
       const yeniForm = sistemdenForm(veri.site, veri.sistem);
       setForm(yeniForm);
+      setSonKayitliForm(yeniForm);
       dilAyarla(yeniForm.panelDili);
       cevirileriAyarla(yeniForm.panelCeviriler);
       siteVerisiGuncellendiYayinla();
@@ -108,6 +112,7 @@ export function SistemAyarlariSayfasi() {
       setSurum(veri.surum);
       const yeniForm = sistemdenForm(veri.site, veri.sistem);
       setForm(yeniForm);
+      setSonKayitliForm(yeniForm);
       dilAyarla(yeniForm.panelDili);
       cevirileriAyarla(yeniForm.panelCeviriler);
       siteVerisiGuncellendiYayinla();
@@ -133,6 +138,7 @@ export function SistemAyarlariSayfasi() {
         setSurum(veri.surum);
         const yuklenen = sistemdenForm(veri.site, veri.sistem);
         setForm(yuklenen);
+        setSonKayitliForm(yuklenen);
         dilAyarla(yuklenen.panelDili);
         cevirileriAyarla(yuklenen.panelCeviriler);
       } catch (err) {
@@ -143,7 +149,7 @@ export function SistemAyarlariSayfasi() {
     })();
   }, [dilAyarla, cevirileriAyarla, hataBildir]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: !kaydediliyor });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli && !kaydediliyor }, kirli);
 
   if (yukleniyor) return <YukleniyorDurumu mesaj="Sistem ayarları yükleniyor..." />;
 

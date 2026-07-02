@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { AdminModulKabuk, AdminPanelKarti } from '@/admin/ortak/AdminBilesenleri';
+import { useSekmeKirli } from '@/kancalar/useSekmeKirli';
 import { TanimlarGenelSekme } from '@/admin/baslat-menusu/tanimlar/bilesenler/genel/TanimlarGenelSekme';
 import { TanimlarSekmeIcerik } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarSekmeIcerik';
 import { TanimlarSekmeCubugu } from '@/admin/baslat-menusu/tanimlar/bilesenler/TanimlarSekmeCubugu';
@@ -7,7 +8,16 @@ import { TanimlarGeciciUyari } from '@/admin/baslat-menusu/tanimlar/bilesenler/g
 import { UYARI_KAYDEDILMEDI } from '@/admin/baslat-menusu/tanimlar/genel/veri';
 import { tanimlarSekmeBul, type TanimlarSekmeId } from '@/admin/baslat-menusu/tanimlar/tipler';
 
-const KIRLI_TAKIP_SEKMELER: TanimlarSekmeId[] = ['genel', 'diger', 'sms-ayarlari'];
+const KIRLI_TAKIP_SEKMELER: TanimlarSekmeId[] = [
+  'genel',
+  'diger',
+  'sms-ayarlari',
+  'kullanicilar',
+  'masa-gruplari',
+  'barkod',
+  'paket-servisi-ucretleri',
+  'restoran-durumu',
+];
 
 export function TanimlarSayfasi() {
   const [sekme, setSekme] = useState<TanimlarSekmeId>('genel');
@@ -23,6 +33,9 @@ export function TanimlarSayfasi() {
   const onSekmeKirliDegisti = useCallback((id: TanimlarSekmeId, kirli: boolean) => {
     setKirliSekmeler((onceki) => ({ ...onceki, [id]: kirli }));
   }, []);
+
+  const ustSekmeKirli = useMemo(() => Object.values(kirliSekmeler).some(Boolean), [kirliSekmeler]);
+  useSekmeKirli(ustSekmeKirli);
 
   const sekmeDegistir = useCallback(
     (yeni: TanimlarSekmeId) => {
@@ -58,7 +71,7 @@ export function TanimlarSayfasi() {
                 <TanimlarSekmeIcerik
                   sekme={sekme}
                   onKirliDegisti={
-                    sekme === 'diger' || sekme === 'sms-ayarlari'
+                    KIRLI_TAKIP_SEKMELER.includes(sekme)
                       ? (kirli) => onSekmeKirliDegisti(sekme, kirli)
                       : undefined
                   }

@@ -27,7 +27,7 @@ export function TarilacakUrunlerSayfasi() {
     basariBildir('Tartılacak ürünler kaydedildi.');
   }, [kayit, basariBildir]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: kirli || kayit.tartilanUrunIdleri.length >= 0 });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli || kayit.tartilanUrunIdleri.length >= 0 }, kirli);
 
   return (
     <AdminModulKabuk

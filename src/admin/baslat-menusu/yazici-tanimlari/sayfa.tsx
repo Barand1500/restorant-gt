@@ -52,7 +52,7 @@ export function YaziciTanimlariSayfasi() {
     basariBildir('Yazıcı tanımları kaydedildi.');
   }, [kayit, basariBildir]);
 
-  useModulAksiyonlari({ kaydet }, { kaydet: true });
+  useModulAksiyonlari({ kaydet }, { kaydet: kirli }, kirli);
 
   return (
     <AdminModulKabuk

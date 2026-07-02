@@ -245,7 +245,8 @@ export function HappyHourFiyatListeleriSayfa() {
       sil: false,
       yayinla: false,
       onizle: false,
-    }
+    },
+    kirli
   );
 
   return (

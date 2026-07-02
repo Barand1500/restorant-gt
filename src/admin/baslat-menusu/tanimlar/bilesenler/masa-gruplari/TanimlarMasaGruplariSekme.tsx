@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TanimlarMasaGrubuAyarlarPanel } from '@/admin/baslat-menusu/tanimlar/bilesenler/masa-gruplari/TanimlarMasaGrubuAyarlarPanel';
 import { TanimlarMasaGrubuExcelTablo } from '@/admin/baslat-menusu/tanimlar/bilesenler/masa-gruplari/TanimlarMasaGrubuExcelTablo';
 import { TanimlarUyariSeridi } from '@/admin/baslat-menusu/tanimlar/bilesenler/kullanicilar/TanimlarUyariSeridi';
@@ -27,9 +27,10 @@ function hucreDeger(g: TanimlarMasaGrubu, alan: TanimlarMasaGrubuAlan): string {
   return g[alan];
 }
 
-export function TanimlarMasaGruplariSekme() {
+export function TanimlarMasaGruplariSekme({ onKirliDegisti }: { onKirliDegisti?: (kirli: boolean) => void }) {
   const { basariBildir, hataBildir } = useAdminSayfaBildirimi();
   const [kayit, setKayit] = useState<TanimlarMasaGrubuKayit>(() => masaGrubuKaydiOku());
+  const [sonKayitli, setSonKayitli] = useState<TanimlarMasaGrubuKayit>(() => masaGrubuKaydiOku());
   const [gorunum, setGorunum] = useState<Gorunum>('liste');
   const [ayarGrupId, setAyarGrupId] = useState<number | null>(null);
   const [seciliId, setSeciliId] = useState<number | null>(1);
@@ -136,8 +137,18 @@ export function TanimlarMasaGruplariSekme() {
     }));
   }, [ayarGrupId]);
 
+  const kirli = useMemo(
+    () => JSON.stringify(kayit) !== JSON.stringify(sonKayitli) || aktifHucre != null,
+    [kayit, sonKayitli, aktifHucre]
+  );
+
+  useEffect(() => {
+    onKirliDegisti?.(kirli);
+  }, [kirli, onKirliDegisti]);
+
   const kaydet = useCallback(() => {
     masaGrubuKaydiKaydet(kayit);
+    setSonKayitli(JSON.parse(JSON.stringify(kayit)) as TanimlarMasaGrubuKayit);
     basariBildir('Masa grupları kaydedildi.');
   }, [kayit, basariBildir]);
 
@@ -156,12 +167,13 @@ export function TanimlarMasaGruplariSekme() {
   useModulAksiyonlari(
     gorunum === 'liste' ? { kaydet, sil: grupSil } : { kaydet },
     {
-      kaydet: true,
+      kaydet: kirli,
       ekle: false,
       sil: gorunum === 'liste' && seciliId != null && seciliId !== YENI_SATIR_ID,
       onizle: false,
       yayinla: false,
-    }
+    },
+    kirli
   );
 
   return (
