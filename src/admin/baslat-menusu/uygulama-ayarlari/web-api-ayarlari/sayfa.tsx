@@ -63,13 +63,7 @@ export function WebApiAyarlariSayfasi() {
       onizleGoster={false}
     >
       <AdminPanelKarti>
-        <WebApiAyarlariForm
-          kayit={taslak}
-          onKayitDegistir={setTaslak}
-          onKaydet={kaydetVeBaslat}
-          kaydediliyor={kaydediliyor}
-          servisBaslatiliyor={servisBaslatiliyor}
-        />
+        <WebApiAyarlariForm kayit={taslak} onKayitDegistir={setTaslak} />
       </AdminPanelKarti>
     </AdminModulKabuk>
   );

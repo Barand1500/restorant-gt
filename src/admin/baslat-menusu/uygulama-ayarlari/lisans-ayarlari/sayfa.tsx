@@ -160,9 +160,7 @@ export function LisansAyarlariSayfasi() {
                     kayit={taslak}
                     duzenleme={duzenleme}
                     onKayitDegistir={setTaslak}
-                    onKaydet={lisansKaydet}
                     onGeri={listeGorunumuneDon}
-                    kaydediliyor={kaydediliyor}
                   />
                 )}
               </div>

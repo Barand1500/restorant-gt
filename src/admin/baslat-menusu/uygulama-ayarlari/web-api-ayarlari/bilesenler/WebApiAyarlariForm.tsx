@@ -4,9 +4,6 @@ import type { WebApiKayit } from '@/admin/baslat-menusu/uygulama-ayarlari/web-ap
 interface WebApiAyarlariFormProps {
   kayit: WebApiKayit;
   onKayitDegistir: (kayit: WebApiKayit) => void;
-  onKaydet: () => void;
-  kaydediliyor?: boolean;
-  servisBaslatiliyor?: boolean;
 }
 
 function metinAlani(
@@ -54,12 +51,8 @@ function secenek(
 export function WebApiAyarlariForm({
   kayit,
   onKayitDegistir,
-  onKaydet,
-  kaydediliyor,
-  servisBaslatiliyor,
 }: WebApiAyarlariFormProps) {
   const guncelle = (parcalar: Partial<WebApiKayit>) => onKayitDegistir({ ...kayit, ...parcalar });
-  const mesgul = kaydediliyor || servisBaslatiliyor;
 
   return (
     <div className="ap-web-api-form">
@@ -121,17 +114,6 @@ export function WebApiAyarlariForm({
           )}
         </div>
       </section>
-
-      <footer className="ap-web-api-alt">
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
-          onClick={onKaydet}
-          disabled={mesgul}
-        >
-          {servisBaslatiliyor ? 'Servis başlatılıyor…' : kaydediliyor ? 'Kaydediliyor…' : 'Kaydet ve Servisi Başlat'}
-        </button>
-      </footer>
     </div>
   );
 }

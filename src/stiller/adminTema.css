@@ -13652,12 +13652,80 @@ html:has(.admin-panel[data-tema='acik']) body {
 
 .ap-aktif-masalar-tablo .ap-master-excel-scroll {
   max-height: calc(100vh - 22rem);
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo {
+  width: 100%;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(1),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(1) {
+  width: 14%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(2),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(2) {
+  width: 10%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(3),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(3) {
+  width: 8%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(4),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(4) {
+  width: 34%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(5),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(5) {
+  width: 8%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(6) {
+  width: 13%;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(7) {
+  width: 13%;
+}
+
+/* Miktar, Fiyat, Tutar — başlık ve değer hizası */
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(5),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(7),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(5),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(6),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(7) {
+  text-align: right;
+  padding-right: calc(0.65rem + 5px);
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(5),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(6),
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th:nth-child(7) {
+  letter-spacing: 0.02em;
 }
 
 .ap-aktif-masalar-th-sayi,
 .ap-aktif-masalar-tablo .ap-master-excel-hucre-sayi {
   text-align: right;
   white-space: nowrap;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo th.ap-aktif-masalar-th-sayi {
+  letter-spacing: 0.02em;
+}
+
+.ap-aktif-masalar-tablo .ap-master-excel-tablo td:nth-child(3) {
+  padding-left: calc(0.65rem - 4px);
 }
 
 .ap-aktif-masalar-zaman {
@@ -14293,10 +14361,15 @@ html:has(.admin-panel[data-tema='acik']) body {
   max-height: calc(100vh - 24rem);
 }
 
-.ap-satis-rapor-th-sayi,
-.ap-satis-rapor-tablo .ap-master-excel-hucre-sayi {
+.ap-satis-rapor-tablo:not(.ap-ps-satis-rapor-tablo):not(.ap-ps-satis-toplam-tablo) .ap-satis-rapor-th-sayi,
+.ap-satis-rapor-tablo:not(.ap-ps-satis-rapor-tablo):not(.ap-ps-satis-toplam-tablo) .ap-master-excel-hucre-sayi {
   text-align: right;
   white-space: nowrap;
+  padding-right: calc(0.65rem + 5px);
+}
+
+.ap-satis-rapor-tablo:not(.ap-ps-satis-rapor-tablo):not(.ap-ps-satis-toplam-tablo) th.ap-satis-rapor-th-sayi {
+  letter-spacing: 0.02em;
 }
 
 .ap-satis-rapor-tarih,

@@ -7,18 +7,14 @@ interface LisansFormPanelProps {
   kayit: LisansKaydi;
   duzenleme: boolean;
   onKayitDegistir: (kayit: LisansKaydi) => void;
-  onKaydet: () => void;
   onGeri: () => void;
-  kaydediliyor?: boolean;
 }
 
 export function LisansFormPanel({
   kayit,
   duzenleme,
   onKayitDegistir,
-  onKaydet,
   onGeri,
-  kaydediliyor,
 }: LisansFormPanelProps) {
   const urunDegistir = (urun: string) => {
     const seriNo = duzenleme && kayit.urun === urun ? kayit.seriNo : yeniSeriNo(urun);
@@ -95,17 +91,6 @@ export function LisansFormPanel({
           />
         </label>
       </div>
-
-      <footer className="ap-lisans-form-alt">
-        <button
-          type="button"
-          className="ap-eklenti-islem-btn ap-eklenti-islem-btn-birincil"
-          onClick={onKaydet}
-          disabled={kaydediliyor}
-        >
-          {kaydediliyor ? 'Kaydediliyor…' : 'Kaydet'}
-        </button>
-      </footer>
     </div>
   );
 }

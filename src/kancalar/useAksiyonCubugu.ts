@@ -395,7 +395,7 @@ const modulAksiyonlari: Record<string, AksiyonButonu[]> = {
         return [
           m.id,
           [
-            A('kaydet', 'Kaydet ve Servisi Başlat', true, true),
+            A('kaydet', 'Kaydet', true, true),
             A('ekle', 'Yeni Ekle', false),
             A('sil', 'Sil', false),
             A('guncelle', 'Düzenle', false),
